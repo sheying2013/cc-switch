@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "CC Switch",
+    "title": "cc switch live",
     "description": "Claude Code・Codex・Gemini CLI のためのオールインワンアシスタント"
   },
   "common": {
@@ -170,7 +170,9 @@
       "message": "エディターを開いた後、以下の設定が他のプログラム（Claude Code など）によって変更されました。自分の編集で上書きしますか？それとも外部の変更を残しますか？その他の編集はどちらでも保存されます。",
       "keepTheirs": "外部の変更を残す",
       "keepMine": "自分の編集で上書き"
-    }
+    },
+    "outboundProxyUrl": "個別送信プロキシ",
+    "outboundProxyHint": "このプロバイダー専用の送信プロキシを設定します（HTTP および SOCKS5 対応）。空欄の場合はグローバルプロキシまたは直接接続を使用します。"
   },
   "claudeCode": {
     "needsRouting": "ルーティングが必要",
@@ -881,7 +883,9 @@
       "pricingSave": "課金設定を保存",
       "pricingSaved": "課金設定を保存しました",
       "pricingSaveFailed": "課金設定の保存に失敗しました: {{error}}",
-      "pricingLoadFailed": "課金設定の読み込みに失敗しました: {{error}}"
+      "pricingLoadFailed": "課金設定の読み込みに失敗しました: {{error}}",
+      "chainingTitle": "プロキシチェーン",
+      "chainingDescription": "グローバル送信プロキシをプロバイダー専用プロキシの親（前置）プロキシとして使用します (CC Switch → グローバルプロキシ → プロバイダープロキシ → ターゲット API)。"
     },
     "saveFailedGeneric": "保存に失敗しました。もう一度お試しください"
   },

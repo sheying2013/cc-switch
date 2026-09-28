@@ -13,6 +13,9 @@ import {
   testProxyUrl,
   getUpstreamProxyStatus,
   scanLocalProxies,
+  getGlobalProxyChaining,
+  setGlobalProxyChaining,
+  testOutboundProxy,
   type ProxyTestResult,
   type UpstreamProxyStatus,
   type DetectedProxy,
@@ -107,3 +110,64 @@ export function useScanProxies() {
 }
 
 export type { DetectedProxy };
+
+/**
+ * 获取全局代理链式代理状态
+ */
+export function useGlobalProxyChaining() {
+  return useQuery({
+    queryKey: ["globalProxyChaining"],
+    queryFn: getGlobalProxyChaining,
+    staleTime: 30 * 1000,
+  });
+}
+
+/**
+ * 设置全局代理链式代理状态
+ */
+export function useSetGlobalProxyChaining() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: setGlobalProxyChaining,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["globalProxyChaining"] });
+    },
+    onError: (error: unknown) => {
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === "string"
+            ? error
+            : "Unknown error";
+      toast.error(t("settings.globalProxy.saveFailed", { error: message }));
+    },
+  });
+}
+
+/**
+ * 测试出站代理（支持单独或链式前置测试）
+ */
+export function useTestOutboundProxy() {
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: ({ proxyUrl, frontProxy }: { proxyUrl: string; frontProxy?: string | null }) =>
+      testOutboundProxy(proxyUrl, frontProxy),
+    onSuccess: (result: ProxyTestResult) => {
+      if (result.success) {
+        toast.success(
+          t("settings.globalProxy.testSuccess", { latency: result.latencyMs }),
+        );
+      } else {
+        toast.error(
+          t("settings.globalProxy.testFailed", { error: result.error }),
+        );
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}

@@ -328,6 +328,7 @@ export function ClaudeDesktopProviderForm({
       name: initialData?.name ?? "",
       websiteUrl: initialData?.websiteUrl ?? "",
       notes: initialData?.notes ?? "",
+      outboundProxyUrl: initialData?.meta?.outboundProxyUrl ?? "",
       settingsConfig: JSON.stringify(
         initialData?.settingsConfig ?? { env: {} },
         null,
@@ -580,7 +581,10 @@ export function ClaudeDesktopProviderForm({
       // 与启动 seed 的 OFFICIAL_SEEDS 占位语义一致。
       const settingsConfig = clonePlainRecord(initialData?.settingsConfig);
       settingsConfig.env = {};
-      const meta: ProviderMeta = { ...(initialData?.meta ?? {}) };
+      const meta: ProviderMeta = {
+        ...(initialData?.meta ?? {}),
+        outboundProxyUrl: values.outboundProxyUrl?.trim() || undefined,
+      };
       delete meta.claudeDesktopMode;
       delete meta.claudeDesktopModelRoutes;
       delete meta.apiFormat;
@@ -773,6 +777,7 @@ export function ClaudeDesktopProviderForm({
 
     const meta: ProviderMeta = {
       ...(initialData?.meta ?? {}),
+      outboundProxyUrl: values.outboundProxyUrl?.trim() || undefined,
       claudeDesktopMode: effectiveMode,
       apiFormat:
         activeProviderType === "xai_oauth"

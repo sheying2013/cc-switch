@@ -170,6 +170,25 @@ impl Database {
         }
     }
 
+    /// 全局代理链式代理（作为供应商代理前置）的存储键名
+    pub const GLOBAL_PROXY_CHAINING_KEY: &'static str = "global_proxy_chaining";
+
+    /// 获取是否启用全局出站代理链式代理
+    pub fn get_global_proxy_chaining(&self) -> Result<bool, AppError> {
+        match self.get_setting(Self::GLOBAL_PROXY_CHAINING_KEY)? {
+            Some(val) => Ok(val == "true" || val == "1"),
+            None => Ok(false),
+        }
+    }
+
+    /// 设置是否启用全局出站代理链式代理
+    pub fn set_global_proxy_chaining(&self, enabled: bool) -> Result<(), AppError> {
+        self.set_setting(
+            Self::GLOBAL_PROXY_CHAINING_KEY,
+            if enabled { "true" } else { "false" },
+        )
+    }
+
     // --- 代理接管状态管理（已废弃，使用 proxy_config.enabled 替代）---
 
     /// 获取指定应用的代理接管状态

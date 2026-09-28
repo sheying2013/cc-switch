@@ -2327,14 +2327,42 @@ impl RequestForwarder {
             self.non_streaming_timeout
         };
 
-        // 获取全局代理 URL
-        let upstream_proxy_url: Option<String> = super::http_client::get_current_proxy_url();
+        // 解析出站代理配置（支持供应商单独代理与全局代理链式组合）
+        let global_proxy = super::http_client::get_current_proxy_url();
+        let chaining_enabled = super::http_client::get_proxy_chaining();
+        let provider_proxy = provider
+            .meta
+            .as_ref()
+            .and_then(|m| m.outbound_proxy_url.clone())
+            .filter(|s| !s.trim().is_empty());
 
-        // SOCKS5 代理不支持 CONNECT 隧道，需要用 reqwest
-        let is_socks_proxy = upstream_proxy_url
-            .as_deref()
-            .map(|u| u.starts_with("socks5"))
-            .unwrap_or(false);
+        let (front_proxy, target_proxy) = match (global_proxy, provider_proxy) {
+            (Some(g), Some(p)) if chaining_enabled => {
+                log::debug!(
+                    "[Forwarder] Chained proxy enabled: front={} -> provider={}",
+                    super::http_client::mask_url(&g),
+                    super::http_client::mask_url(&p)
+                );
+                (Some(g), Some(p))
+            }
+            (_, Some(p)) => {
+                log::debug!(
+                    "[Forwarder] Using provider-specific outbound proxy: {}",
+                    super::http_client::mask_url(&p)
+                );
+                (None, Some(p))
+            }
+            (Some(g), None) => {
+                log::debug!(
+                    "[Forwarder] Using global outbound proxy: {}",
+                    super::http_client::mask_url(&g)
+                );
+                (None, Some(g))
+            }
+            (None, None) => (None, None),
+        };
+
+        let has_proxy = target_proxy.is_some();
 
         let preserve_exact_header_case = should_preserve_exact_header_case(
             adapter.name(),
@@ -2343,18 +2371,15 @@ impl RequestForwarder {
             is_copilot,
         );
 
-        // 发送请求
-        let response = if is_socks_proxy || !preserve_exact_header_case {
-            // OpenAI / Copilot / Codex 类后端不依赖原始 header 大小写；走 reqwest
-            // 连接池，避免 raw TCP/TLS path 每次请求都重新握手。SOCKS5 也只能走 reqwest。
+        // 发送请求：有代理（供应商单独代理 / 全局代理 / 链式代理）或需保留大小写走 hyper raw write；
+        // 仅在完全直连且不需要大小写时走全局 reqwest 连接池
+        let response = if !has_proxy && !preserve_exact_header_case {
             log::debug!(
-                "[Forwarder] Using pooled reqwest client (preserve_exact_header_case={preserve_exact_header_case}, socks_proxy={is_socks_proxy})"
+                "[Forwarder] Using pooled direct reqwest client (preserve_exact_header_case={preserve_exact_header_case})"
             );
             let client = super::http_client::get();
             let mut request = client.request(method.clone(), &url);
             if request_is_streaming {
-                // reqwest 的 timeout 是整请求超时；流式请求交给 response_processor
-                // 的首包/静默期超时控制，避免长流被总时长误杀。
                 request = request.timeout(std::time::Duration::from_secs(24 * 60 * 60));
             } else if !self.non_streaming_timeout.is_zero() {
                 request = request.timeout(self.non_streaming_timeout);
@@ -2383,8 +2408,7 @@ impl RequestForwarder {
             let reqwest_resp = send_result.map_err(map_reqwest_send_error)?;
             ProxyResponse::Reqwest(reqwest_resp)
         } else {
-            // HTTP 代理或直连：走 hyper raw write（保持 header 大小写）
-            // 如果有 HTTP 代理，hyper_client 会用 CONNECT 隧道穿过代理
+            // 通过 HTTP/SOCKS5 隧道或直连发送，支持链式代理与原样 Header 大小写保留
             let uri: http::Uri = url.parse().map_err(|e| {
                 ProxyError::ForwardFailed(format!("Invalid upstream URL ({target_for_log}): {e}"))
             })?;
@@ -2396,7 +2420,8 @@ impl RequestForwarder {
                 extensions.clone(),
                 body_bytes,
                 timeout,
-                upstream_proxy_url.as_deref(),
+                front_proxy.as_deref(),
+                target_proxy.as_deref(),
             )
             .await?
         };

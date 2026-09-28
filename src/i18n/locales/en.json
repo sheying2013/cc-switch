@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "CC Switch",
+    "title": "cc switch live",
     "description": "All-in-One Assistant for Claude Code, Codex & Gemini CLI"
   },
   "common": {
@@ -170,7 +170,9 @@
       "message": "After the editor opened, the settings below were changed by another program (such as Claude Code). Overwrite them with your edits, or keep the external changes? Your other edits are saved either way.",
       "keepTheirs": "Keep external changes",
       "keepMine": "Overwrite with my edits"
-    }
+    },
+    "outboundProxyUrl": "Outbound Proxy",
+    "outboundProxyHint": "Configure a dedicated outbound proxy for this provider, supporting HTTP and SOCKS5. Leave empty to use global outbound proxy or direct connection."
   },
   "claudeCode": {
     "needsRouting": "Needs Routing",
@@ -881,7 +883,9 @@
       "pricingSave": "Save Pricing Defaults",
       "pricingSaved": "Pricing defaults saved",
       "pricingSaveFailed": "Failed to save pricing defaults: {{error}}",
-      "pricingLoadFailed": "Failed to load pricing defaults: {{error}}"
+      "pricingLoadFailed": "Failed to load pricing defaults: {{error}}",
+      "chainingTitle": "Chained Proxy",
+      "chainingDescription": "Use global outbound proxy as upstream/frontend proxy for the provider dedicated proxy (CC Switch → Global Proxy → Provider Proxy → Target API)."
     },
     "saveFailedGeneric": "Save failed, please try again"
   },

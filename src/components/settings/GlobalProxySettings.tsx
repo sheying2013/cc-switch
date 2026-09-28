@@ -8,12 +8,15 @@ import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, TestTube2, Search, Eye, EyeOff, X } from "lucide-react";
+import { Loader2, TestTube2, Search, Eye, EyeOff, X, Link2 } from "lucide-react";
+import { ToggleRow } from "@/components/ui/toggle-row";
 import {
   useGlobalProxyUrl,
   useSetGlobalProxyUrl,
   useTestProxy,
   useScanProxies,
+  useGlobalProxyChaining,
+  useSetGlobalProxyChaining,
   type DetectedProxy,
 } from "@/hooks/useGlobalProxy";
 
@@ -75,6 +78,8 @@ export function GlobalProxySettings() {
   const setMutation = useSetGlobalProxyUrl();
   const testMutation = useTestProxy();
   const scanMutation = useScanProxies();
+  const { data: isChainingEnabled } = useGlobalProxyChaining();
+  const setChainingMutation = useSetGlobalProxyChaining();
 
   const [url, setUrl] = useState("");
   const [username, setUsername] = useState("");
@@ -270,6 +275,23 @@ export function GlobalProxySettings() {
           ))}
         </div>
       )}
+
+      {/* 链式代理配置 */}
+      <div className="pt-2 border-t border-border/40">
+        <ToggleRow
+          icon={<Link2 className="h-4 w-4 text-cyan-500" />}
+          title={t("settings.globalProxy.chainingTitle", {
+            defaultValue: "链式代理",
+          })}
+          description={t("settings.globalProxy.chainingDescription", {
+            defaultValue:
+              "将全局出站代理作为供应商单独代理的前置代理 (CC Switch → 全局出站代理 → 供应商代理 → 目标 API)。",
+          })}
+          checked={isChainingEnabled ?? false}
+          onCheckedChange={(checked) => setChainingMutation.mutate(checked)}
+          disabled={setChainingMutation.isPending}
+        />
+      </div>
     </div>
   );
 }

@@ -411,6 +411,7 @@ function ProviderFormFull({
       name: initialData?.name ?? "",
       websiteUrl: initialData?.websiteUrl ?? "",
       notes: initialData?.notes ?? "",
+      outboundProxyUrl: initialData?.meta?.outboundProxyUrl ?? "",
       settingsConfig: initialData?.settingsConfig
         ? JSON.stringify(initialData.settingsConfig, null, 2)
         : appId === "claude" && claudeLiveBase
@@ -1715,6 +1716,7 @@ function ProviderFormFull({
         promptCacheRouting !== "auto"
           ? promptCacheRouting
           : undefined,
+      outboundProxyUrl: values.outboundProxyUrl?.trim() || undefined,
       customUserAgent:
         (appId === "claude" || appId === "codex") && category !== "official"
           ? customUserAgent.trim() || undefined

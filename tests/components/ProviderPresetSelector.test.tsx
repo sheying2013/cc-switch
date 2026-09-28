@@ -236,15 +236,7 @@ describe("ProviderPresetSelector pure helpers", () => {
     ).toEqual(["alpha", "beta", "delta", "gamma"]);
   });
 
-  it("original 模式按「官方 → 尊享伙伴 → 赞助商 → 非赞助商」四段排序，前三组保序、末组按显示名，双重身份不重复", () => {
-    // 故意打乱传入顺序，验证：
-    // - official 组置顶（officialOnly、officialPrime 按出现顺序）；
-    // - 非官方且 primePartner 的预设次之（primeAndPartner）；
-    // - 赞助商（isPartner）第三段，保持传入（预设文件）顺序：
-    //   partnerZeta 在 partnerAlpha 前，不按字母重排；
-    // - 非赞助商按显示名排序：restAlpha 排到 restZulu 前；
-    // - 既是 official 又是 primePartner 的只归入官方组；
-    //   既是 primePartner 又是 isPartner 的只归入 prime 组、不在赞助商组重复。
+  it("original 模式将官方分类置顶，非官方预设按显示名排序", () => {
     const mixed: TestPresetEntry[] = [
       {
         id: "restZulu",
@@ -262,7 +254,6 @@ describe("ProviderPresetSelector pure helpers", () => {
           websiteUrl: "https://partner-zeta.example.com",
           settingsConfig: {},
           category: "aggregator",
-          isPartner: true,
         },
       },
       {
@@ -272,8 +263,6 @@ describe("ProviderPresetSelector pure helpers", () => {
           websiteUrl: "https://prime-and-partner.example.com",
           settingsConfig: {},
           category: "cn_official",
-          primePartner: true,
-          isPartner: true,
         },
       },
       {
@@ -292,7 +281,6 @@ describe("ProviderPresetSelector pure helpers", () => {
           websiteUrl: "https://official-prime.example.com",
           settingsConfig: {},
           category: "official",
-          primePartner: true,
         },
       },
       {
@@ -302,7 +290,6 @@ describe("ProviderPresetSelector pure helpers", () => {
           websiteUrl: "https://partner-alpha.example.com",
           settingsConfig: {},
           category: "third_party",
-          isPartner: true,
         },
       },
       {
@@ -319,10 +306,10 @@ describe("ProviderPresetSelector pure helpers", () => {
     expect(getIds(sortPresetEntries(mixed, "original", t))).toEqual([
       "officialOnly",
       "officialPrime",
-      "primeAndPartner",
-      "partnerZeta",
       "partnerAlpha",
       "restAlpha",
+      "primeAndPartner",
+      "partnerZeta",
       "restZulu",
     ]);
   });

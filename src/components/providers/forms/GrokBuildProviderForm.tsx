@@ -183,6 +183,7 @@ export function GrokBuildProviderForm({
       name: initialData?.name ?? initialConfig.name,
       websiteUrl: initialData?.websiteUrl ?? "",
       notes: initialData?.notes ?? "",
+      outboundProxyUrl: initialData?.meta?.outboundProxyUrl ?? "",
       settingsConfig: JSON.stringify({ config: rawConfig }),
       icon:
         resolveProviderIcon(
@@ -405,6 +406,7 @@ export function GrokBuildProviderForm({
     delete initialMeta.custom_endpoints;
     const meta: ProviderMeta = {
       ...initialMeta,
+      outboundProxyUrl: values.outboundProxyUrl?.trim() || undefined,
       apiFormat,
       apiKeyField: anthropicAuthField,
       isFullUrl,

@@ -84,15 +84,12 @@ export function RoutingActivationBrand({
         />
       )}
 
-      <motion.a
-        href="https://ccswitch.io"
-        target="_blank"
-        rel="noreferrer"
+      <motion.span
         className={cn(
           "relative z-10 text-xl font-semibold transition-colors duration-500",
           active
-            ? "text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
-            : "text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300",
+            ? "text-emerald-500 dark:text-emerald-400 cursor-default select-none"
+            : "text-blue-500 dark:text-blue-400 cursor-default select-none",
         )}
         animate={
           showBurst
@@ -122,8 +119,8 @@ export function RoutingActivationBrand({
             : { duration: 0.28, ease: [0.22, 1, 0.36, 1] }
         }
       >
-        CC Switch
-      </motion.a>
+        cc switch live
+      </motion.span>
 
       {showBurst && (
         <motion.span

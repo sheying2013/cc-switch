@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "CC Switch",
+    "title": "cc switch live",
     "description": "Claude Code / Codex / Gemini CLI 全方位輔助工具"
   },
   "common": {
@@ -170,7 +170,9 @@
       "message": "開啟編輯器之後，下面這些設定被其他程式（例如 Claude Code）改過。要用你的修改覆蓋，還是保留外部的修改？其餘變更都會照常儲存。",
       "keepTheirs": "保留外部修改",
       "keepMine": "用我的修改覆蓋"
-    }
+    },
+    "outboundProxyUrl": "個別輸出代理",
+    "outboundProxyHint": "為此供應商設定獨立的輸出代理，支援 HTTP 與 SOCKS5。留空則使用全域輸出代理或直連。"
   },
   "claudeCode": {
     "needsRouting": "需要路由",
@@ -882,7 +884,9 @@
       "pricingSave": "儲存計費設定",
       "pricingSaved": "計費設定已儲存",
       "pricingSaveFailed": "儲存計費設定失敗：{{error}}",
-      "pricingLoadFailed": "載入計費設定失敗：{{error}}"
+      "pricingLoadFailed": "載入計費設定失敗：{{error}}",
+      "chainingTitle": "鏈式代理",
+      "chainingDescription": "將全域輸出代理作為供應商獨立代理的前置代理 (CC Switch → 全域輸出代理 → 供應商代理 → 目標 API)。"
     },
     "saveFailedGeneric": "儲存失敗，請重試"
   },

@@ -464,6 +464,9 @@ pub struct ProviderMeta {
     /// 用量查询脚本配置
     #[serde(skip_serializing_if = "Option::is_none")]
     pub usage_script: Option<UsageScript>,
+    /// 供应商单独出站代理 URL（支持 http/https/socks5/socks5h）
+    #[serde(rename = "outboundProxyUrl", skip_serializing_if = "Option::is_none")]
+    pub outbound_proxy_url: Option<String>,
     /// 请求地址管理：测速后自动选择最佳端点
     #[serde(rename = "endpointAutoSelect", skip_serializing_if = "Option::is_none")]
     pub endpoint_auto_select: Option<bool>,

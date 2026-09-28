@@ -1193,10 +1193,12 @@ pub fn run() {
                 log::info!("✓ XaiOAuthManager initialized");
             }
 
-            // 初始化全局出站代理 HTTP 客户端
+            // 初始化全局出站代理 HTTP 客户端及链式代理状态
             {
                 let db = &app.state::<AppState>().db;
                 let proxy_url = db.get_global_proxy_url().ok().flatten();
+                let chaining = db.get_global_proxy_chaining().unwrap_or(false);
+                crate::proxy::http_client::set_proxy_chaining(chaining);
 
                 if let Err(e) = crate::proxy::http_client::init(proxy_url.as_deref()) {
                     log::error!(
@@ -1662,6 +1664,9 @@ pub fn run() {
             // Global upstream proxy
             commands::get_global_proxy_url,
             commands::set_global_proxy_url,
+            commands::get_global_proxy_chaining,
+            commands::set_global_proxy_chaining,
+            commands::test_outbound_proxy,
             commands::test_proxy_url,
             commands::get_upstream_proxy_status,
             commands::scan_local_proxies,

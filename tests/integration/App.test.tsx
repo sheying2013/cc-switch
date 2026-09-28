@@ -573,39 +573,4 @@ describe("App integration with MSW", () => {
 
     liveIdsSpy.mockRestore();
   });
-
-  it("hosts the Skills check-update action in the App toolbar", async () => {
-    localStorage.setItem("cc-switch-last-view", "skills");
-    const { default: App } = await import("@/App");
-    renderApp(App);
-
-    expect(
-      await screen.findByTestId("unified-skills-panel"),
-    ).toBeInTheDocument();
-    const checkUpdatesButton = await screen.findByRole("button", {
-      name: "skills.checkUpdates",
-    });
-    await waitFor(() => expect(checkUpdatesButton).toBeEnabled());
-
-    fireEvent.click(checkUpdatesButton);
-    expect(skillsPanelMocks.checkUpdates).toHaveBeenCalledTimes(1);
-  });
-
-  it("routes the Skills discover toolbar action through the panel guard", async () => {
-    localStorage.setItem("cc-switch-last-view", "skills");
-    const { default: App } = await import("@/App");
-    renderApp(App);
-
-    expect(
-      await screen.findByTestId("unified-skills-panel"),
-    ).toBeInTheDocument();
-    fireEvent.click(
-      await screen.findByRole("button", {
-        name: "skills.discover",
-      }),
-    );
-
-    expect(skillsPanelMocks.openDiscovery).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId("unified-skills-panel")).toBeInTheDocument();
-  });
 });

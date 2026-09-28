@@ -12,20 +12,14 @@ import {
   Maximize2,
   Minimize2,
   X,
-  Book,
   Brain,
   History,
   BarChart2,
-  Download,
-  FolderArchive,
-  Search,
   FolderOpen,
   KeyRound,
   Shield,
   Cpu,
   LayoutDashboard,
-  Loader2,
-  RefreshCw,
 } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Provider, VisibleApps } from "@/types";
@@ -48,7 +42,6 @@ import { useProxyStatus } from "@/hooks/useProxyStatus";
 import { useUsageCacheBridge } from "@/hooks/useUsageCacheBridge";
 import { useTauriEvent } from "@/hooks/useTauriEvent";
 import { useLastValidValue } from "@/hooks/useLastValidValue";
-import { useScanUnmanagedSkills } from "@/hooks/useSkills";
 import {
   extractErrorMessage,
   translatePiProviderMutationError,
@@ -76,24 +69,10 @@ import { ClaudeDesktopRouteToggle } from "@/components/proxy/ClaudeDesktopRouteT
 import { FailoverToggle } from "@/components/proxy/FailoverToggle";
 import { RoutingActivationBrand } from "@/components/proxy/RoutingActivationBrand";
 import UsageScriptModal from "@/components/UsageScriptModal";
-import UnifiedMcpPanel from "@/components/mcp/UnifiedMcpPanel";
-import PromptPanel, {
-  type PromptPanelHandle,
-  type PromptPrimaryAction,
-} from "@/components/prompts/PromptPanel";
-import {
-  SkillsPage,
-  getSkillsPageHeaderActions,
-  type SkillsPageSource,
-} from "@/components/skills/SkillsPage";
-import UnifiedSkillsPanel, {
-  type SkillsCheckUpdatesState,
-} from "@/components/skills/UnifiedSkillsPanel";
 import { DeepLinkImportDialog } from "@/components/DeepLinkImportDialog";
 import { FirstRunNoticeDialog } from "@/components/FirstRunNoticeDialog";
 import { AgentsPanel } from "@/components/agents/AgentsPanel";
 import { UniversalProviderPanel } from "@/components/universal";
-import { McpIcon, SkillsIcon } from "@/components/BrandIcons";
 import { Button } from "@/components/ui/button";
 import { SessionManagerPage } from "@/components/sessions/SessionManagerPage";
 import {
@@ -116,10 +95,6 @@ import {
 type View =
   | "providers"
   | "settings"
-  | "prompts"
-  | "skills"
-  | "skillsDiscovery"
-  | "mcp"
   | "agents"
   | "universal"
   | "sessions"
@@ -151,10 +126,6 @@ const VIEW_STORAGE_KEY = "cc-switch-last-view";
 const VALID_VIEWS: View[] = [
   "providers",
   "settings",
-  "prompts",
-  "skills",
-  "skillsDiscovery",
-  "mcp",
   "agents",
   "universal",
   "sessions",
@@ -181,21 +152,9 @@ function App() {
   const sharedFeatureApp: AppId =
     activeApp === "claude-desktop" ? "claude" : activeApp;
   const [currentView, setCurrentView] = useState<View>(getInitialView);
-  const [skillsDiscoverySource, setSkillsDiscoverySource] =
-    useState<SkillsPageSource>("repos");
   const [settingsDefaultTab, setSettingsDefaultTab] = useState("general");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isWindowMaximized, setIsWindowMaximized] = useState(false);
-  const [mcpManagementBusy, setMcpManagementBusy] = useState(false);
-  const [skillsManagementBusy, setSkillsManagementBusy] = useState(false);
-  const [skillsNavigationBusy, setSkillsNavigationBusy] = useState(false);
-  const [promptManagementBusy, setPromptManagementBusy] = useState(false);
-  const [promptNavigationBusy, setPromptNavigationBusy] = useState(false);
-  const [skillsCheckUpdatesState, setSkillsCheckUpdatesState] =
-    useState<SkillsCheckUpdatesState>({
-      isChecking: false,
-      hasSkills: false,
-    });
 
   useEffect(() => {
     localStorage.setItem(VIEW_STORAGE_KEY, currentView);
@@ -226,10 +185,6 @@ function App() {
 
   // Fallback from sessions view when switching to an app without session support
   useEffect(() => {
-    if (currentView === "mcp" && sharedFeatureApp === "pi") {
-      setCurrentView("providers");
-      return;
-    }
     if (
       currentView === "sessions" &&
       sharedFeatureApp !== "claude" &&
@@ -276,16 +231,7 @@ function App() {
     }
   }, [activeApp, currentView]);
 
-  const promptPanelRef = useRef<PromptPanelHandle>(null);
-  const [promptPrimaryAction, setPromptPrimaryAction] =
-    useState<PromptPrimaryAction>("prompt");
-  const mcpPanelRef = useRef<any>(null);
-  const skillsPageRef = useRef<any>(null);
-  const unifiedSkillsPanelRef = useRef<any>(null);
-  // 订阅未管理 Skill 的共享缓存（实际扫描由 UnifiedSkillsPanel 进入页面时触发）。
-  // 这里 enabled 默认 false，仅用于「导入」按钮的绿点提示，不主动发起扫描。
-  const { data: unmanagedSkills } = useScanUnmanagedSkills();
-  const hasUnmanagedSkills = (unmanagedSkills?.length ?? 0) > 0;
+
   const addActionButtonClass =
     "bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white shadow-lg shadow-orange-500/30 dark:shadow-orange-500/40 rounded-full w-8 h-8";
 
@@ -324,7 +270,6 @@ function App() {
       currentView === "openclawAgents");
   const { data: openclawHealthWarnings = [] } =
     useOpenClawHealth(isOpenClawView);
-  const hasSkillsSupport = sharedFeatureApp !== "openclaw";
   const hasSessionSupport =
     sharedFeatureApp === "claude" ||
     sharedFeatureApp === "codex" ||
@@ -335,7 +280,6 @@ function App() {
     sharedFeatureApp === "hermes" ||
     sharedFeatureApp === "pi" ||
     sharedFeatureApp === "mcode";
-  const hasMcpSupport = sharedFeatureApp !== "pi";
 
   const {
     addProvider,
@@ -460,8 +404,6 @@ function App() {
   // proxy 状态由后端直接改 DB，不走 mutation，必须显式刷新）
   useTauriEvent("profile-applied", async () => {
     await queryClient.invalidateQueries({ queryKey: ["profiles"] });
-    await queryClient.invalidateQueries({ queryKey: ["mcp", "all"] });
-    await queryClient.invalidateQueries({ queryKey: ["skills"] });
     await queryClient.invalidateQueries({
       queryKey: proxyKeys.takeoverStatus,
     });
@@ -604,34 +546,6 @@ function App() {
   }, [t]);
 
   useEffect(() => {
-    const checkSkillsMigration = async () => {
-      try {
-        const result = await invoke<{ count: number; error?: string } | null>(
-          "get_skills_migration_result",
-        );
-        if (result?.error) {
-          toast.error(t("migration.skillsFailed"), {
-            description: t("migration.skillsFailedDescription"),
-            closeButton: true,
-          });
-          console.error("[App] Skills SSOT migration failed:", result.error);
-          return;
-        }
-        if (result && result.count > 0) {
-          toast.success(t("migration.skillsSuccess", { count: result.count }), {
-            closeButton: true,
-          });
-          await queryClient.invalidateQueries({ queryKey: ["skills"] });
-        }
-      } catch (error) {
-        console.error("[App] Failed to check skills migration result:", error);
-      }
-    };
-
-    checkSkillsMigration();
-  }, [t, queryClient]);
-
-  useEffect(() => {
     const checkEnvOnSwitch = async () => {
       try {
         if (activeApp === "mcode") return;
@@ -664,8 +578,7 @@ function App() {
   }, [activeApp]);
 
   const currentViewRef = useRef(currentView);
-  const managementBusy =
-    mcpManagementBusy || skillsNavigationBusy || promptNavigationBusy;
+  const managementBusy = false;
   const managementBusyRef = useRef(false);
   managementBusyRef.current = managementBusy;
 
@@ -696,7 +609,7 @@ function App() {
       if (isTextEditableTarget(event.target)) return;
 
       event.preventDefault();
-      setCurrentView(view === "skillsDiscovery" ? "skills" : "providers");
+      setCurrentView("providers");
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -1031,11 +944,6 @@ function App() {
     }
   };
 
-  const handleOpenSkillsDiscovery = () => {
-    setSkillsDiscoverySource("repos");
-    setCurrentView("skillsDiscovery");
-  };
-
   const renderContent = () => {
     const content = (() => {
       switch (currentView) {
@@ -1048,51 +956,8 @@ function App() {
               defaultTab={settingsDefaultTab}
             />
           );
-        case "prompts":
-          return (
-            <PromptPanel
-              ref={promptPanelRef}
-              open={true}
-              onOpenChange={() => setCurrentView("providers")}
-              appId={sharedFeatureApp}
-              onInteractionBlockedChange={setPromptManagementBusy}
-              onNavigationBlockedChange={setPromptNavigationBusy}
-              onPrimaryActionChange={setPromptPrimaryAction}
-            />
-          );
         case "hermesMemory":
           return <HermesMemoryPanel />;
-        case "skills":
-          return (
-            <UnifiedSkillsPanel
-              ref={unifiedSkillsPanelRef}
-              onOpenDiscovery={handleOpenSkillsDiscovery}
-              onInteractionBlockedChange={setSkillsManagementBusy}
-              onNavigationBlockedChange={setSkillsNavigationBusy}
-              onCheckUpdatesStateChange={setSkillsCheckUpdatesState}
-              currentApp={
-                sharedFeatureApp === "openclaw" ? "claude" : sharedFeatureApp
-              }
-            />
-          );
-        case "skillsDiscovery":
-          return (
-            <SkillsPage
-              ref={skillsPageRef}
-              initialApp={
-                sharedFeatureApp === "openclaw" ? "claude" : sharedFeatureApp
-              }
-              onSourceChange={setSkillsDiscoverySource}
-            />
-          );
-        case "mcp":
-          return (
-            <UnifiedMcpPanel
-              ref={mcpPanelRef}
-              onOpenChange={() => setCurrentView("providers")}
-              onInteractionBlockedChange={setMcpManagementBusy}
-            />
-          );
         case "agents":
           return (
             <AgentsPanel onOpenChange={() => setCurrentView("providers")} />
@@ -1320,13 +1185,7 @@ function App() {
                   size="icon"
                   disabled={managementBusy}
                   aria-label={t("common.back")}
-                  onClick={() =>
-                    setCurrentView(
-                      currentView === "skillsDiscovery"
-                        ? "skills"
-                        : "providers",
-                    )
-                  }
+                  onClick={() => setCurrentView("providers")}
                   className={cn(
                     "mr-2 rounded-lg",
                     managementBusy && "disabled:opacity-100",
@@ -1336,13 +1195,6 @@ function App() {
                 </Button>
                 <h1 className="text-lg font-semibold">
                   {currentView === "settings" && t("settings.title")}
-                  {currentView === "prompts" &&
-                    t("prompts.title", {
-                      appName: t(`apps.${sharedFeatureApp}`),
-                    })}
-                  {currentView === "skills" && t("skills.title")}
-                  {currentView === "skillsDiscovery" && t("skills.title")}
-                  {currentView === "mcp" && t("mcp.unifiedPanel.title")}
                   {currentView === "agents" && t("agents.title")}
                   {currentView === "universal" &&
                     t("universalProvider.title", {
@@ -1452,152 +1304,6 @@ function App() {
                 className="flex shrink-0 items-center gap-1.5"
                 style={{ WebkitAppRegion: "no-drag" } as any}
               >
-                {currentView === "prompts" && promptPrimaryAction && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={promptManagementBusy}
-                    onClick={() => promptPanelRef.current?.openAdd()}
-                    className="hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    {t(
-                      promptPrimaryAction === "template"
-                        ? "pi.prompts.newTemplate"
-                        : "prompts.add",
-                    )}
-                  </Button>
-                )}
-                {currentView === "mcp" && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={mcpManagementBusy}
-                      onClick={() => mcpPanelRef.current?.openImport()}
-                      className="hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      {t("mcp.importExisting")}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={mcpManagementBusy}
-                      onClick={() => mcpPanelRef.current?.openAdd()}
-                      className="hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      {t("mcp.addMcp")}
-                    </Button>
-                  </>
-                )}
-                {currentView === "skills" && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={
-                        skillsManagementBusy ||
-                        skillsCheckUpdatesState.isChecking ||
-                        !skillsCheckUpdatesState.hasSkills
-                      }
-                      onClick={() =>
-                        unifiedSkillsPanelRef.current?.checkUpdates()
-                      }
-                      className={cn(
-                        "hover:bg-black/5 dark:hover:bg-white/5",
-                        skillsManagementBusy && "disabled:opacity-100",
-                      )}
-                    >
-                      {skillsCheckUpdatesState.isChecking ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                      )}
-                      {skillsCheckUpdatesState.isChecking
-                        ? t("skills.checkingUpdates")
-                        : t("skills.checkUpdates")}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={skillsManagementBusy}
-                      onClick={() =>
-                        unifiedSkillsPanelRef.current?.openRestoreFromBackup()
-                      }
-                      className="hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
-                    >
-                      <History className="w-4 h-4 mr-2" />
-                      {t("skills.restoreFromBackup.button")}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={skillsManagementBusy}
-                      onClick={() =>
-                        unifiedSkillsPanelRef.current?.openInstallFromZip()
-                      }
-                      className="hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
-                    >
-                      <FolderArchive className="w-4 h-4 mr-2" />
-                      {t("skills.installFromZip.button")}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={skillsManagementBusy}
-                      onClick={() =>
-                        unifiedSkillsPanelRef.current?.openImport()
-                      }
-                      className="relative hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
-                      title={
-                        hasUnmanagedSkills
-                          ? t("skills.unmanagedAvailable")
-                          : undefined
-                      }
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      {t("skills.import")}
-                      {hasUnmanagedSkills && (
-                        <span
-                          className="absolute top-1 right-1 h-2 w-2 rounded-full bg-green-500"
-                          aria-hidden="true"
-                        />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={skillsManagementBusy}
-                      onClick={() =>
-                        unifiedSkillsPanelRef.current?.openDiscovery()
-                      }
-                      className="hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
-                    >
-                      <Search className="w-4 h-4 mr-2" />
-                      {t("skills.discover")}
-                    </Button>
-                  </>
-                )}
-                {currentView === "skillsDiscovery" && (
-                  <>
-                    {getSkillsPageHeaderActions(skillsDiscoverySource).map(
-                      ({ key, labelKey, Icon, execute }) => (
-                        <Button
-                          key={key}
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => execute(skillsPageRef.current)}
-                          className="hover:bg-black/5 dark:hover:bg-white/5"
-                        >
-                          <Icon className="w-4 h-4 mr-2" />
-                          {t(labelKey)}
-                        </Button>
-                      ),
-                    )}
-                  </>
-                )}
                 {currentView === "providers" && (
                   <>
                     <div className="flex items-center gap-1 p-1 bg-muted rounded-xl">
@@ -1623,15 +1329,6 @@ function App() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setCurrentView("skills")}
-                                className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 w-8 px-2"
-                                title={t("skills.manage")}
-                              >
-                                <SkillsIcon className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
                                 onClick={() => setCurrentView("hermesMemory")}
                                 className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 w-8 px-2"
                                 title={t("hermes.memory.title")}
@@ -1647,17 +1344,6 @@ function App() {
                               >
                                 <LayoutDashboard className="w-4 h-4" />
                               </Button>
-                              {hasMcpSupport && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setCurrentView("mcp")}
-                                  className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 w-8 px-2"
-                                  title={t("mcp.title")}
-                                >
-                                  <McpIcon size={16} />
-                                </Button>
-                              )}
                             </>
                           ) : activeApp === "openclaw" ? (
                             <>
@@ -1712,30 +1398,6 @@ function App() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setCurrentView("skills")}
-                                className={cn(
-                                  "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5",
-                                  "transition-all duration-200 ease-in-out overflow-hidden",
-                                  hasSkillsSupport
-                                    ? "opacity-100 w-8 scale-100 px-2"
-                                    : "opacity-0 w-0 scale-75 pointer-events-none px-0 -ml-1",
-                                )}
-                                title={t("skills.manage")}
-                              >
-                                <SkillsIcon className="flex-shrink-0 w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setCurrentView("prompts")}
-                                className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 w-8 px-2"
-                                title={t("prompts.manage")}
-                              >
-                                <Book className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
                                 onClick={() => setCurrentView("sessions")}
                                 className={cn(
                                   "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5",
@@ -1748,17 +1410,6 @@ function App() {
                               >
                                 <History className="flex-shrink-0 w-4 h-4" />
                               </Button>
-                              {hasMcpSupport && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setCurrentView("mcp")}
-                                  className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 w-8 px-2"
-                                  title={t("mcp.title")}
-                                >
-                                  <McpIcon size={16} />
-                                </Button>
-                              )}
                             </>
                           )}
                         </motion.div>

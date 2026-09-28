@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { useTranslation } from "react-i18next";
-import { Eye, EyeOff, RefreshCw } from "lucide-react";
+import { Eye, EyeOff, RefreshCw, Loader2, TestTube2 } from "lucide-react";
+import { useGlobalProxyUrl, useGlobalProxyChaining, useTestOutboundProxy } from "@/hooks/useGlobalProxy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,6 +49,11 @@ export function UniversalProviderFormModal({
   const [showApiKey, setShowApiKey] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [notes, setNotes] = useState("");
+  const [outboundProxyUrl, setOutboundProxyUrl] = useState("");
+
+  const { data: globalProxyUrl } = useGlobalProxyUrl();
+  const { data: isChainingEnabled } = useGlobalProxyChaining();
+  const testProxyMutation = useTestOutboundProxy();
 
   // 应用启用状态
   const [claudeEnabled, setClaudeEnabled] = useState(true);
@@ -71,6 +77,7 @@ export function UniversalProviderFormModal({
       setApiKey(editingProvider.apiKey);
       setWebsiteUrl(editingProvider.websiteUrl || "");
       setNotes(editingProvider.notes || "");
+      setOutboundProxyUrl(editingProvider.meta?.outboundProxyUrl || "");
       setClaudeEnabled(editingProvider.apps.claude);
       setCodexEnabled(editingProvider.apps.codex);
       setGeminiEnabled(editingProvider.apps.gemini);
@@ -90,6 +97,7 @@ export function UniversalProviderFormModal({
       setApiKey("");
       setWebsiteUrl(defaultPreset.websiteUrl || "");
       setNotes("");
+      setOutboundProxyUrl("");
       setClaudeEnabled(defaultPreset.defaultApps.claude);
       setCodexEnabled(defaultPreset.defaultApps.codex);
       setGeminiEnabled(defaultPreset.defaultApps.gemini);
@@ -199,6 +207,10 @@ requires_openai_auth = true`;
           apiKey: apiKey.trim(),
           websiteUrl: websiteUrl.trim() || undefined,
           notes: notes.trim() || undefined,
+          meta: {
+            ...(editingProvider.meta ?? {}),
+            outboundProxyUrl: outboundProxyUrl.trim() || undefined,
+          },
           apps: {
             claude: claudeEnabled,
             codex: codexEnabled,
@@ -224,6 +236,10 @@ requires_openai_auth = true`;
       provider.models = models;
       provider.websiteUrl = websiteUrl.trim() || undefined;
       provider.notes = notes.trim() || undefined;
+      provider.meta = {
+        ...(provider.meta ?? {}),
+        outboundProxyUrl: outboundProxyUrl.trim() || undefined,
+      };
     }
 
     onSave(provider);
@@ -235,6 +251,7 @@ requires_openai_auth = true`;
     apiKey,
     websiteUrl,
     notes,
+    outboundProxyUrl,
     claudeEnabled,
     codexEnabled,
     geminiEnabled,
@@ -258,6 +275,10 @@ requires_openai_auth = true`;
           apiKey: apiKey.trim(),
           websiteUrl: websiteUrl.trim() || undefined,
           notes: notes.trim() || undefined,
+          meta: {
+            ...(editingProvider.meta ?? {}),
+            outboundProxyUrl: outboundProxyUrl.trim() || undefined,
+          },
           apps: {
             claude: claudeEnabled,
             codex: codexEnabled,
@@ -283,6 +304,10 @@ requires_openai_auth = true`;
       provider.models = models;
       provider.websiteUrl = websiteUrl.trim() || undefined;
       provider.notes = notes.trim() || undefined;
+      provider.meta = {
+        ...(provider.meta ?? {}),
+        outboundProxyUrl: outboundProxyUrl.trim() || undefined,
+      };
     }
 
     return provider;
@@ -293,6 +318,7 @@ requires_openai_auth = true`;
     apiKey,
     websiteUrl,
     notes,
+    outboundProxyUrl,
     claudeEnabled,
     codexEnabled,
     geminiEnabled,
@@ -475,6 +501,51 @@ requires_openai_auth = true`;
                 defaultValue: "可选：添加备注信息",
               })}
             />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="outboundProxyUrl">
+                {t("provider.outboundProxyUrl", {
+                  defaultValue: "单独出站代理",
+                })}
+              </Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={!outboundProxyUrl.trim() || testProxyMutation.isPending}
+                onClick={async () => {
+                  if (outboundProxyUrl.trim()) {
+                    await testProxyMutation.mutateAsync({
+                      proxyUrl: outboundProxyUrl.trim(),
+                      frontProxy:
+                        isChainingEnabled && globalProxyUrl ? globalProxyUrl : null,
+                    });
+                  }
+                }}
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                {testProxyMutation.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                ) : (
+                  <TestTube2 className="h-3.5 w-3.5 mr-1" />
+                )}
+                {t("settings.globalProxy.test", { defaultValue: "测试连接" })}
+              </Button>
+            </div>
+            <Input
+              id="outboundProxyUrl"
+              value={outboundProxyUrl}
+              onChange={(e) => setOutboundProxyUrl(e.target.value)}
+              placeholder="http://127.0.0.1:7890 / socks5://127.0.0.1:1080"
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("provider.outboundProxyHint", {
+                defaultValue:
+                  "为此供应商配置单独的出站代理，支持 HTTP 和 SOCKS5。留空则使用全局出站代理或直连。",
+              })}
+            </p>
           </div>
         </div>
 

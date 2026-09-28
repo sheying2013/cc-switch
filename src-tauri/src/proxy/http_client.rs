@@ -16,6 +16,30 @@ static GLOBAL_CLIENT: OnceCell<RwLock<Client>> = OnceCell::new();
 /// 当前代理 URL（用于日志和状态查询）
 static CURRENT_PROXY_URL: OnceCell<RwLock<Option<String>>> = OnceCell::new();
 
+/// 是否启用链式代理（全局出站代理作为供应商单独代理的前置代理）
+static GLOBAL_PROXY_CHAINING: OnceCell<RwLock<bool>> = OnceCell::new();
+
+/// 获取是否启用全局出站代理链式代理
+pub fn get_proxy_chaining() -> bool {
+    GLOBAL_PROXY_CHAINING
+        .get()
+        .and_then(|lock| lock.read().ok())
+        .map(|val| *val)
+        .unwrap_or(false)
+}
+
+/// 设置是否启用全局出站代理链式代理
+pub fn set_proxy_chaining(enabled: bool) {
+    if let Some(lock) = GLOBAL_PROXY_CHAINING.get() {
+        if let Ok(mut val) = lock.write() {
+            *val = enabled;
+        }
+    } else {
+        let _ = GLOBAL_PROXY_CHAINING.set(RwLock::new(enabled));
+    }
+    log::info!("[GlobalProxy] Proxy chaining set to: {enabled}");
+}
+
 /// CC Switch 代理服务器当前监听的端口
 static CC_SWITCH_PROXY_PORT: OnceCell<RwLock<u16>> = OnceCell::new();
 

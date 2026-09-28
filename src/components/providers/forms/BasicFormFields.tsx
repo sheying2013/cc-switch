@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/form";
 import { ImeSafeInput } from "@/components/ui/ime-safe-input";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2, TestTube2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,7 @@ import { IconPicker } from "@/components/IconPicker";
 import { getIconMetadata } from "@/icons/extracted/metadata";
 import type { UseFormReturn } from "react-hook-form";
 import type { ProviderFormData } from "@/lib/schemas/provider";
+import { useGlobalProxyUrl, useGlobalProxyChaining, useTestOutboundProxy } from "@/hooks/useGlobalProxy";
 
 interface BasicFormFieldsProps {
   form: UseFormReturn<ProviderFormData>;
@@ -35,6 +36,9 @@ export function BasicFormFields({
 }: BasicFormFieldsProps) {
   const { t } = useTranslation();
   const [iconDialogOpen, setIconDialogOpen] = useState(false);
+  const { data: globalProxyUrl } = useGlobalProxyUrl();
+  const { data: isChainingEnabled } = useGlobalProxyChaining();
+  const testProxyMutation = useTestOutboundProxy();
 
   const currentIcon = form.watch("icon");
   const currentIconColor = form.watch("iconColor");
@@ -190,6 +194,63 @@ export function BasicFormFields({
                 placeholder={t("providerForm.websiteUrlPlaceholder")}
               />
             </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="outboundProxyUrl"
+        render={({ field }) => (
+          <FormItem>
+            <div className="flex items-center justify-between">
+              <FormLabel>
+                {t("provider.outboundProxyUrl", {
+                  defaultValue: "单独出站代理",
+                })}
+              </FormLabel>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={!field.value?.trim() || testProxyMutation.isPending}
+                onClick={async () => {
+                  if (field.value?.trim()) {
+                    await testProxyMutation.mutateAsync({
+                      proxyUrl: field.value.trim(),
+                      frontProxy:
+                        isChainingEnabled && globalProxyUrl ? globalProxyUrl : null,
+                    });
+                  }
+                }}
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                {testProxyMutation.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                ) : (
+                  <TestTube2 className="h-3.5 w-3.5 mr-1" />
+                )}
+                {t("settings.globalProxy.test", { defaultValue: "测试连接" })}
+              </Button>
+            </div>
+            <FormControl>
+              <ImeSafeInput
+                ref={field.ref}
+                name={field.name}
+                value={field.value ?? ""}
+                onValueChange={field.onChange}
+                onBlur={field.onBlur}
+                disabled={field.disabled}
+                placeholder="http://127.0.0.1:7890 / socks5://127.0.0.1:1080"
+              />
+            </FormControl>
+            <p className="text-xs text-muted-foreground">
+              {t("provider.outboundProxyHint", {
+                defaultValue:
+                  "为此供应商配置单独的出站代理，支持 HTTP 和 SOCKS5。留空则使用全局出站代理或直连。",
+              })}
+            </p>
             <FormMessage />
           </FormItem>
         )}

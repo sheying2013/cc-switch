@@ -118,6 +118,7 @@ export function McodeProviderForm({
       name: initialData?.name ?? "",
       notes: initialData?.notes ?? "",
       websiteUrl: initialData?.websiteUrl ?? "",
+      outboundProxyUrl: initialData?.meta?.outboundProxyUrl ?? "",
       icon: initialData?.icon ?? "",
       iconColor: initialData?.iconColor ?? "",
       settingsConfig: jsonText,
@@ -185,7 +186,10 @@ export function McodeProviderForm({
             await onSubmit({
               ...identity,
               name: identity.name.trim(),
-              meta: initialData?.meta,
+              meta: {
+                ...(initialData?.meta ?? {}),
+                outboundProxyUrl: identity.outboundProxyUrl?.trim() || undefined,
+              },
               providerKey: isEdit ? providerId : providerKey,
               presetCategory: category,
               settingsConfig: JSON.stringify({

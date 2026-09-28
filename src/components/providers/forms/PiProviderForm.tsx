@@ -520,6 +520,7 @@ export function PiProviderForm({
       name: initialData?.name ?? optionalText(initialConfig.name),
       websiteUrl: initialData?.websiteUrl ?? "",
       notes: initialData?.notes ?? "",
+      outboundProxyUrl: initialData?.meta?.outboundProxyUrl ?? "",
       settingsConfig: initialSettingsConfigText,
       icon: initialData?.icon ?? "",
       iconColor: initialData?.iconColor ?? "",
@@ -1248,7 +1249,10 @@ export function PiProviderForm({
         providerKey: isEdit ? providerId : trimmedKey,
         presetId: selectedPresetId ?? undefined,
         presetCategory: category,
-        meta: initialData?.meta,
+        meta: {
+          ...(initialData?.meta ?? {}),
+          outboundProxyUrl: identity.outboundProxyUrl?.trim() || undefined,
+        },
       };
       await onSubmit(values);
     } catch (error) {

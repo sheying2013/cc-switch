@@ -83,3 +83,30 @@ export async function getUpstreamProxyStatus(): Promise<UpstreamProxyStatus> {
 export async function scanLocalProxies(): Promise<DetectedProxy[]> {
   return invoke<DetectedProxy[]>("scan_local_proxies");
 }
+
+/**
+ * 获取是否启用全局出站代理链式代理
+ */
+export async function getGlobalProxyChaining(): Promise<boolean> {
+  return invoke<boolean>("get_global_proxy_chaining");
+}
+
+/**
+ * 设置是否启用全局出站代理链式代理
+ */
+export async function setGlobalProxyChaining(enabled: boolean): Promise<void> {
+  return invoke("set_global_proxy_chaining", { enabled });
+}
+
+/**
+ * 测试出站代理（支持单独测试或前置链式测试）
+ */
+export async function testOutboundProxy(
+  proxyUrl: string,
+  frontProxy?: string | null,
+): Promise<ProxyTestResult> {
+  return invoke<ProxyTestResult>("test_outbound_proxy", {
+    frontProxy: frontProxy || null,
+    proxyUrl,
+  });
+}

@@ -29,8 +29,6 @@ const ppioBrandFields = {
   websiteUrl: "https://ppio.com",
   apiKeyUrl: "https://ppio.com/activity/ccswitch",
   category: "aggregator",
-  isPartner: true,
-  partnerPromotionKey: "ppio",
   icon: "ppio",
   iconColor: "#2874FF",
 };

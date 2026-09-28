@@ -69,6 +69,26 @@ pub fn set_global_proxy_url(state: tauri::State<'_, AppState>, url: String) -> R
     Ok(())
 }
 
+/// 获取全局代理是否启用链式代理
+#[tauri::command]
+pub fn get_global_proxy_chaining(state: tauri::State<'_, AppState>) -> Result<bool, String> {
+    state.db.get_global_proxy_chaining().map_err(|e| e.to_string())
+}
+
+/// 设置全局代理是否启用链式代理（全局出站代理作为供应商单独代理的前置）
+#[tauri::command]
+pub fn set_global_proxy_chaining(
+    state: tauri::State<'_, AppState>,
+    enabled: bool,
+) -> Result<(), String> {
+    state
+        .db
+        .set_global_proxy_chaining(enabled)
+        .map_err(|e| e.to_string())?;
+    http_client::set_proxy_chaining(enabled);
+    Ok(())
+}
+
 /// 代理测试结果
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -85,76 +105,35 @@ pub struct ProxyTestResult {
 ///
 /// 通过指定的代理 URL 发送测试请求，返回连接结果和延迟。
 /// 使用多个测试目标，任一成功即认为代理可用。
+/// 测试出站代理连接（支持单代理或前置链式代理）
 #[tauri::command]
-pub async fn test_proxy_url(url: String) -> Result<ProxyTestResult, String> {
-    if url.trim().is_empty() {
+pub async fn test_outbound_proxy(
+    front_proxy: Option<String>,
+    proxy_url: String,
+) -> Result<ProxyTestResult, String> {
+    if proxy_url.trim().is_empty() {
         return Err("Proxy URL is empty".to_string());
     }
 
-    let start = Instant::now();
-
-    // 构建带代理的临时客户端
-    let proxy = reqwest::Proxy::all(&url).map_err(|e| format!("Invalid proxy URL: {e}"))?;
-
-    let client = reqwest::Client::builder()
-        .proxy(proxy)
-        .timeout(std::time::Duration::from_secs(10))
-        .connect_timeout(std::time::Duration::from_secs(10))
-        .build()
-        .map_err(|e| format!("Failed to build client: {e}"))?;
-
-    // 使用多个测试目标，提高兼容性
-    // 优先使用 httpbin（专门用于 HTTP 测试），回退到其他公共端点
-    let test_urls = [
-        "https://httpbin.org/get",
-        "https://www.google.com",
-        "https://api.anthropic.com",
-    ];
-
-    let mut last_error = None;
-
-    for test_url in test_urls {
-        match client.head(test_url).send().await {
-            Ok(resp) => {
-                let latency = start.elapsed().as_millis() as u64;
-                log::debug!(
-                    "[GlobalProxy] Test successful: {} -> {} via {} ({}ms)",
-                    http_client::mask_url(&url),
-                    test_url,
-                    resp.status(),
-                    latency
-                );
-                return Ok(ProxyTestResult {
-                    success: true,
-                    latency_ms: latency,
-                    error: None,
-                });
-            }
-            Err(e) => {
-                log::debug!("[GlobalProxy] Test to {test_url} failed: {e}");
-                last_error = Some(e);
-            }
-        }
+    let front_ref = front_proxy.as_deref().filter(|s| !s.trim().is_empty());
+    match crate::proxy::hyper_client::test_proxy_chain(front_ref, proxy_url.trim()).await {
+        Ok(latency_ms) => Ok(ProxyTestResult {
+            success: true,
+            latency_ms,
+            error: None,
+        }),
+        Err(e) => Ok(ProxyTestResult {
+            success: false,
+            latency_ms: 0,
+            error: Some(e.to_string()),
+        }),
     }
+}
 
-    // 所有测试目标都失败
-    let latency = start.elapsed().as_millis() as u64;
-    let error_msg = last_error
-        .map(|e| e.to_string())
-        .unwrap_or_else(|| "All test targets failed".to_string());
-
-    log::debug!(
-        "[GlobalProxy] Test failed: {} -> {} ({}ms)",
-        http_client::mask_url(&url),
-        error_msg,
-        latency
-    );
-
-    Ok(ProxyTestResult {
-        success: false,
-        latency_ms: latency,
-        error: Some(error_msg),
-    })
+/// 测试代理连接（兼容已有调用）
+#[tauri::command]
+pub async fn test_proxy_url(url: String) -> Result<ProxyTestResult, String> {
+    test_outbound_proxy(None, url).await
 }
 
 /// 获取当前出站代理状态
