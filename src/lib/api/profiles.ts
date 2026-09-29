@@ -20,14 +20,11 @@ export interface PerApp<T> {
 /**
  * 项目 Profile 的配置快照（与后端 ProfilePayload 严格对应）
  *
- * 所有槽位 null = 该侧从未拍过快照（应用时不动），与"拍到的就是空集"
- * （空数组，应用时清空启用）严格区分。
+ * null = 该侧从未拍过快照（应用时不动），与"拍到的就是当前供应商"严格区分。
+ * MCP / Skills / Prompt 相关槽位已随对应功能一起移除。
  */
 export interface ProfilePayload {
   providers: PerApp<string | null>;
-  mcp: PerApp<string[] | null>;
-  skills: PerApp<string[] | null>;
-  prompts: PerApp<string | null>;
 }
 
 export interface Profile {

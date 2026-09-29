@@ -42,18 +42,6 @@ export const DEFAULT_VISIBLE_APPS: VisibleApps = {
   mcode: true,
 };
 
-/** App IDs shown in Skills panels. */
-export const SKILLS_APP_IDS: AppId[] = [
-  "claude",
-  "codex",
-  "gemini",
-  "grokbuild",
-  "opencode",
-  "hermes",
-  "pi",
-  "mcode",
-];
-
 export type ProxyAppId = Extract<
   AppId,
   "claude" | "codex" | "gemini" | "grokbuild"
@@ -101,22 +89,6 @@ export const EDITOR_VIEW_APP_IDS: AppId[] = [
 
 export function usesEditorView(appId: AppId): boolean {
   return EDITOR_VIEW_APP_IDS.includes(appId);
-}
-
-/** Pi has no native MCP registry; do not manufacture a disabled mirror. */
-export type McpAppId = Exclude<AppId, "claude-desktop" | "openclaw" | "pi">;
-export const MCP_APP_IDS: McpAppId[] = [
-  "claude",
-  "codex",
-  "gemini",
-  "grokbuild",
-  "opencode",
-  "hermes",
-  "mcode",
-];
-
-export function isMcpAppId(appId: string): appId is McpAppId {
-  return (MCP_APP_IDS as string[]).includes(appId);
 }
 
 export const APP_ICON_MAP: Record<AppId, AppConfig> = {

@@ -22,9 +22,6 @@ export interface GeminiProviderPreset {
   model?: string;
   description?: string;
   category?: ProviderCategory;
-  isPartner?: boolean;
-  primePartner?: boolean; // 置顶合作伙伴（顶级）：徽章显示为心形
-  partnerPromotionKey?: string;
   endpointCandidates?: string[];
   theme?: GeminiPresetTheme;
   // 图标配置
@@ -42,7 +39,6 @@ export const geminiProviderPresets: GeminiProviderPreset[] = [
     },
     description: "Google 官方 Gemini API (OAuth)",
     category: "official",
-    partnerPromotionKey: "google-official",
     theme: {
       icon: "gemini",
       backgroundColor: "#4285F4",
@@ -411,7 +407,7 @@ export const geminiProviderPresets: GeminiProviderPreset[] = [
     endpointCandidates: ["https://apicdn.xycai.us", "https://apicdn.xyc.ai"],
     icon: "xycai",
   },
-  // ===== 非赞助商预设：应用内展示按显示名排序，此处文件顺序不影响展示 =====
+  // ===== 预设：应用内展示按显示名排序，此处文件顺序不影响展示 =====
   {
     name: "E-FlowCode",
     websiteUrl: "https://e-flowcode.cc",

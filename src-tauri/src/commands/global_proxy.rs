@@ -6,7 +6,7 @@ use crate::proxy::http_client;
 use crate::store::AppState;
 use serde::Serialize;
 use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 /// 获取全局代理 URL
 ///

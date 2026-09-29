@@ -19,8 +19,6 @@ export interface Provider {
   sortIndex?: number; // 排序索引（用于自定义拖拽排序）
   // 备注信息
   notes?: string;
-  // 新增：是否为商业合作伙伴
-  isPartner?: boolean;
   // 可选：供应商元数据（仅存于 ~/.cc-switch/config.json，不写入 live 配置）
   meta?: ProviderMeta;
   // 图标配置
@@ -187,10 +185,6 @@ export interface ProviderMeta {
   usage_script?: UsageScript;
   // 请求地址管理：测速后自动选择最佳端点
   endpointAutoSelect?: boolean;
-  // 是否为官方合作伙伴
-  isPartner?: boolean;
-  // 合作伙伴促销 key（用于后端识别 PackyCode 等）
-  partnerPromotionKey?: string;
   // API 格式（Claude / Codex 供应商使用）
   // - "anthropic": 原生 Anthropic Messages API 格式，直接透传
   // - "openai_chat": OpenAI Chat Completions 格式，需要格式转换
@@ -235,12 +229,6 @@ export interface ProviderMeta {
   // GitHub Copilot 关联账号 ID（旧字段，保留兼容读取）
   githubAccountId?: string;
 }
-
-// Skill 同步方式
-export type SkillSyncMethod = "auto" | "symlink" | "copy";
-
-// Skill 存储位置
-export type SkillStorageLocation = "cc_switch" | "unified";
 
 // Claude API 格式类型
 // - "anthropic": 原生 Anthropic Messages API 格式，直接透传
@@ -431,12 +419,6 @@ export interface Settings {
   // 当前 Gemini 供应商 ID（优先于数据库 is_current）
   currentProviderGemini?: string;
 
-  // ===== Skill 同步设置 =====
-  // Skill 同步方式：auto（默认，优先 symlink）、symlink、copy
-  skillSyncMethod?: SkillSyncMethod;
-  // Skill 存储位置：cc_switch（默认）或 unified（~/.agents/skills/）
-  skillStorageLocation?: SkillStorageLocation;
-
   // ===== WebDAV v2 同步设置 =====
   webdavSync?: WebDavSyncSettings;
 
@@ -484,67 +466,6 @@ export interface SessionMessage {
   role: string;
   content: string;
   ts?: number;
-}
-
-// MCP 服务器连接参数（宽松：允许扩展字段）
-export interface McpServerSpec {
-  // 可选：社区常见 .mcp.json 中 stdio 配置可不写 type
-  type?: "stdio" | "http" | "sse";
-  // stdio 字段
-  command?: string;
-  args?: string[];
-  env?: Record<string, string>;
-  cwd?: string;
-  // http 和 sse 字段
-  url?: string;
-  headers?: Record<string, string>;
-  // 通用字段
-  [key: string]: any;
-}
-
-// v3.7.0: MCP 服务器应用启用状态
-export interface McpApps {
-  mcode?: boolean;
-  claude: boolean;
-  "claude-desktop"?: boolean;
-  codex: boolean;
-  gemini: boolean;
-  grokbuild?: boolean;
-  opencode: boolean;
-  openclaw: boolean;
-  hermes: boolean;
-}
-
-// MCP 服务器条目（v3.7.0 统一结构）
-export interface McpServer {
-  id: string;
-  name: string;
-  server: McpServerSpec;
-  apps: McpApps; // v3.7.0: 标记应用到哪些客户端
-  description?: string;
-  tags?: string[];
-  homepage?: string;
-  docs?: string;
-  // 兼容旧字段（v3.6.x 及以前）
-  enabled?: boolean; // 已废弃，v3.7.0 使用 apps 字段
-  source?: string;
-  [key: string]: any;
-}
-
-// MCP 服务器映射（id -> McpServer）
-export type McpServersMap = Record<string, McpServer>;
-
-// MCP 配置状态
-export interface McpStatus {
-  userConfigPath: string;
-  userConfigExists: boolean;
-  serverCount: number;
-}
-
-// 新：来自 config.json 的 MCP 列表响应
-export interface McpConfigResponse {
-  configPath: string;
-  servers: Record<string, McpServer>;
 }
 
 // ============================================================================
@@ -636,19 +557,6 @@ export interface OpenCodeProviderConfig {
   name?: string; // 供应商显示名称
   options: OpenCodeProviderOptions;
   models: Record<string, OpenCodeModel>;
-}
-
-// OpenCode MCP 服务器配置（与统一格式不同）
-export interface OpenCodeMcpServerSpec {
-  type: "local" | "remote";
-  // local 类型字段
-  command?: string[]; // 与统一格式不同：命令和参数合并为数组
-  environment?: Record<string, string>; // 与统一格式不同：使用 environment 而非 env
-  // remote 类型字段
-  url?: string;
-  headers?: Record<string, string>;
-  // 通用字段
-  enabled?: boolean;
 }
 
 // ============================================================================

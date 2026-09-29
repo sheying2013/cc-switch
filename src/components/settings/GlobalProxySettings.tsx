@@ -8,7 +8,15 @@ import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, TestTube2, Search, Eye, EyeOff, X, Link2 } from "lucide-react";
+import {
+  Loader2,
+  TestTube2,
+  Search,
+  Eye,
+  EyeOff,
+  X,
+  Link2,
+} from "lucide-react";
 import { ToggleRow } from "@/components/ui/toggle-row";
 import {
   useGlobalProxyUrl,

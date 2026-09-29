@@ -5,18 +5,6 @@ import zhTW from "@/i18n/locales/zh-TW.json";
 import zh from "@/i18n/locales/zh.json";
 
 const requiredPaths = [
-  "common.enableAllForApp",
-  "common.disableAllForApp",
-  "common.bulkToggleFailed",
-  "skills.installedSearchPlaceholder",
-  "skills.installedSearchAriaLabel",
-  "skills.noInstalledSearchResults",
-  "mcp.unifiedPanel.searchPlaceholder",
-  "mcp.unifiedPanel.searchAriaLabel",
-  "mcp.unifiedPanel.noSearchResults",
-  "prompts.searchPlaceholder",
-  "prompts.searchAriaLabel",
-  "prompts.noSearchResults",
   // `translatePiProviderMutationError` returns this key for the duplicate-key error
   // the Pi backend raises, and it existed in no locale -- so the toast showed the raw
   // key. Its own test mocks `t` as identity, so it stayed green throughout.

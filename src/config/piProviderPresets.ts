@@ -39,9 +39,6 @@ export interface PiProviderPreset {
     models: PiPresetModel[];
   };
   category?: ProviderCategory;
-  isPartner?: boolean;
-  primePartner?: boolean;
-  partnerPromotionKey?: string;
   theme?: PresetTheme;
   icon?: string;
   iconColor?: string;
@@ -468,8 +465,8 @@ const piProviderPresetDefinitions: PiProviderPreset[] = [
   // （2026-09-16 版）team 专属基址 —— 与国内个人版 qianfan.baidubce.com/
   // .../personal 是两套部署，勿合并。阵容与 claude/codex/opencode/openclaw/
   // hermes 五 app 的 FluxA 预设同源：七款取 FluxA 产品页模型表（排除标
-  // Coming soon 的 deepseek-v4-pro-0813 / glm-5.3），kimi-k2.6 是定稿赞助
-  // 文案点名补的。deepseek-v4-flash-0731 无独立目录键，按 v4-flash 同款
+  // Coming soon 的 deepseek-v4-pro-0813 / glm-5.3），kimi-k2.6 按 FluxA
+  // 产品页目录补齐。deepseek-v4-flash-0731 无独立目录键，按 v4-flash 同款
   // 能力取用、id 写真实 wire 名。思考档位（thinkingProfile）不填：国内版
   // 有、国际 team 部署未实测，与 Codex 侧不声明 codexChatReasoning 同理
   {

@@ -63,8 +63,6 @@ type TestPresetEntry = {
     websiteUrl: string;
     settingsConfig: Record<string, never>;
     category: ProviderCategory;
-    primePartner?: boolean;
-    isPartner?: boolean;
   };
 };
 

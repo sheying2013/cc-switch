@@ -1,26 +1,21 @@
 //! 项目 Profile 编排服务
 //!
 //! Profile 是**全应用共享的项目实体**（用户拥有的项目就那几个），payload
-//! 按 app 分槽存配置快照（供应商 / MCP / Skills / Prompt）。快照与应用
-//! 均**按分组（scope）操作**：Claude Code 与 Codex 的工作目录往往不同
-//! （各在各的项目里），因此各组独立指向自己的当前项目、只拍/只应用组内
-//! 槽位，互不牵连；重命名/删除作用于共享实体本身。
+//! 按 app 分槽存配置快照（供应商）。快照与应用均**按分组（scope）操作**：
+//! Claude Code 与 Codex 的工作目录往往不同（各在各的项目里），因此各组独立
+//! 指向自己的当前项目、只拍/只应用组内槽位，互不牵连；重命名/删除作用于
+//! 共享实体本身。
 //! 应用（apply）时复用现有切换原语批量落地：
 //! - 供应商：`ProviderService::switch`（内建代理接管热切换与接管下禁切官方）
-//! - MCP：`McpService::toggle_app`（改标志 + 单 server 物化）
-//! - Skills：`SkillService::toggle_app`（改标志 + 单 skill 物化）
-//! - Prompt：`PromptService::enable_prompt`（互斥激活 + 原子写 live）
 //!
 //! apply 为 best-effort：单项失败收集为 warning 继续，不整体回滚。
-
-use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 
 use crate::app_config::AppType;
 use crate::database::Profile;
 use crate::error::AppError;
-use crate::services::{McpService, PromptService, ProviderService, SkillService};
+use crate::services::ProviderService;
 use crate::store::AppState;
 
 /// Profile 操作的应用分组：项目实体全应用共享，但快照/应用/当前指针按组进行。
@@ -124,12 +119,6 @@ impl<T> PerApp<T> {
 pub struct ProfilePayload {
     /// 每 app 的当前供应商 id
     pub providers: PerApp<Option<String>>,
-    /// 每 app 启用的 MCP server id 集合
-    pub mcp: PerApp<Option<Vec<String>>>,
-    /// 每 app 启用的 Skill id 集合
-    pub skills: PerApp<Option<Vec<String>>>,
-    /// 每 app 激活的 prompt id
-    pub prompts: PerApp<Option<String>>,
 }
 
 impl ProfilePayload {
@@ -142,52 +131,16 @@ impl ProfilePayload {
             {
                 *dst = src.clone();
             }
-            if let (Some(dst), Some(src)) = (self.mcp.get_mut(app), other.mcp.get(app)) {
-                *dst = src.clone();
-            }
-            if let (Some(dst), Some(src)) = (self.skills.get_mut(app), other.skills.get(app)) {
-                *dst = src.clone();
-            }
-            if let (Some(dst), Some(src)) = (self.prompts.get_mut(app), other.prompts.get(app)) {
-                *dst = src.clone();
-            }
         }
     }
 
     /// 某分组是否拍过快照（任一槽位非 None 即视为拍过）
     pub fn scope_captured(&self, scope: ProfileScope) -> bool {
-        scope.apps().iter().any(|app| {
-            self.providers.get(app).is_some_and(|s| s.is_some())
-                || self.mcp.get(app).is_some_and(|s| s.is_some())
-                || self.skills.get(app).is_some_and(|s| s.is_some())
-                || self.prompts.get(app).is_some_and(|s| s.is_some())
-        })
+        scope
+            .apps()
+            .iter()
+            .any(|app| self.providers.get(app).is_some_and(|s| s.is_some()))
     }
-}
-
-/// 计算从当前启用状态到目标集合的最小 toggle 集
-///
-/// 返回 (需要执行的 (id, enabled) 列表, payload 中已不存在于 DB 的悬空 id 列表)
-fn plan_toggles(
-    current: &[(String, bool)],
-    target_ids: &[String],
-) -> (Vec<(String, bool)>, Vec<String>) {
-    let existing: HashSet<&str> = current.iter().map(|(id, _)| id.as_str()).collect();
-    let target: HashSet<&str> = target_ids.iter().map(|s| s.as_str()).collect();
-
-    let toggles = current
-        .iter()
-        .filter(|(id, enabled)| target.contains(id.as_str()) != *enabled)
-        .map(|(id, enabled)| (id.clone(), !enabled))
-        .collect();
-
-    let dangling = target_ids
-        .iter()
-        .filter(|id| !existing.contains(id.as_str()))
-        .cloned()
-        .collect();
-
-    (toggles, dangling)
 }
 
 pub struct ProfileService;
@@ -199,8 +152,6 @@ impl ProfileService {
         scope: ProfileScope,
     ) -> Result<ProfilePayload, AppError> {
         let mut payload = ProfilePayload::default();
-        let mcp_servers = state.db.get_all_mcp_servers()?;
-        let skills = state.db.get_all_installed_skills()?;
 
         for app in scope.apps().iter() {
             if let Some(slot) = payload.providers.get_mut(app) {
@@ -210,32 +161,6 @@ impl ProfileService {
                     app,
                     crate::mode::current::Purpose::InUse,
                 )?;
-            }
-            if let Some(slot) = payload.mcp.get_mut(app) {
-                *slot = Some(
-                    mcp_servers
-                        .values()
-                        .filter(|s| s.apps.is_enabled_for(app))
-                        .map(|s| s.id.clone())
-                        .collect(),
-                );
-            }
-            if let Some(slot) = payload.skills.get_mut(app) {
-                *slot = Some(
-                    skills
-                        .values()
-                        .filter(|s| s.apps.is_enabled_for(app))
-                        .map(|s| s.id.clone())
-                        .collect(),
-                );
-            }
-            if let Some(slot) = payload.prompts.get_mut(app) {
-                *slot = state
-                    .db
-                    .get_prompts(app.as_str())?
-                    .values()
-                    .find(|p| p.enabled)
-                    .map(|p| p.id.clone());
             }
         }
         Ok(payload)
@@ -390,67 +315,6 @@ impl ProfileService {
                 }
             }
 
-            // 2. MCP diff（最小 toggle：仅动目标态≠当前态的条目；None = 该侧未拍过，不动）
-            if let Some(Some(target_ids)) = payload.mcp.get(app) {
-                let servers = state.db.get_all_mcp_servers()?;
-                let current: Vec<(String, bool)> = servers
-                    .values()
-                    .map(|s| (s.id.clone(), s.apps.is_enabled_for(app)))
-                    .collect();
-                let (toggles, dangling) = plan_toggles(&current, target_ids);
-                for id in dangling {
-                    warnings.push(format!("[{app_str}] MCP '{id}' no longer exists, skipped"));
-                }
-                for (id, enabled) in toggles {
-                    if let Err(e) = McpService::toggle_app(state, &id, app.clone(), enabled) {
-                        warnings.push(format!(
-                            "[{app_str}] toggle MCP '{id}' -> {enabled} failed: {e}"
-                        ));
-                    }
-                }
-            }
-
-            // 3. Skills diff（SkillService 返回 anyhow::Result，收进 warning）
-            if let Some(Some(target_ids)) = payload.skills.get(app) {
-                let skills = state.db.get_all_installed_skills()?;
-                let current: Vec<(String, bool)> = skills
-                    .values()
-                    .map(|s| (s.id.clone(), s.apps.is_enabled_for(app)))
-                    .collect();
-                let (toggles, dangling) = plan_toggles(&current, target_ids);
-                for id in dangling {
-                    warnings.push(format!(
-                        "[{app_str}] skill '{id}' no longer exists, skipped"
-                    ));
-                }
-                for (id, enabled) in toggles {
-                    if let Err(e) = SkillService::toggle_app(&state.db, &id, app, enabled) {
-                        warnings.push(format!(
-                            "[{app_str}] toggle skill '{id}' -> {enabled} failed: {e}"
-                        ));
-                    }
-                }
-            }
-
-            // 4. Prompt（None = 不动；已激活则幂等跳过，避免无谓的文件写与备份）
-            if let Some(Some(target_prompt)) = payload.prompts.get(app) {
-                let prompts = state.db.get_prompts(app_str)?;
-                match prompts.get(target_prompt) {
-                    None => warnings.push(format!(
-                        "[{app_str}] prompt '{target_prompt}' no longer exists, skipped"
-                    )),
-                    Some(p) if p.enabled => {}
-                    Some(_) => {
-                        if let Err(e) =
-                            PromptService::enable_prompt(state, app.clone(), target_prompt)
-                        {
-                            warnings.push(format!(
-                                "[{app_str}] enable prompt '{target_prompt}' failed: {e}"
-                            ));
-                        }
-                    }
-                }
-            }
         }
 
         state
@@ -465,10 +329,6 @@ impl ProfileService {
 mod tests {
     use super::*;
 
-    fn ids(v: &[&str]) -> Vec<String> {
-        v.iter().map(|s| s.to_string()).collect()
-    }
-
     #[test]
     fn test_payload_serde_roundtrip() {
         let payload = ProfilePayload {
@@ -476,21 +336,6 @@ mod tests {
                 claude: Some("p1".into()),
                 claude_desktop: Some("d1".into()),
                 codex: None,
-            },
-            mcp: PerApp {
-                claude: Some(ids(&["m1", "m2"])),
-                claude_desktop: Some(vec![]),
-                codex: None,
-            },
-            skills: PerApp {
-                claude: Some(vec![]),
-                claude_desktop: Some(vec![]),
-                codex: Some(ids(&["s1"])),
-            },
-            prompts: PerApp {
-                claude: None,
-                claude_desktop: None,
-                codex: Some("pr1".into()),
             },
         };
         let json = serde_json::to_string(&payload).unwrap();
@@ -504,18 +349,16 @@ mod tests {
 
     #[test]
     fn test_payload_tolerates_missing_fields() {
-        // 前向兼容：旧版/部分字段缺失时应落到 None（"该侧未拍过"）而不是报错，
-        // 应用时对缺失槽位不做任何改动
-        let back: ProfilePayload =
-            serde_json::from_str(r#"{"providers":{"claude":"p1"},"mcp":{"claude":["m1"]}}"#)
-                .unwrap();
+        // 前向兼容：部分字段缺失时应落到 None（"该侧未拍过"）而不是报错，
+        // 应用时对缺失槽位不做任何改动。
+        // 旧版本 payload 里的 mcp/skills/prompts 槽位会被直接忽略。
+        let back: ProfilePayload = serde_json::from_str(
+            r#"{"providers":{"claude":"p1"},"mcp":{"claude":["m1"]},"skills":{"codex":["s1"]},"prompts":{"codex":"pr1"}}"#,
+        )
+        .unwrap();
         assert_eq!(back.providers.claude, Some("p1".to_string()));
         assert_eq!(back.providers.claude_desktop, None);
         assert_eq!(back.providers.codex, None);
-        assert_eq!(back.mcp.claude, Some(ids(&["m1"])));
-        assert_eq!(back.mcp.claude_desktop, None);
-        assert_eq!(back.mcp.codex, None, "missing slot means untouched");
-        assert_eq!(back.prompts.codex, None);
 
         let empty: ProfilePayload = serde_json::from_str("{}").unwrap();
         assert_eq!(empty, ProfilePayload::default());
@@ -530,12 +373,6 @@ mod tests {
                 claude_desktop: Some("d1".into()),
                 codex: Some("c1".into()),
             },
-            mcp: PerApp {
-                claude: Some(ids(&["m1"])),
-                claude_desktop: Some(vec![]),
-                codex: Some(ids(&["m9"])),
-            },
-            ..Default::default()
         };
         // 在 Claude 页"以当前状态更新"：只覆盖 claude 组槽位
         let fresh = ProfilePayload {
@@ -544,12 +381,6 @@ mod tests {
                 claude_desktop: None,
                 codex: Some("SHOULD-NOT-LEAK".into()),
             },
-            mcp: PerApp {
-                claude: Some(ids(&["m2"])),
-                claude_desktop: Some(vec![]),
-                codex: None,
-            },
-            ..Default::default()
         };
         payload.merge_scope_from(&fresh, ProfileScope::Claude);
 
@@ -559,10 +390,8 @@ mod tests {
             Some("d1".to_string()),
             "claude-desktop slot is in its own scope, untouched by claude merge"
         );
-        assert_eq!(payload.mcp.claude, Some(ids(&["m2"])));
         // codex 侧完好：既没被覆盖也没被 fresh 的值污染
         assert_eq!(payload.providers.codex, Some("c1".to_string()));
-        assert_eq!(payload.mcp.codex, Some(ids(&["m9"])));
     }
 
     #[test]
@@ -572,8 +401,8 @@ mod tests {
         assert!(!payload.scope_captured(ProfileScope::ClaudeDesktop));
         assert!(!payload.scope_captured(ProfileScope::Codex));
 
-        // 只拍过 claude 组（哪怕拍到的是空集）
-        payload.mcp.claude = Some(vec![]);
+        // 只拍过 claude 组（哪怕拍到的不是 Some）
+        payload.providers.claude = Some("p1".into());
         assert!(payload.scope_captured(ProfileScope::Claude));
         assert!(!payload.scope_captured(ProfileScope::ClaudeDesktop));
         assert!(!payload.scope_captured(ProfileScope::Codex));
@@ -624,29 +453,5 @@ mod tests {
             }
         }
         assert_eq!(ProfileScope::for_app(&AppType::Gemini), None);
-    }
-
-    #[test]
-    fn test_plan_toggles_minimal_diff() {
-        let current = vec![
-            ("a".to_string(), true),  // 目标含 a：不动
-            ("b".to_string(), false), // 目标含 b：开
-            ("c".to_string(), true),  // 目标不含 c：关
-            ("d".to_string(), false), // 目标不含 d：不动
-        ];
-        let (toggles, dangling) = plan_toggles(&current, &ids(&["a", "b", "ghost"]));
-        assert_eq!(
-            toggles,
-            vec![("b".to_string(), true), ("c".to_string(), false)]
-        );
-        assert_eq!(dangling, ids(&["ghost"]));
-    }
-
-    #[test]
-    fn test_plan_toggles_empty_target_disables_all_enabled() {
-        let current = vec![("a".to_string(), true), ("b".to_string(), false)];
-        let (toggles, dangling) = plan_toggles(&current, &[]);
-        assert_eq!(toggles, vec![("a".to_string(), false)]);
-        assert!(dangling.is_empty());
     }
 }

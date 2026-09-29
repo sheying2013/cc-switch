@@ -1,18 +1,15 @@
 <div align="center">
 
-# CC Switch
+# cc switch live
 
 ### The All-in-One Manager for Claude Code, Claude Desktop, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw, Hermes Agent, Pi & MiniMax Code
 
-**Switch API providers in one click and manage MCP, Skills, and Prompts in one place — no more hand-editing JSON / TOML / YAML config files.**
+**Switch API providers in one click — no more hand-editing JSON / TOML / YAML config files.**
 
-[![Version](https://img.shields.io/github/v/release/farion1231/cc-switch?color=blue&label=version)](https://github.com/farion1231/cc-switch/releases)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/farion1231/cc-switch/releases)
+[![Version](https://img.shields.io/github/v/release/sheying2013/cc-switch?color=blue&label=version)](https://github.com/sheying2013/cc-switch/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/sheying2013/cc-switch/releases)
 [![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%202-orange.svg)](https://tauri.app/)
-[![Downloads](https://img.shields.io/github/downloads/farion1231/cc-switch/total)](https://github.com/farion1231/cc-switch/releases/latest)
-
-<a href="https://trendshift.io/repositories/15372" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15372" alt="farion1231%2Fcc-switch | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-<a href="https://www.star-history.com/#farion1231/cc-switch&Date"><picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=farion1231/cc-switch&theme=dark" /><img alt="Star History Rank" src="https://api.star-history.com/badge?repo=farion1231/cc-switch" width="196" height="55" /></picture></a>
+[![Downloads](https://img.shields.io/github/downloads/sheying2013/cc-switch/total)](https://github.com/sheying2013/cc-switch/releases/latest)
 
 
 English | [中文](README_ZH.md) | [日本語](README_JA.md) | [Deutsch](README_DE.md) | [Changelog](CHANGELOG.md)
@@ -23,14 +20,13 @@ English | [中文](README_ZH.md) | [日本語](README_JA.md) | [Deutsch](README_
 
 ## Why CC Switch?
 
-AI coding tools like Claude Code, Codex, and Gemini CLI each have their own configuration format. Switching API providers means hand-editing JSON, TOML, YAML, or `.env` files, and MCP, Skills, and prompts have to be maintained separately in every tool.
+AI coding tools like Claude Code, Codex, and Gemini CLI each have their own configuration format. Switching API providers means hand-editing JSON, TOML, YAML, or `.env` files.
 
 **CC Switch** brings all of this into a single desktop app: pick a preset, enter your key, and switch in one click, without losing your existing configuration.
 
 - **One App, Ten Tools** — Claude Code, Claude Desktop, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw, Hermes, Pi, and MiniMax Code
 - **No More Manual Editing** — 90+ provider presets including AWS Bedrock, NVIDIA NIM, and community relays
 - **Use GPT in Claude Code, Claude in Codex** — Built-in local routing automatically converts between Anthropic, OpenAI, and Gemini API formats, with automatic failover
-- **Centralized MCP, Skills & Prompts** — Add MCP servers and Skills once, then choose which tools to sync them to; prompts are maintained separately for each tool
 - **Usage & Quotas at a Glance** — Track token usage and spending even without local routing; subscription quotas and balances show right on provider cards and in the tray
 - **Cross-Platform** — Native desktop app for Windows, macOS, and Linux, built with Tauri 2
 
@@ -102,17 +98,14 @@ Download the latest Linux build from the [Releases](../../releases) page:
 4. **Back to Official Login**: Switch to the built-in official provider in the list (e.g. "Claude Official"), restart the tool, then follow its login/OAuth flow
 5. **Local Routing (optional)**: To use OpenAI- or Gemini-format providers in Claude Code, or to use Claude in Codex, you need to turn on local routing. In "Settings → Routing → Local Routing", turn on "Routing Master Switch", then turn on the tool you need under "Routing Enabled". To toggle it right from the top of the main page, turn on "Show Routing Toggle on Main Page"
 
-### MCP, Prompts, Skills, Projects & Sessions
+### Projects & Sessions
 
-- **MCP**: Click "MCP Management" → Add servers via templates or custom config (or "Import Existing") → Toggle sync for each tool
-- **Prompts**: Click "Prompts" → Create prompts with the Markdown editor → Enable one to write it to that tool's prompt file
-- **Skills**: Click "Skills" → "Discover Skills" → Search skills.sh or browse GitHub repos → One-click install to supported tools
 - **Projects**: On the Claude Code, Claude Desktop, or Codex page, open the project switcher at the top of the main page → "New project" to save the current configuration; later, pick it from the switcher to switch the whole setup at once
 - **Sessions**: Click "Session Manager" → Browse, search, and restore each tool's conversation history
 
 > **Note**: On first launch, CC Switch automatically imports your existing Claude Code, Codex, Gemini CLI, and Grok Build configuration as a provider named `default` and adds an official provider for each of these tools and Claude Desktop, so nothing you had configured is lost.
 
-For detailed guides on every feature, check out the **[User Manual](docs/user-manual/en/README.md)**, covering provider management, MCP/Prompts/Skills, local routing & failover, and more.
+For detailed guides on every feature, check out the **[User Manual](docs/user-manual/en/README.md)**, covering provider management, local routing & failover, and more.
 
 ## Features
 
@@ -120,31 +113,29 @@ For detailed guides on every feature, check out the **[User Manual](docs/user-ma
 
 ### Supported Features by Tool
 
-| Tool | Providers | Local Routing | Tray Switching | MCP | Skills | Prompts | Sessions | Usage Stats |
-| --- | --- | :---: | :---: | :---: | :---: | --- | :---: | :---: |
-| Claude Code | Switch | ✓ | ✓ | ✓ | ✓ | CLAUDE.md | ✓ | ✓ |
-| Claude Desktop | Switch | Model Mapping only | – | – | – | – | – | Model Mapping only |
-| Codex | Switch | ✓ | ✓ | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
-| Gemini CLI | Switch | ✓ | ✓ | ✓ | ✓ | GEMINI.md | ✓ | ✓ |
-| Grok Build | Switch | ✓ | ✓ | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
-| OpenCode | Coexist | – | – | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
-| OpenClaw | Coexist | – | – | – | – | Workspace editor | ✓ | – |
-| Hermes | Coexist | – | – | ✓ | ✓ | Memory | ✓ | – |
-| Pi | Coexist | – | – | – | ✓ | AGENTS.md, SYSTEM.md, prompt templates | ✓ | ✓ |
-| MiniMax Code | Coexist | – | – | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
+| Tool | Providers | Local Routing | Tray Switching | Sessions | Usage Stats |
+| --- | --- | :---: | :---: | :---: | :---: |
+| Claude Code | Switch | ✓ | ✓ | ✓ | ✓ |
+| Claude Desktop | Switch | Model Mapping only | – | – | Model Mapping only |
+| Codex | Switch | ✓ | ✓ | ✓ | ✓ |
+| Gemini CLI | Switch | ✓ | ✓ | ✓ | ✓ |
+| Grok Build | Switch | ✓ | ✓ | ✓ | ✓ |
+| OpenCode | Coexist | – | – | ✓ | ✓ |
+| OpenClaw | Coexist | – | – | ✓ | – |
+| Hermes | Coexist | – | – | ✓ | – |
+| Pi | Coexist | – | – | ✓ | ✓ |
+| MiniMax Code | Coexist | – | – | ✓ | ✓ |
 
 - **Switch**: only one provider is active at a time; **Coexist**: multiple providers are written into the tool's own config at the same time, and you pick one inside the tool.
 - **Local Routing**: CC Switch forwards requests on your machine and converts API formats; see [Local Routing & Failover](#local-routing--failover) below. Claude Desktop providers can use "Direct" or "Model Mapping"; with "Model Mapping", requests go through local routing.
 - **Sessions**: Browse and search conversation history, and copy a resume command to continue a conversation (resuming OpenClaw and Hermes sessions isn't supported yet). To view Hermes sessions, select "All" in the Session Manager.
 - **Usage Stats**: Without local routing, usage is collected from each tool's local session logs; requests that go through local routing are counted as well.
-- The MCP, Skills, Prompts, and Sessions panels opened from the Claude Desktop page apply to Claude Code.
 
 ### Provider Management
 
 - **90+ provider presets** — Pick a preset and enter your key to add a provider, or create a custom configuration
 - **Key fields only** — Switching replaces only the connection details such as the endpoint, key, and model; plugins, hooks, MCP, settings you added yourself, and comments stay as they are
-- **Projects** — Save Claude Code's or Codex's current provider, MCP, Skills, and prompt files as a project (for Claude Desktop, only the provider is saved), then switch the whole setup in one click from the project switcher at the top of the main page or from the tray; when you switch to another project, the current state is automatically saved back to the previous project
-- **OAuth Authentication Center (Beta)** — Sign in to multiple GitHub Copilot, ChatGPT, and xAI (Grok) accounts in "Settings → Auth" and use those subscriptions as providers in Claude Code, Claude Desktop, and Codex (everything except Codex's OpenAI Official requires local routing). Using a subscription outside the official client may violate the vendor's terms of service; assess the risk yourself
+- **Projects** — Save Claude Code's or Codex's current provider as a project (for Claude Desktop, only the provider is saved), then switch the whole setup in one click from the project switcher at the top of the main page or from the tray; when you switch to another project, the current state is automatically saved back to the previous project
 - **Third-party providers for Claude Desktop** — Connect directly to Anthropic-compatible endpoints; for non-Claude models, choose "Model Mapping" to map tiers like Sonnet, Opus, and Haiku to the provider's actual models through local routing
 - **Universal providers** — One config syncs to Claude Code, Codex, and Gemini CLI
 - One-click switching, system tray quick switching (Claude Code, Codex, Gemini CLI, Grok Build), drag-and-drop sorting, import/export
@@ -157,13 +148,6 @@ For detailed guides on every feature, check out the **[User Manual](docs/user-ma
 - **Rectifier** — Automatically fixes certain requests that some upstreams can't handle (e.g. Thinking signatures, or falling back when images aren't supported)
 - Official providers (e.g. Claude Official) can't go through local routing (except Codex's OpenAI Official)
 - Guides: [Using GPT in Claude Code](docs/guides/claude-codex-routing-guide-en.md) · [Using Claude in Codex](docs/guides/codex-claude-routing-guide-en.md)
-
-### MCP, Prompts & Skills
-
-- **Unified MCP panel** — Manage all MCP servers in one place, choose which tools to sync each one to, import existing configs from each tool, and import via Deep Link
-- **Prompts** — A per-tool prompt library with a Markdown editor; enabling a prompt writes it to that tool's prompt file (CLAUDE.md / AGENTS.md / GEMINI.md), and the file's existing content is saved back to the library first, so nothing is lost. Pi can also edit SYSTEM.md, APPEND_SYSTEM.md, and prompt templates
-- **Skills** — Search skills.sh, or install in one click from GitHub repos or ZIP files; check for updates and update all in one click; sync to each tool via symlinks or file copies; you can optionally store them in `~/.agents/skills`
-- All three panels support search, and MCP and Skills can also be enabled or disabled all at once per tool
 
 ### Usage & Cost Tracking
 
@@ -181,7 +165,7 @@ For detailed guides on every feature, check out the **[User Manual](docs/user-ma
 
 - **Cloud sync** — Sync across devices via WebDAV (Jianguoyun, Nextcloud, Synology NAS, etc.) or S3-compatible storage (AWS S3, Cloudflare R2, Alibaba Cloud OSS, Tencent Cloud COS, etc.); you can also put the CC Switch configuration directory in a cloud drive folder such as Dropbox, OneDrive, or iCloud
 - **CLI tool management** — On the "About" page, see the current and latest versions of command-line tools like Claude Code and Codex, install, upgrade, or upgrade all in one click, and diagnose duplicate installations; on Windows it can also manage tools inside WSL (see FAQ)
-- **Deep Link** (`ccswitch://`) — Import providers, MCP servers, and prompts, or add skill repositories, in one click via a link
+- **Deep Link** (`ccswitch://`) — Import providers in one click via a link
 - **Built-in utilities** — Skip Claude Code's first-run confirmation, hide AI attribution, have the VS Code Claude Code extension follow CC Switch's provider switches, and more
 - Dark / Light / System theme, auto-launch, auto-updater, atomic writes, auto-backups, i18n (zh/zh-TW/en/ja)
 
@@ -278,10 +262,9 @@ The "Connectivity check" on a provider card only checks whether the provider add
 
 By default, everything is stored in the `.cc-switch` folder in your home directory (`C:\Users\<user>\.cc-switch` on Windows):
 
-- **Database**: `cc-switch.db` (SQLite — providers, MCP, prompts, Skills, projects, usage records, etc.)
+- **Database**: `cc-switch.db` (SQLite — providers, projects, usage records, etc.)
 - **Local settings**: `settings.json` (device-level settings such as each tool's config directory, backup policy, and cloud sync connection details)
 - **Backups**: `backups/` (backed up automatically every 24 hours by default, keeping the 10 most recent; adjustable in "Settings → Advanced → Backup & Restore")
-- **Skills**: `skills/` (can be changed to `~/.agents/skills` in Settings), synced to each tool via symlinks by default, falling back to copying if that fails
 - **Skill Backups**: `skill-backups/` (created automatically before uninstalling or updating a skill, keeping the 20 most recent)
 - **OAuth login credentials**: `copilot_auth.json`, `codex_oauth_auth.json`, `xai_oauth_auth.json`
 - **Logs**: `logs/cc-switch.log` and `crash.log` — please attach them when reporting an issue
@@ -332,10 +315,6 @@ Issues and suggestions are welcome! Before developing a new feature, please open
 For development setup, pre-submit checks, and architecture notes, see [CONTRIBUTING.md](CONTRIBUTING.md); for usage questions, check [SUPPORT.md](SUPPORT.md) first; report security vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
 
 **Tech stack**: Tauri 2 · Rust · React 18 · TypeScript · SQLite
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=farion1231/cc-switch&type=Date)](https://www.star-history.com/#farion1231/cc-switch&Date)
 
 ## License
 

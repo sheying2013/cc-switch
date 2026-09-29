@@ -1,18 +1,15 @@
 <div align="center">
 
-# CC Switch
+# cc switch live
 
 ### Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw、Hermes Agent、Pi、MiniMax Code 的全方位管理工具
 
-**一键切换 API 供应商，统一管理 MCP、Skills 与提示词，不用再手改 JSON / TOML / YAML 配置文件。**
+**一键切换 API 供应商，不用再手改 JSON / TOML / YAML 配置文件。**
 
-[![Version](https://img.shields.io/github/v/release/farion1231/cc-switch?color=blue&label=version)](https://github.com/farion1231/cc-switch/releases)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/farion1231/cc-switch/releases)
+[![Version](https://img.shields.io/github/v/release/sheying2013/cc-switch?color=blue&label=version)](https://github.com/sheying2013/cc-switch/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/sheying2013/cc-switch/releases)
 [![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%202-orange.svg)](https://tauri.app/)
-[![Downloads](https://img.shields.io/github/downloads/farion1231/cc-switch/total)](https://github.com/farion1231/cc-switch/releases/latest)
-
-<a href="https://trendshift.io/repositories/15372" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15372" alt="farion1231%2Fcc-switch | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-<a href="https://www.star-history.com/#farion1231/cc-switch&Date"><picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=farion1231/cc-switch&theme=dark" /><img alt="Star History Rank" src="https://api.star-history.com/badge?repo=farion1231/cc-switch" width="196" height="55" /></picture></a>
+[![Downloads](https://img.shields.io/github/downloads/sheying2013/cc-switch/total)](https://github.com/sheying2013/cc-switch/releases/latest)
 
 
 [English](README.md) | 中文 | [日本語](README_JA.md) | [Deutsch](README_DE.md) | [更新日志](CHANGELOG.md)
@@ -23,14 +20,13 @@
 
 ## 为什么选择 CC Switch？
 
-Claude Code、Codex、Gemini CLI 等 AI 编程工具各有各的配置格式。换一个 API 供应商，就得手动改 JSON、TOML、YAML 或 `.env` 文件；MCP、Skills 和提示词也要在每个工具里分别维护。
+Claude Code、Codex、Gemini CLI 等 AI 编程工具各有各的配置格式。换一个 API 供应商，就得手动改 JSON、TOML、YAML 或 `.env` 文件。
 
 **CC Switch** 把这些工作集中到一个桌面应用里：选一个预设、填入 Key，一键即可切换，原有配置不会丢失。
 
 - **一个应用，十个工具** — Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw、Hermes、Pi、MiniMax Code
 - **告别手动编辑** — 90+ 供应商预设，包括 AWS Bedrock、NVIDIA NIM 和社区中转服务
 - **在 Claude Code 里用 GPT，在 Codex 里用 Claude** — 内置本地路由，自动转换 Anthropic、OpenAI、Gemini 的接口格式，并支持自动故障转移
-- **MCP、Skills 与提示词集中管理** — MCP 和 Skills 添加一次，按工具勾选同步；提示词按工具分别维护
 - **用量与额度一目了然** — 不开本地路由也能统计 Token 用量和花费，供应商卡片和托盘上直接显示订阅额度与余额
 - **跨平台** — 基于 Tauri 2 构建的原生桌面应用，支持 Windows、macOS 和 Linux
 
@@ -102,17 +98,14 @@ paru -S cc-switch-bin
 4. **恢复官方登录**：切换到列表中自带的官方供应商（如“Claude Official”），重启工具后按照其登录/OAuth 流程操作
 5. **本地路由（可选）**：想在 Claude Code 里使用 OpenAI 或 Gemini 格式的供应商，或在 Codex 里使用 Claude，需要开启本地路由。做法是在「设置 → 路由 → 本地路由」里打开“路由总开关”，再在“路由启用”里打开对应的工具。想在主页顶部直接开关，可以打开“在主页面显示本地路由开关”
 
-### MCP、提示词、Skills、项目与会话
+### 项目与会话
 
-- **MCP**：点击“MCP 管理”按钮 → 通过模板或自定义配置添加服务器（或“导入已有”）→ 切换各工具的同步开关
-- **提示词**：点击“提示词” → 使用 Markdown 编辑器创建提示词 → 启用后写入该工具的提示词文件
-- **Skills**：点击“Skills” →“发现技能” → 搜索 skills.sh 或浏览 GitHub 仓库 → 一键安装到支持的工具
 - **项目**：在 Claude Code、Claude Desktop 或 Codex 页面，打开主页顶部的项目切换器 →“新建项目”，把当前配置保存下来，之后从切换器里选择即可整套切换
-- **会话**：点击“会话管理” → 浏览、搜索和恢复各工具的会话历史
+- **会话**：点击“会话管理器” → 浏览、搜索并恢复各工具的对话历史
 
-> **注意**：首次启动时，CC Switch 会自动把 Claude Code、Codex、Gemini CLI、Grok Build 的现有配置导入为名为 `default` 的供应商，并为这几个工具和 Claude Desktop 添加官方供应商，原有配置不会丢失。
+> **注意**：首次启动时，CC Switch 会自动把已有的 Claude Code、Codex、Gemini CLI、Grok Build 配置导入为一个名为 `default` 的供应商，并为这些工具和 Claude Desktop 各添加一个官方供应商，因此原有配置不会丢失。
 
-各项功能的详细用法请查阅 **[用户手册](docs/user-manual/zh/README.md)**，涵盖供应商管理、MCP/提示词/Skills、本地路由与故障转移等全部功能。
+每个功能的详细指南请查看 **[用户手册](docs/user-manual/zh/README.md)**，涵盖供应商管理、本地路由与故障转移等内容。
 
 ## 功能特性
 
@@ -120,31 +113,29 @@ paru -S cc-switch-bin
 
 ### 各工具支持的功能
 
-| 工具 | 供应商 | 本地路由 | 托盘切换 | MCP | Skills | 提示词 | 会话 | 用量统计 |
-| --- | --- | :---: | :---: | :---: | :---: | --- | :---: | :---: |
-| Claude Code | 切换 | ✓ | ✓ | ✓ | ✓ | CLAUDE.md | ✓ | ✓ |
-| Claude Desktop | 切换 | 模型映射时 | – | – | – | – | – | 模型映射时 |
-| Codex | 切换 | ✓ | ✓ | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
-| Gemini CLI | 切换 | ✓ | ✓ | ✓ | ✓ | GEMINI.md | ✓ | ✓ |
-| Grok Build | 切换 | ✓ | ✓ | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
-| OpenCode | 共存 | – | – | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
-| OpenClaw | 共存 | – | – | – | – | 工作区编辑器 | ✓ | – |
-| Hermes | 共存 | – | – | ✓ | ✓ | 记忆管理 | ✓ | – |
-| Pi | 共存 | – | – | – | ✓ | AGENTS.md、SYSTEM.md、提示词模板 | ✓ | ✓ |
-| MiniMax Code | 共存 | – | – | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
+| 工具 | 供应商 | 本地路由 | 托盘切换 | 会话 | 用量统计 |
+| --- | --- | :---: | :---: | :---: | :---: |
+| Claude Code | 切换 | ✓ | ✓ | ✓ | ✓ |
+| Claude Desktop | 切换 | 模型映射时 | – | – | 模型映射时 |
+| Codex | 切换 | ✓ | ✓ | ✓ | ✓ |
+| Gemini CLI | 切换 | ✓ | ✓ | ✓ | ✓ |
+| Grok Build | 切换 | ✓ | ✓ | ✓ | ✓ |
+| OpenCode | 共存 | – | – | ✓ | ✓ |
+| OpenClaw | 共存 | – | – | ✓ | – |
+| Hermes | 共存 | – | – | ✓ | – |
+| Pi | 共存 | – | – | ✓ | ✓ |
+| MiniMax Code | 共存 | – | – | ✓ | ✓ |
 
 - **切换**：同一时间只启用一个供应商；**共存**：多个供应商同时写入工具自身的配置，在工具里选择使用。
 - **本地路由**：由 CC Switch 在本机转发请求并转换接口格式，见下方[本地路由与故障转移](#本地路由与故障转移)。Claude Desktop 的供应商可选“直连”或“模型映射”，选“模型映射”时经本地路由转发。
 - **会话**：浏览、搜索会话历史，复制恢复命令继续对话（OpenClaw、Hermes 的会话暂不支持恢复）。Hermes 的会话需要在会话管理里选择“全部”查看。
 - **用量统计**：不开本地路由时，从各工具的本地会话记录统计；经本地路由的请求也会计入。
-- 在 Claude Desktop 页面打开的 MCP、Skills、提示词和会话面板，作用于 Claude Code。
 
 ### 供应商管理
 
 - **90+ 供应商预设** — 选择预设、填入 Key 即可添加，也可以创建自定义配置
 - **只改关键字段** — 切换时只替换请求地址、Key、模型等连接信息，插件、Hook、MCP、你自己加的设置和注释都原样保留
-- **项目** — 把 Claude Code 或 Codex 当前的供应商、MCP、Skills 和提示词文件保存为一个项目（Claude Desktop 只保存供应商），之后在主页顶部的项目切换器或托盘里一键整套切换；切到其他项目时，当前状态会自动存回原项目
-- **OAuth 认证中心（Beta）** — 在「设置 → 认证」里登录多个 GitHub Copilot、ChatGPT、xAI（Grok）账号，把订阅当作供应商用在 Claude Code、Claude Desktop 和 Codex 中（除 Codex 的 OpenAI Official 外，都需要开启本地路由）。在官方客户端以外使用订阅可能违反厂商的服务条款，请自行评估风险
+- **项目** — 把 Claude Code 或 Codex 当前的供应商保存为一个项目（Claude Desktop 只保存供应商），之后在主页顶部的项目切换器或托盘里一键整套切换；切到其他项目时，当前状态会自动存回原项目
 - **Claude Desktop 接入第三方** — 可以直连 Anthropic 兼容端点；非 Claude 模型选“模型映射”，经本地路由把 Sonnet、Opus、Haiku 等档位映射到供应商的实际模型
 - **通用供应商** — 一份配置同步到 Claude Code、Codex 和 Gemini CLI
 - 一键切换、系统托盘快速切换（Claude Code、Codex、Gemini CLI、Grok Build）、拖拽排序、导入导出
@@ -157,13 +148,6 @@ paru -S cc-switch-bin
 - **整流器** — 自动修正部分上游不兼容的请求（如 Thinking 签名、不支持图片时降级）
 - 官方供应商（如 Claude Official）不能走本地路由（Codex 的 OpenAI Official 除外）
 - 使用攻略：[在 Claude Code 中使用 GPT](docs/guides/claude-codex-routing-guide-zh.md) · [在 Codex 中使用 Claude](docs/guides/codex-claude-routing-guide-zh.md)
-
-### MCP、提示词与 Skills
-
-- **统一 MCP 面板** — 一处管理所有 MCP 服务器，按工具勾选同步，支持从各工具导入现有配置，支持 Deep Link 导入
-- **提示词** — 按工具分别管理的提示词库，使用 Markdown 编辑器；启用后写入该工具的提示词文件（CLAUDE.md / AGENTS.md / GEMINI.md），启用前会先把文件里原有的内容存回提示词库，不会丢失。Pi 还可以编辑 SYSTEM.md、APPEND_SYSTEM.md 和提示词模板
-- **Skills** — 搜索 skills.sh，或从 GitHub 仓库、ZIP 文件一键安装；检查更新并一键全部更新；通过软链接或文件复制同步到各工具，存储位置可选 `~/.agents/skills`
-- 三个面板都支持搜索，MCP 和 Skills 还可以按工具一键全部启用或停用
 
 ### 用量与成本追踪
 
@@ -181,7 +165,7 @@ paru -S cc-switch-bin
 
 - **云同步** — 通过 WebDAV（坚果云、Nextcloud、群晖 NAS 等）或 S3 兼容存储（AWS S3、Cloudflare R2、阿里云 OSS、腾讯云 COS 等）在多台设备之间同步；也可以把 CC Switch 配置目录放到 Dropbox、OneDrive、iCloud 等网盘文件夹中
 - **CLI 工具管理** — 在「关于」页查看 Claude Code、Codex 等命令行工具的当前版本和最新版本，一键安装、升级或全部升级，并诊断重复安装；Windows 上还能管理 WSL 里的工具（见常见问题）
-- **Deep Link**（`ccswitch://`）— 通过链接一键导入供应商、MCP 服务器和提示词，或添加技能仓库
+- **Deep Link**（`ccswitch://`）— 通过链接一键导入供应商
 - **小工具** — 跳过 Claude Code 初次安装确认、隐藏 AI 署名、让 VS Code 的 Claude Code 插件随本软件切换供应商等
 - 深色 / 浅色 / 跟随系统主题、开机自启、自动更新、原子写入、自动备份、国际化（简中/繁中/英/日）
 
@@ -278,10 +262,9 @@ Codex 还可以在 CC Switch 里用“使用 ChatGPT 登录”登录多个 ChatG
 
 默认都在用户主目录下的 `.cc-switch` 文件夹（Windows 为 `C:\Users\<用户名>\.cc-switch`）：
 
-- **数据库**：`cc-switch.db`（SQLite — 供应商、MCP、提示词、Skills、项目、用量记录等）
+- **数据库**：`cc-switch.db`（SQLite — 供应商、项目、用量记录等）
 - **本地设置**：`settings.json`（设备级设置，如各工具的配置目录、备份策略、云同步连接信息）
 - **备份**：`backups/`（默认每 24 小时自动备份一次、保留最近 10 个，可在「设置 → 高级 → 备份与恢复」中调整）
-- **Skills**：`skills/`（可在设置中改为 `~/.agents/skills`），默认通过软链接同步到各工具，失败时改为复制
 - **技能备份**：`skill-backups/`（卸载或更新技能前自动创建，保留最近 20 个）
 - **OAuth 登录凭据**：`copilot_auth.json`、`codex_oauth_auth.json`、`xai_oauth_auth.json`
 - **日志**：`logs/cc-switch.log` 和 `crash.log`，反馈问题时请附上
@@ -332,10 +315,6 @@ CC_SWITCH_GDK_BACKEND=wayland ./CC-Switch-*.AppImage
 开发环境、提交前检查和架构说明见 [CONTRIBUTING.md](CONTRIBUTING.md#贡献指南)；使用问题请先看 [SUPPORT.md](SUPPORT.md)；安全漏洞请按 [SECURITY.md](SECURITY.md) 私下报告。
 
 **技术栈**：Tauri 2 · Rust · React 18 · TypeScript · SQLite
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=farion1231/cc-switch&type=Date)](https://www.star-history.com/#farion1231/cc-switch&Date)
 
 ## License
 

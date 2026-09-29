@@ -2,7 +2,11 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, RefreshCw, Loader2, TestTube2 } from "lucide-react";
-import { useGlobalProxyUrl, useGlobalProxyChaining, useTestOutboundProxy } from "@/hooks/useGlobalProxy";
+import {
+  useGlobalProxyUrl,
+  useGlobalProxyChaining,
+  useTestOutboundProxy,
+} from "@/hooks/useGlobalProxy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

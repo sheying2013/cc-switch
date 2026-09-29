@@ -153,8 +153,13 @@ export function useTestOutboundProxy() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: ({ proxyUrl, frontProxy }: { proxyUrl: string; frontProxy?: string | null }) =>
-      testOutboundProxy(proxyUrl, frontProxy),
+    mutationFn: ({
+      proxyUrl,
+      frontProxy,
+    }: {
+      proxyUrl: string;
+      frontProxy?: string | null;
+    }) => testOutboundProxy(proxyUrl, frontProxy),
     onSuccess: (result: ProxyTestResult) => {
       if (result.success) {
         toast.success(

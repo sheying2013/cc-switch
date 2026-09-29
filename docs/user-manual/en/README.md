@@ -23,9 +23,6 @@
 │   └── 2.6 Claude Desktop
 │
 ├── 3. Extensions
-│   ├── 3.1 MCP Server Management
-│   ├── 3.2 Prompts Management
-│   ├── 3.3 Skills Management
 │   ├── 3.4 Session Manager
 │   └── 3.5 Workspace & Memory
 │
@@ -70,9 +67,6 @@
 
 | File | Description |
 |------|-------------|
-| [3.1-mcp.md](./3-extensions/3.1-mcp.md) | MCP protocol, add servers, app binding |
-| [3.2-prompts.md](./3-extensions/3.2-prompts.md) | Create presets, activate/switch, smart backfill |
-| [3.3-skills.md](./3-extensions/3.3-skills.md) | Discover skills, install/uninstall, repository management |
 | [3.4-sessions.md](./3-extensions/3.4-sessions.md) | Session Manager: browse, search, resume, delete sessions |
 | [3.5-workspace.md](./3-extensions/3.5-workspace.md) | Workspace files and daily memory (OpenClaw) |
 
@@ -124,5 +118,5 @@
 
 Feel free to submit Issues or PRs to improve the documentation:
 
-- [GitHub Issues](https://github.com/farion1231/cc-switch/issues)
-- [GitHub Repository](https://github.com/farion1231/cc-switch)
+- [GitHub Issues](https://github.com/sheying2013/cc-switch/issues)
+- [GitHub Repository](https://github.com/sheying2013/cc-switch)

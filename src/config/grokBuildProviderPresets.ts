@@ -33,8 +33,6 @@ export interface GrokBuildProviderPreset {
   auth: Record<string, any>;
   config: string; // Codex 风格 TOML 载体（只消费 base_url / model / wire_api）
   isOfficial?: boolean;
-  isPartner?: boolean;
-  partnerPromotionKey?: string;
   category?: ProviderCategory;
   endpointCandidates?: string[];
   icon?: string;
@@ -290,7 +288,7 @@ export const grokBuildProviderPresets: GrokBuildProviderPreset[] = [
     nameKey: "providerForm.presets.ucloud",
     websiteUrl: "https://www.compshare.cn",
     apiKeyUrl:
-      "https://www.compshare.cn/coding-plan?ytag=GPU_YY_YX_git_cc-switch",
+      "https://www.compshare.cn/coding-plan",
     auth: grokAuth(),
     config: grokPresetConfig("Compshare", "https://api.modelverse.cn/v1"),
     endpointCandidates: ["https://api.modelverse.cn/v1"],
@@ -303,7 +301,7 @@ export const grokBuildProviderPresets: GrokBuildProviderPreset[] = [
     nameKey: "providerForm.presets.ucloudCoding",
     websiteUrl: "https://www.compshare.cn",
     apiKeyUrl:
-      "https://www.compshare.cn/coding-plan?ytag=GPU_YY_YX_git_cc-switch",
+      "https://www.compshare.cn/coding-plan",
     auth: grokAuth(),
     config: grokPresetConfig(
       "Compshare Coding Plan",
@@ -444,7 +442,7 @@ export const grokBuildProviderPresets: GrokBuildProviderPreset[] = [
     category: "third_party",
     icon: "sudocode-us",
   },
-  // ===== 非赞助商预设：应用内展示按显示名排序，此处文件顺序不影响展示 =====
+  // ===== 预设：应用内展示按显示名排序，此处文件顺序不影响展示 =====
   {
     name: "xAI (Grok)",
     websiteUrl: "https://x.ai/api",

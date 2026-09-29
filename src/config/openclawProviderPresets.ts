@@ -27,9 +27,6 @@ export interface OpenClawProviderPreset {
   /** OpenClaw settings_config structure */
   settingsConfig: OpenClawProviderConfig;
   isOfficial?: boolean;
-  isPartner?: boolean;
-  primePartner?: boolean; // 置顶合作伙伴（顶级）：徽章显示为心形
-  partnerPromotionKey?: string;
   category?: ProviderCategory;
   /** Template variable definitions */
   templateValues?: Record<string, TemplateValueConfig>;
@@ -845,7 +842,7 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
     // .../personal 是两套部署，勿合并。阵容与窗口按 FluxA 产品页模型表
     // （glm-5.2 500k ≠ 国内版千帆平台 1M，国际 team 部署口径，勿按国内预设
     // "修正"）；标注 Coming soon 的 deepseek-v4-pro-0813 / glm-5.3 不收。
-    // Kimi K2.6 是定稿赞助文案点名的模型，FluxA 产品页模型表与百度国际站
+    // Kimi K2.6 未见于 FluxA 产品页模型表与百度国际站
     // team 文档都没列它：id / 窗口取 FluxA baidu-ai-cloud 模型目录（categories
     // 只有 text）与国内 Token Plan 预设（262144）双重印证，非臆造；
     // maxTokens 取同一张表的 Max output 列。cost 不填：FluxA 按 credits 计费、
@@ -1486,7 +1483,7 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
     nameKey: "providerForm.presets.ucloud",
     websiteUrl: "https://www.compshare.cn",
     apiKeyUrl:
-      "https://www.compshare.cn/coding-plan?ytag=GPU_YY_YX_git_cc-switch",
+      "https://www.compshare.cn/coding-plan",
     settingsConfig: {
       baseUrl: "https://api.modelverse.cn/v1",
       apiKey: "",
@@ -1524,7 +1521,7 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
     nameKey: "providerForm.presets.ucloudCoding",
     websiteUrl: "https://www.compshare.cn",
     apiKeyUrl:
-      "https://www.compshare.cn/coding-plan?ytag=GPU_YY_YX_git_cc-switch",
+      "https://www.compshare.cn/coding-plan",
     settingsConfig: {
       baseUrl: "https://cp.compshare.cn/v1",
       apiKey: "",
@@ -2088,7 +2085,7 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
       },
     },
   },
-  // ===== 非赞助商预设：应用内展示按显示名排序，此处文件顺序不影响展示 =====
+  // ===== 预设：应用内展示按显示名排序，此处文件顺序不影响展示 =====
   {
     name: "Amux",
     websiteUrl: "https://amux.ai",

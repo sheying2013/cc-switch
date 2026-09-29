@@ -15,8 +15,6 @@ interface ApiKeySectionProps {
     thirdParty: string;
   };
   disabled?: boolean;
-  isPartner?: boolean;
-  partnerPromotionKey?: string;
 }
 
 export function ApiKeySection({
@@ -29,7 +27,6 @@ export function ApiKeySection({
   websiteUrl,
   placeholder,
   disabled,
-  partnerPromotionKey,
 }: ApiKeySectionProps) {
   const { t } = useTranslation();
 

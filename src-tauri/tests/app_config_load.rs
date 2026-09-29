@@ -105,3 +105,43 @@ fn load_valid_v2_config_succeeds() {
         .is_some());
     assert!(loaded.get_manager(&cc_switch_lib::AppType::Codex).is_some());
 }
+
+#[test]
+fn load_drops_legacy_mcp_prompts_skills_top_level_groups() {
+    let _guard = test_mutex().lock().unwrap_or_else(|e| e.into_inner());
+    reset_test_fs();
+    let _home = ensure_test_home();
+    let path = cfg_path();
+    fs::create_dir_all(path.parent().unwrap()).expect("create cfg dir");
+
+    // 旧版把 mcp/prompts/skills 连同 apps 一起写在顶层；删除这些功能后
+    // 它们不能被 #[serde(flatten)] 的 apps 当成“应用”保留下来。
+    let legacy = r#"{
+  "version": 2,
+  "claude": {"providers": {}, "current": ""},
+  "codex": {"providers": {}, "current": ""},
+  "mcp": {"servers": {}},
+  "prompts": {"claude": []},
+  "skills": {"installed": []}
+}"#;
+    fs::write(&path, legacy).expect("seed legacy json");
+
+    let loaded = MultiAppConfig::load().expect("legacy config should still load");
+    for orphan in ["mcp", "prompts", "skills"] {
+        assert!(
+            !loaded.apps.contains_key(orphan),
+            "orphan group {orphan} must not survive loading"
+        );
+    }
+    assert!(loaded.apps.contains_key("claude"));
+    assert!(loaded.apps.contains_key("codex"));
+
+    // load() 在清理后会自动保存，磁盘上也必须不再有这些顶层键
+    let saved = fs::read_to_string(&path).expect("read saved config");
+    for orphan in ["mcp", "prompts", "skills"] {
+        assert!(
+            !saved.contains(&format!("\"{orphan}\"")),
+            "orphan group {orphan} must not be written back: {saved}"
+        );
+    }
+}

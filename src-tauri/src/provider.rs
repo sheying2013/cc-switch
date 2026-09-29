@@ -470,15 +470,6 @@ pub struct ProviderMeta {
     /// 请求地址管理：测速后自动选择最佳端点
     #[serde(rename = "endpointAutoSelect", skip_serializing_if = "Option::is_none")]
     pub endpoint_auto_select: Option<bool>,
-    /// 合作伙伴标记（前端使用 isPartner，保持字段名一致）
-    #[serde(rename = "isPartner", skip_serializing_if = "Option::is_none")]
-    pub is_partner: Option<bool>,
-    /// 合作伙伴促销 key，用于识别 PackyCode 等特殊供应商
-    #[serde(
-        rename = "partnerPromotionKey",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub partner_promotion_key: Option<String>,
     /// 已停用：供应商级成本倍率。新版不再读取，只为与旧版设备同步时原样往返保留
     #[serde(rename = "costMultiplier", skip_serializing_if = "Option::is_none")]
     pub cost_multiplier: Option<String>,

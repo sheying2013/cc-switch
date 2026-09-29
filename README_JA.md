@@ -1,18 +1,15 @@
 <div align="center">
 
-# CC Switch
+# cc switch live
 
 ### Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw、Hermes Agent、Pi、MiniMax Code のオールインワン管理ツール
 
-**ワンクリックで API プロバイダを切り替え、MCP・Skills・プロンプトを一元管理。JSON / TOML / YAML の設定ファイルを手作業で編集する必要はもうありません。**
+**ワンクリックで API プロバイダを切り替え。JSON / TOML / YAML の設定ファイルを手作業で編集する必要はもうありません。**
 
-[![Version](https://img.shields.io/github/v/release/farion1231/cc-switch?color=blue&label=version)](https://github.com/farion1231/cc-switch/releases)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/farion1231/cc-switch/releases)
+[![Version](https://img.shields.io/github/v/release/sheying2013/cc-switch?color=blue&label=version)](https://github.com/sheying2013/cc-switch/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/sheying2013/cc-switch/releases)
 [![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%202-orange.svg)](https://tauri.app/)
-[![Downloads](https://img.shields.io/github/downloads/farion1231/cc-switch/total)](https://github.com/farion1231/cc-switch/releases/latest)
-
-<a href="https://trendshift.io/repositories/15372" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15372" alt="farion1231%2Fcc-switch | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-<a href="https://www.star-history.com/#farion1231/cc-switch&Date"><picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=farion1231/cc-switch&theme=dark" /><img alt="Star History Rank" src="https://api.star-history.com/badge?repo=farion1231/cc-switch" width="196" height="55" /></picture></a>
+[![Downloads](https://img.shields.io/github/downloads/sheying2013/cc-switch/total)](https://github.com/sheying2013/cc-switch/releases/latest)
 
 
 [English](README.md) | [中文](README_ZH.md) | 日本語 | [Deutsch](README_DE.md) | [Changelog](CHANGELOG.md)
@@ -23,14 +20,13 @@
 
 ## CC Switch を選ぶ理由
 
-Claude Code、Codex、Gemini CLI などの AI コーディングツールは、それぞれ設定形式が異なります。API プロバイダを変えるたびに JSON、TOML、YAML、`.env` ファイルを手作業で編集しなければならず、MCP、Skills、プロンプトもツールごとに個別に管理する必要があります。
+Claude Code、Codex、Gemini CLI などの AI コーディングツールは、それぞれ設定形式が異なります。API プロバイダを変えるたびに JSON、TOML、YAML、`.env` ファイルを手作業で編集しなければなりません。
 
 **CC Switch** は、こうした作業を 1 つのデスクトップアプリに集約します。プリセットを選んでキーを入力すれば、ワンクリックで切り替えられます。既存の設定が失われることもありません。
 
 - **1 つのアプリで 10 のツール** — Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw、Hermes、Pi、MiniMax Code
 - **手動編集は不要** — AWS Bedrock、NVIDIA NIM、コミュニティリレーなど 90 以上のプロバイダプリセットを内蔵
 - **Claude Code で GPT を、Codex で Claude を使う** — ローカルルーティングを内蔵し、Anthropic、OpenAI、Gemini の API 形式を自動で変換。自動フェイルオーバーにも対応
-- **MCP・Skills・プロンプトを一元管理** — MCP と Skills は一度追加すれば、ツールごとにチェックを入れて同期。プロンプトはツールごとに個別に管理
 - **使用量とクォータをひと目で確認** — ローカルルーティングを使わなくてもトークン使用量と費用を集計。サブスクリプションのクォータと残高をプロバイダカードとトレイに直接表示
 - **クロスプラットフォーム** — Tauri 2 で構築された Windows、macOS、Linux 対応のネイティブデスクトップアプリ
 
@@ -102,17 +98,14 @@ paru -S cc-switch-bin
 4. **公式ログインに戻す**: リストに含まれている公式プロバイダ（例：「Claude Official」）に切り替え、ツールを再起動してログイン/OAuth フローを実行
 5. **ローカルルーティング（任意）**: Claude Code で OpenAI 形式や Gemini 形式のプロバイダを使う場合や、Codex で Claude を使う場合は、ローカルルーティングを有効にする必要があります。「設定 → ルーティング → ローカルルーティング」で「ルーティング総スイッチ」をオンにし、「ルーティング有効」で対象のツールをオンにしてください。メインページ上部から直接オン/オフしたい場合は、「メインページにルーティング切り替えを表示」をオンにします
 
-### MCP、プロンプト、Skills、プロジェクト & セッション
+### プロジェクト & セッション
 
-- **MCP**: 「MCP 管理」ボタンをクリック → テンプレートまたはカスタム設定でサーバーを追加（または「既存をインポート」）→ ツールごとの同期をトグルで切り替え
-- **プロンプト**: 「プロンプト」をクリック → Markdown エディタでプロンプトを作成 → 有効化すると、そのツールのプロンプトファイルに書き込み
-- **Skills**: 「Skills」をクリック → 「スキルを発見」 → skills.sh を検索、または GitHub リポジトリを閲覧 → 対応ツールへワンクリックでインストール
 - **プロジェクト**: Claude Code、Claude Desktop、Codex のページで、メインページ上部のプロジェクトスイッチャーを開く → 「新規プロジェクト」で現在の設定を保存。以降はスイッチャーから選ぶだけで設定一式を切り替え
-- **セッション**: 「セッション管理」をクリック → 各ツールの会話履歴を閲覧・検索・復元
+- **セッション**: 「セッションマネージャー」をクリック → 各ツールの会話履歴を閲覧・検索・復元
 
-> **補足**: 初回起動時、CC Switch は Claude Code、Codex、Gemini CLI、Grok Build の既存設定を `default` という名前のプロバイダとして自動でインポートし、これらのツールと Claude Desktop に公式プロバイダを追加します。既存の設定が失われることはありません。
+> **注意**: 初回起動時、CC Switch は既存の Claude Code、Codex、Gemini CLI、Grok Build の設定を `default` という名前のプロバイダとして自動インポートし、これらのツールと Claude Desktop に公式プロバイダを追加します。既存の設定が失われることはありません。
 
-各機能の詳しい使い方については、**[ユーザーマニュアル](docs/user-manual/ja/README.md)** をご覧ください。プロバイダ管理、MCP/プロンプト/Skills、ローカルルーティングとフェイルオーバーなど、すべての機能を網羅しています。
+各機能の詳細なガイドは **[ユーザーマニュアル](docs/user-manual/ja/README.md)** をご覧ください。プロバイダ管理、ローカルルーティング & フェイルオーバーなどを網羅しています。
 
 ## 特長
 
@@ -120,31 +113,29 @@ paru -S cc-switch-bin
 
 ### ツール別の対応機能
 
-| ツール | プロバイダ | ローカルルーティング | トレイ切り替え | MCP | Skills | プロンプト | セッション | 使用量統計 |
-| --- | --- | :---: | :---: | :---: | :---: | --- | :---: | :---: |
-| Claude Code | 切り替え | ✓ | ✓ | ✓ | ✓ | CLAUDE.md | ✓ | ✓ |
-| Claude Desktop | 切り替え | モデルマッピング時 | – | – | – | – | – | モデルマッピング時 |
-| Codex | 切り替え | ✓ | ✓ | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
-| Gemini CLI | 切り替え | ✓ | ✓ | ✓ | ✓ | GEMINI.md | ✓ | ✓ |
-| Grok Build | 切り替え | ✓ | ✓ | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
-| OpenCode | 共存 | – | – | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
-| OpenClaw | 共存 | – | – | – | – | ワークスペースエディタ | ✓ | – |
-| Hermes | 共存 | – | – | ✓ | ✓ | メモリ | ✓ | – |
-| Pi | 共存 | – | – | – | ✓ | AGENTS.md、SYSTEM.md、プロンプトテンプレート | ✓ | ✓ |
-| MiniMax Code | 共存 | – | – | ✓ | ✓ | AGENTS.md | ✓ | ✓ |
+| ツール | プロバイダ | ローカルルーティング | トレイ切り替え | セッション | 使用量統計 |
+| --- | --- | :---: | :---: | :---: | :---: |
+| Claude Code | 切り替え | ✓ | ✓ | ✓ | ✓ |
+| Claude Desktop | 切り替え | モデルマッピング時 | – | – | モデルマッピング時 |
+| Codex | 切り替え | ✓ | ✓ | ✓ | ✓ |
+| Gemini CLI | 切り替え | ✓ | ✓ | ✓ | ✓ |
+| Grok Build | 切り替え | ✓ | ✓ | ✓ | ✓ |
+| OpenCode | 共存 | – | – | ✓ | ✓ |
+| OpenClaw | 共存 | – | – | ✓ | – |
+| Hermes | 共存 | – | – | ✓ | – |
+| Pi | 共存 | – | – | ✓ | ✓ |
+| MiniMax Code | 共存 | – | – | ✓ | ✓ |
 
 - **切り替え**：同時に有効にできるプロバイダは 1 つだけです。**共存**：複数のプロバイダを同時にツール自身の設定に書き込み、ツール内で選んで使用します。
 - **ローカルルーティング**：CC Switch がローカルでリクエストを転送し、API 形式を変換します。詳しくは下記の[ローカルルーティング & フェイルオーバー](#ローカルルーティング--フェイルオーバー)をご覧ください。Claude Desktop のプロバイダでは「直接接続」か「モデルマッピング」を選択でき、「モデルマッピング」を選ぶとローカルルーティング経由で転送されます。
 - **セッション**：会話履歴を閲覧・検索し、再開コマンドをコピーして会話を続けられます（OpenClaw と Hermes のセッションは現在、再開に対応していません）。Hermes のセッションは、セッション管理で「すべて」を選ぶと表示されます。
 - **使用量統計**：ローカルルーティングを使わない場合は、各ツールのローカルセッション記録から集計します。ローカルルーティングを経由したリクエストも集計に含まれます。
-- Claude Desktop のページで開いた MCP、Skills、プロンプト、セッションの各パネルは、Claude Code に適用されます。
 
 ### プロバイダ管理
 
 - **90 以上のプロバイダプリセット** — プリセットを選んでキーを入力するだけで追加。カスタム設定の作成も可能
 - **主要フィールドだけを変更** — 切り替え時に置き換えるのはリクエスト先アドレス、キー、モデルなどの接続情報だけ。プラグイン、フック、MCP、自分で追加した設定やコメントはそのまま残ります
-- **プロジェクト** — Claude Code または Codex の現在のプロバイダ、MCP、Skills、プロンプトファイルを 1 つのプロジェクトとして保存（Claude Desktop はプロバイダのみ保存）。以降はメインページ上部のプロジェクトスイッチャーやトレイから設定一式をワンクリックで切り替え。別のプロジェクトに切り替えると、現在の状態は自動的に元のプロジェクトへ保存
-- **OAuth 認証センター（Beta）** — 「設定 → 認証」で GitHub Copilot、ChatGPT、xAI（Grok）の複数アカウントにログインし、サブスクリプションをプロバイダとして Claude Code、Claude Desktop、Codex で利用（Codex の OpenAI Official 以外はすべてローカルルーティングの有効化が必要）。公式クライアント以外でサブスクリプションを使用すると、ベンダーの利用規約に違反する可能性があります。リスクはご自身で判断してください
+- **プロジェクト** — Claude Code または Codex の現在のプロバイダを 1 つのプロジェクトとして保存（Claude Desktop はプロバイダのみ保存）。以降はメインページ上部のプロジェクトスイッチャーやトレイから設定一式をワンクリックで切り替え。別のプロジェクトに切り替えると、現在の状態は自動的に元のプロジェクトへ保存
 - **Claude Desktop でサードパーティを利用** — Anthropic 互換エンドポイントに直接接続可能。Claude 以外のモデルは「モデルマッピング」を選び、ローカルルーティング経由で Sonnet、Opus、Haiku などのティアをプロバイダの実際のモデルにマッピング
 - **ユニバーサルプロバイダ** — 1 つの設定を Claude Code、Codex、Gemini CLI に同期
 - ワンクリック切り替え、システムトレイからのクイック切り替え（Claude Code、Codex、Gemini CLI、Grok Build）、ドラッグ＆ドロップ並び替え、インポート/エクスポート
@@ -157,13 +148,6 @@ paru -S cc-switch-bin
 - **整流器** — 一部の上流と互換性のないリクエストを自動で修正（Thinking 署名、画像非対応時のフォールバックなど）
 - 公式プロバイダ（Claude Official など）はローカルルーティングを経由できません（Codex の OpenAI Official を除く）
 - 使い方ガイド：[Claude Code で GPT を使う](docs/guides/claude-codex-routing-guide-ja.md) · [Codex で Claude を使う](docs/guides/codex-claude-routing-guide-ja.md)
-
-### MCP、プロンプト & Skills
-
-- **統一 MCP パネル** — すべての MCP サーバーを 1 か所で管理し、ツールごとにチェックを入れて同期。各ツールの既存設定からのインポート、Deep Link インポートに対応
-- **プロンプト** — ツールごとに管理するプロンプトライブラリ（Markdown エディタ付き）。有効化すると、そのツールのプロンプトファイル（CLAUDE.md / AGENTS.md / GEMINI.md）に書き込み。有効化の前にファイル内の既存の内容をプロンプトライブラリへ保存するため、内容が失われることはありません。Pi では SYSTEM.md、APPEND_SYSTEM.md、プロンプトテンプレートも編集可能
-- **Skills** — skills.sh を検索、または GitHub リポジトリや ZIP ファイルからワンクリックでインストール。更新の確認とワンクリックでの一括更新に対応。シンボリックリンクまたはファイルコピーで各ツールに同期し、保存場所として `~/.agents/skills` も選択可能
-- 3 つのパネルはいずれも検索に対応。MCP と Skills はツールごとにワンクリックで一括有効化・一括無効化も可能
 
 ### 使用量 & コストトラッキング
 
@@ -181,7 +165,7 @@ paru -S cc-switch-bin
 
 - **クラウド同期** — WebDAV（坚果云、Nextcloud、Synology NAS など）または S3 互換ストレージ（AWS S3、Cloudflare R2、Alibaba Cloud OSS、Tencent Cloud COS など）で複数のデバイス間を同期。CC Switch の設定ディレクトリを Dropbox、OneDrive、iCloud などのクラウドストレージのフォルダに置くことも可能
 - **CLI ツール管理** — 「バージョン情報」ページで Claude Code、Codex などのコマンドラインツールの現在のバージョンと最新バージョンを確認し、ワンクリックでインストール、アップグレード、一括アップグレード。重複インストールの診断にも対応。Windows では WSL 内のツールも管理可能（よくある質問を参照）
-- **Deep Link**（`ccswitch://`）— リンクからプロバイダ、MCP サーバー、プロンプトをワンクリックでインポート、またはスキルリポジトリを追加
+- **Deep Link**（`ccswitch://`）— リンクからプロバイダをワンクリックでインポート
 - **便利ツール** — Claude Code の初回確認のスキップ、AI 署名の非表示、VS Code の Claude Code 拡張を CC Switch のプロバイダ切り替えに追従させる機能など
 - ダーク / ライト / システムテーマ、自動起動、自動アップデーター、アトミック書き込み、自動バックアップ、多言語対応（簡体中文/繁體中文/英/日）
 
@@ -278,10 +262,9 @@ Codex では、CC Switch 内の「ChatGPT でログイン」から複数の Chat
 
 デフォルトでは、すべてユーザーのホームディレクトリにある `.cc-switch` フォルダ（Windows では `C:\Users\<ユーザー名>\.cc-switch`）に保存されます：
 
-- **データベース**: `cc-switch.db`（SQLite — プロバイダ、MCP、プロンプト、Skills、プロジェクト、使用量記録など）
+- **データベース**: `cc-switch.db`（SQLite — プロバイダ、プロジェクト、使用量記録など）
 - **ローカル設定**: `settings.json`（デバイスレベルの設定。各ツールの設定ディレクトリ、バックアップポリシー、クラウド同期の接続情報など）
 - **バックアップ**: `backups/`（デフォルトでは 24 時間ごとに自動バックアップし、最新 10 件を保持。「設定 → 詳細 → バックアップと復元」で変更可能）
-- **Skills**: `skills/`（設定で `~/.agents/skills` に変更可能）。デフォルトではシンボリックリンクで各ツールに同期し、失敗した場合はコピーに切り替え
 - **Skill バックアップ**: `skill-backups/`（スキルのアンインストールまたは更新の前に自動作成、最新 20 件を保持）
 - **OAuth ログイン認証情報**: `copilot_auth.json`、`codex_oauth_auth.json`、`xai_oauth_auth.json`
 - **ログ**: `logs/cc-switch.log` と `crash.log`（問題を報告する際は添付してください）
@@ -332,10 +315,6 @@ Issue でのバグ報告やご提案を歓迎します！新機能を開発す�
 開発環境、提出前のチェック、アーキテクチャの説明は [CONTRIBUTING.md](CONTRIBUTING.md)（英語）をご覧ください。使い方に関する質問は、まず [SUPPORT.md](SUPPORT.md) をご確認ください。セキュリティ上の脆弱性は、[SECURITY.md](SECURITY.md) に従って非公開で報告してください。
 
 **技術スタック**：Tauri 2 · Rust · React 18 · TypeScript · SQLite
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=farion1231/cc-switch&type=Date)](https://www.star-history.com/#farion1231/cc-switch&Date)
 
 ## ライセンス
 

@@ -43,8 +43,6 @@ pub enum AppError {
     },
     #[error("锁获取失败: {0}")]
     Lock(String),
-    #[error("MCP 校验失败: {0}")]
-    McpValidation(String),
     #[error("{0}")]
     Message(String),
     #[error("HTTP {status}: {body}")]

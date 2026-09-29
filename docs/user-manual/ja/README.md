@@ -23,9 +23,6 @@
 │   └── 2.6 Claude Desktop
 │
 ├── 3. 拡張機能
-│   ├── 3.1 MCP サーバー管理
-│   ├── 3.2 Prompts プロンプト管理
-│   ├── 3.3 Skills スキル管理
 │   ├── 3.4 セッションマネージャー
 │   └── 3.5 ワークスペースとメモリー
 │
@@ -70,9 +67,6 @@
 
 | ファイル | 内容 |
 |------|------|
-| [3.1-mcp.md](./3-extensions/3.1-mcp.md) | MCP プロトコル、サーバーの追加、アプリバインド |
-| [3.2-prompts.md](./3-extensions/3.2-prompts.md) | プリセットの作成、有効化の切り替え、スマートバックフィル |
-| [3.3-skills.md](./3-extensions/3.3-skills.md) | スキルの発見、インストール・アンインストール、リポジトリ管理 |
 | [3.4-sessions.md](./3-extensions/3.4-sessions.md) | セッションマネージャー：閲覧、検索、再開、削除 |
 | [3.5-workspace.md](./3-extensions/3.5-workspace.md) | ワークスペースファイルとデイリーメモリー（OpenClaw） |
 
@@ -124,5 +118,5 @@
 
 Issue や PR でドキュメントの改善にご協力ください：
 
-- [GitHub Issues](https://github.com/farion1231/cc-switch/issues)
-- [GitHub Repository](https://github.com/farion1231/cc-switch)
+- [GitHub Issues](https://github.com/sheying2013/cc-switch/issues)
+- [GitHub Repository](https://github.com/sheying2013/cc-switch)

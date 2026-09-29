@@ -1,0 +1,159 @@
+name: Upstream Sync
+
+# 自动把 farion1231/cc-switch 的更新同步进本仓库，同时保留本仓库的删减与定制。
+#
+# 判定逻辑：
+#   * 脚本退出码 0  -> 合并结果已干净，先推送同步分支，显式 dispatch CI；CI 成功后才推 main。
+#   * 脚本退出码 2  -> 存在无法自动剥离的残留，开 PR 人工复核，main 不受影响。
+#
+# 过滤规则见 .github/upstream-sync.conf，实现见 scripts/upstream-sync.sh。
+
+on:
+  schedule:
+    # 每周一 18:00 UTC（北京时间周二 02:00）
+    - cron: "0 18 * * 1"
+  workflow_dispatch:
+    inputs:
+      base_ref:
+        description: "上游基线引用"
+        required: false
+        default: refs/remotes/upstream/main
+      dry_run:
+        description: "只生成报告，不改任何分支"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    # 只在目标仓库执行，避免别人 fork 后误触发
+    if: github.repository == 'sheying2013/cc-switch'
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.sync.outputs.code }}
+      dry_run: ${{ steps.sync.outputs.dry_run }}
+      changed: ${{ steps.sync.outputs.changed }}
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+          persist-credentials: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/farion1231/cc-switch.git 2>/dev/null \
+            || git remote set-url upstream https://github.com/farion1231/cc-switch.git
+
+      - name: Reset stale local sync branch
+        run: git branch -D upstream-sync 2>/dev/null || true
+
+      - name: Sync upstream (merge + auto filter + auto strip)
+        id: sync
+        env:
+          BASE_REF: ${{ inputs.base_ref || 'refs/remotes/upstream/main' }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set +e
+          if [ "$DRY_RUN" = "true" ]; then
+            scripts/upstream-sync.sh --base "$BASE_REF" --dry-run
+            echo "code=$?" >> "$GITHUB_OUTPUT"
+            echo "dry_run=true" >> "$GITHUB_OUTPUT"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          scripts/upstream-sync.sh --base "$BASE_REF"
+          CODE=$?
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "dry_run=false" >> "$GITHUB_OUTPUT"
+          if git rev-parse --verify --quiet upstream-sync >/dev/null; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+          # 0 = 干净，2 = 需人工复核；两者都算跑通，交给后续步骤分流
+          if [ "$CODE" -eq 0 ] || [ "$CODE" -eq 2 ]; then
+            exit 0
+          fi
+          exit "$CODE"
+
+      - name: Summarize
+        if: always()
+        run: |
+          if [ -f .upstream-sync/report.md ]; then
+            cat .upstream-sync/report.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "未生成报告（可能已是最新，见上方日志）。" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Push clean sync branch for validation
+        if: steps.sync.outputs.dry_run != 'true' && steps.sync.outputs.code == '0' && steps.sync.outputs.changed == 'true'
+        run: git push -u origin upstream-sync --force-with-lease
+
+      - name: Validate clean sync branch with CI
+        id: validate
+        if: steps.sync.outputs.dry_run != 'true' && steps.sync.outputs.code == '0' && steps.sync.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          gh workflow run ci.yml --ref upstream-sync
+          DISPATCH=$?
+          if [ "$DISPATCH" -ne 0 ]; then
+            echo "result=failure" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          CURRENT_SHA=$(git rev-parse HEAD)
+          RUN_ID=""
+          for _ in $(seq 1 30); do
+            RUN_ID=$(gh run list --workflow ci.yml --branch upstream-sync --event workflow_dispatch --limit 20 --json databaseId,headSha --jq ".[] | select(.headSha == \"$CURRENT_SHA\") | .databaseId" 2>/dev/null | head -1)
+            [ -n "$RUN_ID" ] && break
+            sleep 5
+          done
+          if [ -z "$RUN_ID" ]; then
+            echo "result=failure" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          gh run watch "$RUN_ID" --exit-status
+          if [ "$?" -eq 0 ]; then
+            echo "result=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "result=failure" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fast-forward main after successful CI
+        if: steps.sync.outputs.dry_run != 'true' && steps.sync.outputs.changed == 'true' && steps.validate.outputs.result == 'success'
+        run: |
+          git push origin HEAD:refs/heads/main
+          echo "validated sync branch pushed to main."
+
+      - name: Open review PR when manual follow-up is required
+        if: steps.sync.outputs.dry_run != 'true' && steps.sync.outputs.changed == 'true' && (steps.sync.outputs.code == '2' || steps.validate.outputs.result == 'failure')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push -u origin upstream-sync --force-with-lease
+          TITLE="chore(sync): upstream $(date -u +%Y-%m-%d) (needs review)"
+          if gh pr view upstream-sync --json number >/dev/null 2>&1; then
+            gh pr edit upstream-sync --title "$TITLE" --body-file .upstream-sync/report.md
+          else
+            gh pr create --base main --head upstream-sync \
+              --title "$TITLE" --body-file .upstream-sync/report.md
+          fi

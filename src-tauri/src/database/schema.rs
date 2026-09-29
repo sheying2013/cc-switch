@@ -339,7 +339,7 @@ impl Database {
         .map_err(|e| AppError::Database(e.to_string()))?;
 
         // 19. Profiles 表（全应用共享的项目实体，payload 按 app 分槽快照
-        //     供应商/MCP/Skills/Prompt；各应用分组的 current 标记在 settings 表）
+        //     供应商；各应用分组的 current 标记在 settings 表）
         conn.execute(
             "CREATE TABLE IF NOT EXISTS profiles (
                 id TEXT PRIMARY KEY,
@@ -1029,7 +1029,7 @@ impl Database {
     ///
     /// 迁移策略：
     /// 1. 旧数据库只存储安装记录，真正的 skill 文件在文件系统
-    /// 2. 直接重建新表结构，后续由 SkillService 在首次启动时扫描文件系统重建数据
+    /// 2. 直接重建新表结构（skill 相关代码已移除，不再有消费方）
     fn migrate_v2_to_v3(conn: &Connection) -> Result<(), AppError> {
         // 检查是否已经是新结构（通过检查是否有 enabled_claude 列）
         if Self::has_column(conn, "skills", "enabled_claude")? {

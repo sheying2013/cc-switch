@@ -1,15 +1,12 @@
 //! Deep link module tests
 
-use super::mcp::parse_mcp_apps;
 use super::parser::parse_deeplink_url;
-use super::prompt::import_prompt_from_deeplink;
 use super::provider::parse_and_merge_config;
 use super::utils::{infer_homepage_from_endpoint, validate_url};
 use super::DeepLinkImportRequest;
 use crate::AppType;
-use crate::{store::AppState, Database};
 use base64::prelude::*;
-use std::{env, ffi::OsString, sync::Arc};
+use std::{env, ffi::OsString};
 
 struct TestHomeGuard {
     _dir: tempfile::TempDir,
@@ -221,12 +218,6 @@ fn test_build_gemini_provider_with_model() {
         config: None,
         config_format: None,
         config_url: None,
-        apps: None,
-        repo: None,
-        directory: None,
-        branch: None,
-        content: None,
-        description: None,
         enabled: None,
         usage_enabled: None,
         usage_script: None,
@@ -274,12 +265,6 @@ fn test_build_gemini_provider_without_model() {
         config: None,
         config_format: None,
         config_url: None,
-        apps: None,
-        repo: None,
-        directory: None,
-        branch: None,
-        content: None,
-        description: None,
         enabled: None,
         usage_enabled: None,
         usage_script: None,
@@ -320,12 +305,6 @@ fn test_deeplink_usage_script_does_not_copy_provider_credentials() {
         config: None,
         config_format: None,
         config_url: None,
-        apps: None,
-        repo: None,
-        directory: None,
-        branch: None,
-        content: None,
-        description: None,
         enabled: None,
         usage_enabled: Some(true),
         usage_script: None,
@@ -367,12 +346,6 @@ fn usage_script_request(code: &str, usage_enabled: Option<bool>) -> DeepLinkImpo
         config: None,
         config_format: None,
         config_url: None,
-        apps: None,
-        repo: None,
-        directory: None,
-        branch: None,
-        content: None,
-        description: None,
         enabled: None,
         usage_enabled,
         usage_script: Some(BASE64_STANDARD.encode(code)),
@@ -450,12 +423,6 @@ fn test_deeplink_usage_script_omits_explicit_credentials_that_match_provider() {
         config: None,
         config_format: None,
         config_url: None,
-        apps: None,
-        repo: None,
-        directory: None,
-        branch: None,
-        content: None,
-        description: None,
         enabled: None,
         usage_enabled: Some(true),
         usage_script: None,
@@ -498,12 +465,6 @@ fn test_deeplink_usage_script_preserves_distinct_usage_credentials() {
         config: None,
         config_format: None,
         config_url: None,
-        apps: None,
-        repo: None,
-        directory: None,
-        branch: None,
-        content: None,
-        description: None,
         enabled: None,
         usage_enabled: Some(true),
         usage_script: None,
@@ -551,12 +512,6 @@ fn test_parse_and_merge_config_claude() {
         config: Some(config_b64),
         config_format: Some("json".to_string()),
         config_url: None,
-        apps: None,
-        repo: None,
-        directory: None,
-        branch: None,
-        content: None,
-        description: None,
         enabled: None,
         usage_enabled: None,
         usage_script: None,
@@ -674,12 +629,6 @@ fn test_parse_and_merge_config_url_override() {
         config: Some(config_b64),
         config_format: Some("json".to_string()),
         config_url: None,
-        apps: None,
-        repo: None,
-        directory: None,
-        branch: None,
-        content: None,
-        description: None,
         enabled: None,
         usage_enabled: None,
         usage_script: None,
@@ -737,12 +686,6 @@ fn test_build_claude_provider_preserves_custom_env_fields() {
         config: Some(config_b64),
         config_format: Some("json".to_string()),
         config_url: None,
-        apps: None,
-        repo: None,
-        directory: None,
-        branch: None,
-        content: None,
-        description: None,
         enabled: None,
         usage_enabled: None,
         usage_script: None,
@@ -792,12 +735,6 @@ fn test_build_claude_provider_without_config_unchanged() {
         config: None,
         config_format: None,
         config_url: None,
-        apps: None,
-        repo: None,
-        directory: None,
-        branch: None,
-        content: None,
-        description: None,
         enabled: None,
         usage_enabled: None,
         usage_script: None,
@@ -815,129 +752,6 @@ fn test_build_claude_provider_without_config_unchanged() {
     assert_eq!(env["ANTHROPIC_BASE_URL"], "https://api.example.com");
     // No extras leaked in
     assert_eq!(env.len(), 2);
-}
-
-// =============================================================================
-// Prompt Tests
-// =============================================================================
-
-// Integration-style unit test: prompt import reaches PromptService and resolves
-// live config file paths, so HOME must be isolated before it runs.
-#[test]
-#[serial_test::serial]
-fn test_import_prompt_allows_space_in_base64_content() {
-    let _test_home = TestHomeGuard::new();
-    let url = "ccswitch://v1/import?resource=prompt&app=codex&name=PromptPlus&content=Pj4+";
-    let request = parse_deeplink_url(url).unwrap();
-
-    // URL decoded content may have "+" become space
-    assert_eq!(request.content.as_deref(), Some("Pj4 "));
-
-    let db = Arc::new(Database::memory().expect("create memory db"));
-    let state = AppState::new(db.clone());
-
-    let prompt_id = import_prompt_from_deeplink(&state, request.clone()).expect("import prompt");
-
-    let prompts = state.db.get_prompts("codex").expect("get prompts");
-    let prompt = prompts.get(&prompt_id).expect("prompt saved");
-
-    assert_eq!(prompt.content, ">>>");
-    assert_eq!(prompt.name, request.name.unwrap());
-}
-
-// =============================================================================
-// MCP Tests
-// =============================================================================
-
-#[test]
-fn test_parse_mcp_apps() {
-    let apps = parse_mcp_apps("claude,codex").unwrap();
-    assert!(apps.claude);
-    assert!(apps.codex);
-    assert!(!apps.gemini);
-
-    let apps = parse_mcp_apps("gemini").unwrap();
-    assert!(!apps.claude);
-    assert!(!apps.codex);
-    assert!(apps.gemini);
-
-    let apps = parse_mcp_apps("grokbuild,opencode,hermes").unwrap();
-    assert!(apps.grokbuild);
-    assert!(apps.opencode);
-    assert!(apps.hermes);
-
-    let err = parse_mcp_apps("invalid").unwrap_err();
-    assert!(err.to_string().contains("Invalid app"));
-}
-
-#[test]
-fn test_parse_prompt_deeplink() {
-    let content = "Hello World";
-    let content_b64 = BASE64_STANDARD.encode(content);
-    let url = format!(
-        "ccswitch://v1/import?resource=prompt&app=claude&name=test&content={}&description=desc&enabled=true",
-        content_b64
-    );
-
-    let request = parse_deeplink_url(&url).unwrap();
-    assert_eq!(request.resource, "prompt");
-    assert_eq!(request.app.unwrap(), "claude");
-    assert_eq!(request.name.unwrap(), "test");
-    assert_eq!(request.content.unwrap(), content_b64);
-    assert_eq!(request.description.unwrap(), "desc");
-    assert!(request.enabled.unwrap());
-}
-
-#[test]
-fn test_parse_grokbuild_prompt_deeplink() {
-    let content_b64 = BASE64_STANDARD.encode("Grok instructions");
-    let url = format!(
-        "ccswitch://v1/import?resource=prompt&app=grokbuild&name=test&content={content_b64}"
-    );
-
-    let request = parse_deeplink_url(&url).expect("parse Grok Build prompt deeplink");
-
-    assert_eq!(request.app.as_deref(), Some("grokbuild"));
-}
-
-#[test]
-fn test_parse_mcp_deeplink() {
-    let config = r#"{"mcpServers":{"test":{"command":"echo"}}}"#;
-    let config_b64 = BASE64_STANDARD.encode(config);
-    let url = format!(
-        "ccswitch://v1/import?resource=mcp&apps=claude,codex&config={}&enabled=true",
-        config_b64
-    );
-
-    let request = parse_deeplink_url(&url).unwrap();
-    assert_eq!(request.resource, "mcp");
-    assert_eq!(request.apps.unwrap(), "claude,codex");
-    assert_eq!(request.config.unwrap(), config_b64);
-    assert!(request.enabled.unwrap());
-}
-
-#[test]
-fn test_parse_grokbuild_mcp_deeplink() {
-    let config = r#"{"mcpServers":{"test":{"command":"echo"}}}"#;
-    let config_b64 = BASE64_STANDARD.encode(config);
-    let url = format!(
-        "ccswitch://v1/import?resource=mcp&apps=grokbuild&config={config_b64}&enabled=true"
-    );
-
-    let request = parse_deeplink_url(&url).expect("parse Grok Build MCP deeplink");
-
-    assert_eq!(request.apps.as_deref(), Some("grokbuild"));
-}
-
-#[test]
-fn test_parse_skill_deeplink() {
-    let url = "ccswitch://v1/import?resource=skill&repo=owner/repo&directory=skills&branch=dev";
-    let request = parse_deeplink_url(url).unwrap();
-
-    assert_eq!(request.resource, "skill");
-    assert_eq!(request.repo.unwrap(), "owner/repo");
-    assert_eq!(request.directory.unwrap(), "skills");
-    assert_eq!(request.branch.unwrap(), "dev");
 }
 
 // =============================================================================

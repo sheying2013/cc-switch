@@ -29,3 +29,6 @@ copilot-api
 .history
 CODEBUDDY.md
 mainWindow.js
+
+# 上游同步工作目录（报告/计划，产物不入库）
+.upstream-sync/

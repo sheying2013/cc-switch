@@ -15,10 +15,6 @@ import { server } from "../msw/server";
 
 const toastSuccessMock = vi.fn();
 const toastErrorMock = vi.fn();
-const skillsPanelMocks = vi.hoisted(() => ({
-  checkUpdates: vi.fn(),
-  openDiscovery: vi.fn(),
-}));
 
 vi.mock("sonner", () => ({
   toast: {
@@ -142,48 +138,10 @@ vi.mock("@/components/AppSwitcher", () => ({
     </div>
   ),
 }));
-
-vi.mock("@/components/skills/UnifiedSkillsPanel", async () => {
-  const React = await import("react");
-  const MockUnifiedSkillsPanel = React.forwardRef(
-    ({ onCheckUpdatesStateChange }: any, ref) => {
-      React.useEffect(() => {
-        onCheckUpdatesStateChange?.({ isChecking: false, hasSkills: true });
-        return () =>
-          onCheckUpdatesStateChange?.({
-            isChecking: false,
-            hasSkills: false,
-          });
-      }, [onCheckUpdatesStateChange]);
-      React.useImperativeHandle(ref, () => ({
-        openDiscovery: skillsPanelMocks.openDiscovery,
-        openImport: vi.fn(),
-        openInstallFromZip: vi.fn(),
-        openRestoreFromBackup: vi.fn(),
-        checkUpdates: skillsPanelMocks.checkUpdates,
-      }));
-      return <div data-testid="unified-skills-panel" />;
-    },
-  );
-  MockUnifiedSkillsPanel.displayName = "MockUnifiedSkillsPanel";
-  return { default: MockUnifiedSkillsPanel };
-});
-
 vi.mock("@/components/UpdateBadge", () => ({
   UpdateBadge: ({ onClick }: any) => (
     <button onClick={onClick}>update-badge</button>
   ),
-}));
-
-vi.mock("@/components/mcp/McpPanel", () => ({
-  default: ({ open, onOpenChange }: any) =>
-    open ? (
-      <div data-testid="mcp-panel">
-        <button onClick={() => onOpenChange(false)}>close-mcp</button>
-      </div>
-    ) : (
-      <button onClick={() => onOpenChange(true)}>open-mcp</button>
-    ),
 }));
 
 const renderApp = (AppComponent: ComponentType) => {
@@ -202,8 +160,6 @@ describe("App integration with MSW", () => {
     resetProviderState();
     toastSuccessMock.mockReset();
     toastErrorMock.mockReset();
-    skillsPanelMocks.checkUpdates.mockReset();
-    skillsPanelMocks.openDiscovery.mockReset();
     localStorage.removeItem("cc-switch-last-view");
     localStorage.removeItem("cc-switch-last-app");
   });

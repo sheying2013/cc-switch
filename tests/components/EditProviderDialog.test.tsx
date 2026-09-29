@@ -451,7 +451,6 @@ describe("EditProviderDialog", () => {
         models: [{ id: "model" }],
       },
       meta: {
-        isPartner: true,
         endpointAutoSelect: true,
         custom_endpoints: {
           "https://failover.example.com/v1": {
@@ -477,7 +476,7 @@ describe("EditProviderDialog", () => {
 
     await waitFor(() => expect(handleSubmit).toHaveBeenCalledTimes(1));
     expect(handleSubmit.mock.calls[0][0].provider.meta).toMatchObject({
-      isPartner: true,
+      endpointAutoSelect: true,
     });
     expect(handleSubmit.mock.calls[0][0]).not.toHaveProperty(
       "expectedSettingsConfig",

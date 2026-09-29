@@ -152,38 +152,6 @@ fn normalize_default(default: &Option<String>) -> Option<String> {
 }
 
 #[test]
-fn deleted_default_skill_repo_is_not_restored() {
-    let db = Database::memory().expect("create memory db");
-
-    assert_eq!(db.init_default_skill_repos().expect("initialize repos"), 4);
-    for repo in db.get_skill_repos().expect("get initialized repos") {
-        db.delete_skill_repo(&repo.owner, &repo.name)
-            .expect("delete repo");
-    }
-    assert!(db.get_skill_repos().expect("get deleted repos").is_empty());
-
-    assert_eq!(
-        db.init_default_skill_repos().expect("reinitialize repos"),
-        0
-    );
-    assert!(db.get_skill_repos().expect("get repos").is_empty());
-}
-
-#[test]
-fn existing_skill_repo_selection_is_not_supplemented() {
-    let db = Database::memory().expect("create memory db");
-    let default_store = crate::services::skill::SkillStore::default();
-    db.save_skill_repo(&default_store.repos[0])
-        .expect("save existing repo");
-
-    assert_eq!(db.init_default_skill_repos().expect("initialize repos"), 0);
-    assert_eq!(db.get_skill_repos().expect("get repos").len(), 1);
-    assert!(db
-        .get_bool_flag("default_skill_repos_initialized")
-        .expect("get initialized flag"));
-}
-
-#[test]
 fn schema_migration_sets_user_version_when_missing() {
     let conn = Connection::open_in_memory().expect("open memory db");
 
@@ -230,10 +198,6 @@ fn schema_migration_adds_missing_columns_for_providers() {
         ("providers", "meta"),
         ("providers", "is_current"),
         ("provider_endpoints", "added_at"),
-        ("mcp_servers", "enabled_gemini"),
-        ("prompts", "updated_at"),
-        ("skills", "installed_at"),
-        ("skill_repos", "enabled"),
     ] {
         assert!(
             Database::has_column(&conn, table, column).expect("check column"),
@@ -273,31 +237,6 @@ fn schema_migration_aligns_column_defaults_and_types() {
     assert_eq!(tags.r#type, "TEXT");
     assert_eq!(tags.notnull, 1);
     assert_eq!(normalize_default(&tags.default).as_deref(), Some("[]"));
-
-    let enabled = get_column_info(&conn, "prompts", "enabled");
-    assert_eq!(enabled.r#type, "BOOLEAN");
-    assert_eq!(enabled.notnull, 1);
-    assert_eq!(normalize_default(&enabled.default).as_deref(), Some("1"));
-
-    let installed_at = get_column_info(&conn, "skills", "installed_at");
-    assert_eq!(installed_at.r#type, "INTEGER");
-    assert_eq!(installed_at.notnull, 1);
-    assert_eq!(
-        normalize_default(&installed_at.default).as_deref(),
-        Some("0")
-    );
-
-    let branch = get_column_info(&conn, "skill_repos", "branch");
-    assert_eq!(branch.r#type, "TEXT");
-    assert_eq!(normalize_default(&branch.default).as_deref(), Some("main"));
-
-    let skill_repo_enabled = get_column_info(&conn, "skill_repos", "enabled");
-    assert_eq!(skill_repo_enabled.r#type, "BOOLEAN");
-    assert_eq!(skill_repo_enabled.notnull, 1);
-    assert_eq!(
-        normalize_default(&skill_repo_enabled.default).as_deref(),
-        Some("1")
-    );
 }
 
 #[test]
@@ -707,9 +646,6 @@ fn schema_dry_run_does_not_write_to_disk() {
     let config = MultiAppConfig {
         version: 2,
         apps,
-        mcp: Default::default(),
-        prompts: Default::default(),
-        skills: Default::default(),
         common_config_snippets: Default::default(),
         claude_common_config_snippet: None,
     };
@@ -757,9 +693,6 @@ fn dry_run_validates_schema_compatibility() {
     let config = MultiAppConfig {
         version: 2,
         apps,
-        mcp: Default::default(),
-        prompts: Default::default(),
-        skills: Default::default(),
         common_config_snippets: Default::default(),
         claude_common_config_snippet: None,
     };

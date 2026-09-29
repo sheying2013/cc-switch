@@ -5,6 +5,7 @@ on:
     branches: [main]
   push:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -24,7 +25,7 @@ jobs:
       # On pull_request the filter reads changed files via the API (no checkout);
       # on push it needs a local git history to diff against.
       - name: Checkout
-        if: github.event_name == 'push'
+        if: github.event_name != 'pull_request'
         uses: actions/checkout@v6
 
       - name: Detect changed paths

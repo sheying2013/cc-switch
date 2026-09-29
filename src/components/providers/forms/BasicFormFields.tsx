@@ -22,7 +22,11 @@ import { IconPicker } from "@/components/IconPicker";
 import { getIconMetadata } from "@/icons/extracted/metadata";
 import type { UseFormReturn } from "react-hook-form";
 import type { ProviderFormData } from "@/lib/schemas/provider";
-import { useGlobalProxyUrl, useGlobalProxyChaining, useTestOutboundProxy } from "@/hooks/useGlobalProxy";
+import {
+  useGlobalProxyUrl,
+  useGlobalProxyChaining,
+  useTestOutboundProxy,
+} from "@/hooks/useGlobalProxy";
 
 interface BasicFormFieldsProps {
   form: UseFormReturn<ProviderFormData>;
