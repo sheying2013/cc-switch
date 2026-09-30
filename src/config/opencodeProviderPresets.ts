@@ -572,8 +572,7 @@ export const opencodeProviderPresets: OpenCodeProviderPreset[] = [
   {
     name: "FennoAI",
     websiteUrl: "https://api.fenno.ai",
-    apiKeyUrl:
-      "https://api.fenno.ai/register",
+    apiKeyUrl: "https://api.fenno.ai/register",
     settingsConfig: {
       npm: "@ai-sdk/openai-compatible",
       name: "FennoAI",
@@ -948,8 +947,7 @@ export const opencodeProviderPresets: OpenCodeProviderPreset[] = [
   {
     name: "TeamoRouter",
     websiteUrl: "https://teamorouter.cn",
-    apiKeyUrl:
-      "https://teamorouter.cn",
+    apiKeyUrl: "https://teamorouter.cn",
     settingsConfig: {
       npm: "@ai-sdk/openai-compatible",
       name: "TeamoRouter",
@@ -1103,10 +1101,8 @@ export const opencodeProviderPresets: OpenCodeProviderPreset[] = [
   },
   {
     name: "BytePlus",
-    websiteUrl:
-      "https://www.byteplus.com/en/product/modelark",
-    apiKeyUrl:
-      "https://www.byteplus.com/en/product/modelark",
+    websiteUrl: "https://www.byteplus.com/en/product/modelark",
+    apiKeyUrl: "https://www.byteplus.com/en/product/modelark",
     settingsConfig: {
       npm: "@ai-sdk/openai-compatible",
       name: "BytePlus",
@@ -1453,8 +1449,7 @@ export const opencodeProviderPresets: OpenCodeProviderPreset[] = [
   {
     name: "SudoCode.chat",
     websiteUrl: "https://sudocode.chat",
-    apiKeyUrl:
-      "https://sudocode.chat/sign-up",
+    apiKeyUrl: "https://sudocode.chat/sign-up",
     settingsConfig: {
       npm: "@ai-sdk/openai",
       name: "SudoCode.chat",
@@ -2048,8 +2043,7 @@ export const opencodeProviderPresets: OpenCodeProviderPreset[] = [
   {
     name: "千问AI平台",
     websiteUrl: "https://platform.qianwenai.com",
-    apiKeyUrl:
-      "https://platform.qianwenai.com/home/api-keys",
+    apiKeyUrl: "https://platform.qianwenai.com/home/api-keys",
     settingsConfig: {
       npm: "@ai-sdk/openai-compatible",
       name: "千问AI平台",
@@ -2090,10 +2084,8 @@ export const opencodeProviderPresets: OpenCodeProviderPreset[] = [
   },
   {
     name: "千问AI平台 Token Plan",
-    websiteUrl:
-      "https://platform.qianwenai.com/pricing/token-plan",
-    apiKeyUrl:
-      "https://platform.qianwenai.com/home/api-keys",
+    websiteUrl: "https://platform.qianwenai.com/pricing/token-plan",
+    apiKeyUrl: "https://platform.qianwenai.com/home/api-keys",
     settingsConfig: {
       npm: "@ai-sdk/anthropic",
       name: "千问AI平台 Token Plan",
@@ -2221,8 +2213,7 @@ export const opencodeProviderPresets: OpenCodeProviderPreset[] = [
   },
   {
     name: "QwenCloud Token Plan",
-    websiteUrl:
-      "https://www.qwencloud.com/pricing/token-plan",
+    websiteUrl: "https://www.qwencloud.com/pricing/token-plan",
     apiKeyUrl: "https://home.qwencloud.com/api-keys",
     settingsConfig: {
       npm: "@ai-sdk/anthropic",

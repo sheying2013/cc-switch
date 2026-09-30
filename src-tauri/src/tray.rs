@@ -579,9 +579,7 @@ pub fn create_tray_menu(
     let show_main_item =
         MenuItem::with_id(app, "show_main", tray_texts.show_main, true, None::<&str>)
             .map_err(|e| AppError::Message(format!("创建打开主界面菜单失败: {e}")))?;
-    menu_builder = menu_builder
-        .item(&show_main_item)
-        .separator();
+    menu_builder = menu_builder.item(&show_main_item).separator();
 
     // 每个应用类型折叠为子菜单，避免供应商过多时菜单过长
     for section in TRAY_SECTIONS.iter() {

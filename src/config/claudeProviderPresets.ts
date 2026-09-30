@@ -243,8 +243,7 @@ export const providerPresets: ProviderPreset[] = [
   {
     name: "FennoAI",
     websiteUrl: "https://api.fenno.ai",
-    apiKeyUrl:
-      "https://api.fenno.ai/register",
+    apiKeyUrl: "https://api.fenno.ai/register",
     settingsConfig: {
       env: {
         ANTHROPIC_BASE_URL: "https://api.fenno.ai",
@@ -438,8 +437,7 @@ export const providerPresets: ProviderPreset[] = [
   {
     name: "TeamoRouter",
     websiteUrl: "https://teamorouter.cn",
-    apiKeyUrl:
-      "https://teamorouter.cn",
+    apiKeyUrl: "https://teamorouter.cn",
     settingsConfig: {
       env: {
         ANTHROPIC_BASE_URL: "https://api.teamorouter.cn",
@@ -528,10 +526,8 @@ export const providerPresets: ProviderPreset[] = [
   },
   {
     name: "BytePlus",
-    websiteUrl:
-      "https://www.byteplus.com/en/product/modelark",
-    apiKeyUrl:
-      "https://www.byteplus.com/en/product/modelark",
+    websiteUrl: "https://www.byteplus.com/en/product/modelark",
+    apiKeyUrl: "https://www.byteplus.com/en/product/modelark",
     settingsConfig: {
       env: {
         ANTHROPIC_BASE_URL:
@@ -621,8 +617,7 @@ export const providerPresets: ProviderPreset[] = [
     name: "Compshare",
     nameKey: "providerForm.presets.ucloud",
     websiteUrl: "https://www.compshare.cn",
-    apiKeyUrl:
-      "https://www.compshare.cn/coding-plan",
+    apiKeyUrl: "https://www.compshare.cn/coding-plan",
     settingsConfig: {
       env: {
         ANTHROPIC_BASE_URL: "https://api.modelverse.cn",
@@ -638,8 +633,7 @@ export const providerPresets: ProviderPreset[] = [
     name: "Compshare Coding Plan",
     nameKey: "providerForm.presets.ucloudCoding",
     websiteUrl: "https://www.compshare.cn",
-    apiKeyUrl:
-      "https://www.compshare.cn/coding-plan",
+    apiKeyUrl: "https://www.compshare.cn/coding-plan",
     settingsConfig: {
       env: {
         ANTHROPIC_BASE_URL: "https://cp.compshare.cn",
@@ -792,8 +786,7 @@ export const providerPresets: ProviderPreset[] = [
   {
     name: "SudoCode.chat",
     websiteUrl: "https://sudocode.chat",
-    apiKeyUrl:
-      "https://sudocode.chat/sign-up",
+    apiKeyUrl: "https://sudocode.chat/sign-up",
     settingsConfig: {
       env: {
         ANTHROPIC_BASE_URL: "https://api.sudocode.chat",
@@ -1203,8 +1196,7 @@ export const providerPresets: ProviderPreset[] = [
   {
     name: "千问AI平台",
     websiteUrl: "https://platform.qianwenai.com",
-    apiKeyUrl:
-      "https://platform.qianwenai.com/home/api-keys",
+    apiKeyUrl: "https://platform.qianwenai.com/home/api-keys",
     settingsConfig: {
       env: {
         ANTHROPIC_BASE_URL: "https://dashscope.aliyuncs.com/apps/anthropic",
@@ -1238,10 +1230,8 @@ export const providerPresets: ProviderPreset[] = [
   },
   {
     name: "千问AI平台 Token Plan",
-    websiteUrl:
-      "https://platform.qianwenai.com/pricing/token-plan",
-    apiKeyUrl:
-      "https://platform.qianwenai.com/home/api-keys",
+    websiteUrl: "https://platform.qianwenai.com/pricing/token-plan",
+    apiKeyUrl: "https://platform.qianwenai.com/home/api-keys",
     settingsConfig: {
       env: {
         ANTHROPIC_BASE_URL:
@@ -1303,8 +1293,7 @@ export const providerPresets: ProviderPreset[] = [
   },
   {
     name: "QwenCloud Token Plan",
-    websiteUrl:
-      "https://www.qwencloud.com/pricing/token-plan",
+    websiteUrl: "https://www.qwencloud.com/pricing/token-plan",
     apiKeyUrl: "https://home.qwencloud.com/api-keys",
     settingsConfig: {
       env: {

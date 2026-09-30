@@ -437,8 +437,7 @@ requires_openai_auth = true`,
   {
     name: "FennoAI",
     websiteUrl: "https://api.fenno.ai",
-    apiKeyUrl:
-      "https://api.fenno.ai/register",
+    apiKeyUrl: "https://api.fenno.ai/register",
     category: "aggregator",
     auth: generateThirdPartyAuth(""),
     config: generateThirdPartyConfig(
@@ -679,8 +678,7 @@ requires_openai_auth = true`,
   {
     name: "TeamoRouter",
     websiteUrl: "https://teamorouter.cn",
-    apiKeyUrl:
-      "https://teamorouter.cn",
+    apiKeyUrl: "https://teamorouter.cn",
     category: "aggregator",
     auth: generateThirdPartyAuth(""),
     config: generateThirdPartyConfig(
@@ -808,10 +806,8 @@ requires_openai_auth = true`,
   },
   {
     name: "BytePlus",
-    websiteUrl:
-      "https://www.byteplus.com/en/product/modelark",
-    apiKeyUrl:
-      "https://www.byteplus.com/en/product/modelark",
+    websiteUrl: "https://www.byteplus.com/en/product/modelark",
+    apiKeyUrl: "https://www.byteplus.com/en/product/modelark",
     auth: generateThirdPartyAuth(""),
     config: generateThirdPartyConfig(
       "byteplus",
@@ -957,8 +953,7 @@ requires_openai_auth = true`,
     name: "Compshare",
     nameKey: "providerForm.presets.ucloud",
     websiteUrl: "https://www.compshare.cn",
-    apiKeyUrl:
-      "https://www.compshare.cn/coding-plan",
+    apiKeyUrl: "https://www.compshare.cn/coding-plan",
     auth: generateThirdPartyAuth(""),
     config: generateThirdPartyConfig(
       "compshare",
@@ -974,8 +969,7 @@ requires_openai_auth = true`,
     name: "Compshare Coding Plan",
     nameKey: "providerForm.presets.ucloudCoding",
     websiteUrl: "https://www.compshare.cn",
-    apiKeyUrl:
-      "https://www.compshare.cn/coding-plan",
+    apiKeyUrl: "https://www.compshare.cn/coding-plan",
     auth: generateThirdPartyAuth(""),
     config: generateThirdPartyConfig(
       "compshare_coding",
@@ -1127,8 +1121,7 @@ requires_openai_auth = true`,
   {
     name: "SudoCode.chat",
     websiteUrl: "https://sudocode.chat",
-    apiKeyUrl:
-      "https://sudocode.chat/sign-up",
+    apiKeyUrl: "https://sudocode.chat/sign-up",
     category: "third_party",
     auth: generateThirdPartyAuth(""),
     config: `model_provider = "custom"
@@ -1595,8 +1588,7 @@ requires_openai_auth = true`,
   {
     name: "千问AI平台",
     websiteUrl: "https://platform.qianwenai.com",
-    apiKeyUrl:
-      "https://platform.qianwenai.com/home/api-keys",
+    apiKeyUrl: "https://platform.qianwenai.com/home/api-keys",
     auth: generateThirdPartyAuth(""),
     config: generateThirdPartyConfig(
       "qianwenai",
@@ -1648,10 +1640,8 @@ requires_openai_auth = true`,
   },
   {
     name: "千问AI平台 Token Plan",
-    websiteUrl:
-      "https://platform.qianwenai.com/pricing/token-plan",
-    apiKeyUrl:
-      "https://platform.qianwenai.com/home/api-keys",
+    websiteUrl: "https://platform.qianwenai.com/pricing/token-plan",
+    apiKeyUrl: "https://platform.qianwenai.com/home/api-keys",
     auth: generateThirdPartyAuth(""),
     config: generateThirdPartyConfig(
       "qianwenai_token_plan",
@@ -1792,8 +1782,7 @@ requires_openai_auth = true`,
   },
   {
     name: "QwenCloud Token Plan",
-    websiteUrl:
-      "https://www.qwencloud.com/pricing/token-plan",
+    websiteUrl: "https://www.qwencloud.com/pricing/token-plan",
     apiKeyUrl: "https://home.qwencloud.com/api-keys",
     auth: generateThirdPartyAuth(""),
     config: generateThirdPartyConfig(

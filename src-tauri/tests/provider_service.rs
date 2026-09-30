@@ -2054,10 +2054,7 @@ fn packycode_partner_meta_triggers_security_flag_even_without_keywords() {
             }),
             Some("https://example.com".to_string()),
         );
-        provider.meta = Some(ProviderMeta {
-            partner_promotion_key: Some("packycode".to_string()),
-            ..ProviderMeta::default()
-        });
+        provider.meta = Some(ProviderMeta::default());
         manager.providers.insert("packy-meta".to_string(), provider);
     }
 
@@ -2108,10 +2105,7 @@ fn switch_google_official_gemini_preserves_env_vars() {
             }),
             Some("https://ai.google.dev".to_string()),
         );
-        provider.meta = Some(ProviderMeta {
-            partner_promotion_key: Some("google-official".to_string()),
-            ..ProviderMeta::default()
-        });
+        provider.meta = Some(ProviderMeta::default());
         manager
             .providers
             .insert("google-official".to_string(), provider);

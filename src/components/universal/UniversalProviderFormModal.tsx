@@ -518,13 +518,17 @@ requires_openai_auth = true`;
                 type="button"
                 variant="ghost"
                 size="sm"
-                disabled={!outboundProxyUrl.trim() || testProxyMutation.isPending}
+                disabled={
+                  !outboundProxyUrl.trim() || testProxyMutation.isPending
+                }
                 onClick={async () => {
                   if (outboundProxyUrl.trim()) {
                     await testProxyMutation.mutateAsync({
                       proxyUrl: outboundProxyUrl.trim(),
                       frontProxy:
-                        isChainingEnabled && globalProxyUrl ? globalProxyUrl : null,
+                        isChainingEnabled && globalProxyUrl
+                          ? globalProxyUrl
+                          : null,
                     });
                   }
                 }}

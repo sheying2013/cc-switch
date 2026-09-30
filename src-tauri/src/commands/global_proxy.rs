@@ -72,7 +72,10 @@ pub fn set_global_proxy_url(state: tauri::State<'_, AppState>, url: String) -> R
 /// 获取全局代理是否启用链式代理
 #[tauri::command]
 pub fn get_global_proxy_chaining(state: tauri::State<'_, AppState>) -> Result<bool, String> {
-    state.db.get_global_proxy_chaining().map_err(|e| e.to_string())
+    state
+        .db
+        .get_global_proxy_chaining()
+        .map_err(|e| e.to_string())
 }
 
 /// 设置全局代理是否启用链式代理（全局出站代理作为供应商单独代理的前置）

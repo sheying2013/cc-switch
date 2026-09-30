@@ -1,0 +1,136 @@
+name: Build macOS x64
+
+# 手动触发的 x86_64 单独构建，不依赖 release environment / Apple 签名密钥。
+# 产物：Actions Artifact（DMG + .app.zip）；可选上传到指定 tag 的 Release。
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: '可选：把产物上传到该 tag 的 GitHub Release（留空则只上传 Actions Artifact）'
+        required: false
+        default: ''
+      adhoc_sign:
+        description: '是否使用 ad-hoc 签名（-）；失败会自动回退为不签名'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: macos-x64-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-macos-x64:
+    name: macOS x86_64 (.dmg / .app)
+    runs-on: macos-14
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Setup Rust (x86_64-apple-darwin)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: macos-x64
+
+      - name: Setup pnpm
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+        run: |
+          corepack enable
+          corepack install
+          node --version
+          pnpm --version
+
+      - name: Install frontend deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Tauri App (macOS x86_64)
+        shell: bash
+        env:
+          APPLE_SIGNING_IDENTITY: ${{ inputs.adhoc_sign == 'true' && '-' || '' }}
+        run: |
+          set -uo pipefail
+          # 关闭 updater 产物签名（本仓库没有 TAURI_SIGNING_PRIVATE_KEY），只产出 .app/.dmg
+          CONFIG_OVERRIDE='{"bundle":{"createUpdaterArtifacts":false}}'
+          build() {
+            pnpm tauri build --target x86_64-apple-darwin --config "$CONFIG_OVERRIDE"
+          }
+          if [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
+            echo "=== attempt 1: ad-hoc signing (APPLE_SIGNING_IDENTITY=-) ==="
+            if build; then exit 0; fi
+            echo "⚠️ ad-hoc signing failed, retrying without codesign..."
+            unset APPLE_SIGNING_IDENTITY
+          fi
+          echo "=== attempt 2: unsigned build ==="
+          build
+
+      - name: Collect macOS x64 artifacts
+        shell: bash
+        run: |
+          set -euxo pipefail
+          BUNDLE="src-tauri/target/x86_64-apple-darwin/release/bundle"
+          VER="$(node -p "require('./package.json').version")"
+          mkdir -p release-assets
+
+          APP="$(find "$BUNDLE/macos" -maxdepth 1 -name '*.app' -type d | head -1)"
+          [ -n "$APP" ] || { echo "❌ no .app produced"; exit 1; }
+
+          APPNAME="$(basename "$APP")"
+          BIN="$(find "$APP/Contents/MacOS" -maxdepth 1 -type f | head -1)"
+          echo "APP=$APP"
+          echo "BIN=$BIN"
+          echo "--- architecture ---"
+          lipo -archs "$BIN" | tee release-assets/ARCH.txt
+          file "$BIN" | tee -a release-assets/ARCH.txt
+          echo "--- codesign ---"
+          codesign -dv --verbose=2 "$APP" 2>&1 | tee release-assets/CODESIGN.txt || true
+
+          # .app 用 ditto 打包（保留可执行位与符号链接；upload-artifact 直接传目录会丢权限）
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "release-assets/${APPNAME%.app}-${VER}-x86_64.zip"
+
+          DMG="$(find "$BUNDLE/dmg" -maxdepth 1 -name '*.dmg' -type f | head -1 || true)"
+          if [ -n "$DMG" ]; then
+            cp "$DMG" "release-assets/"
+          else
+            echo "⚠️ no .dmg produced (only .app zip will be uploaded)"
+          fi
+          ls -la release-assets
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cc-switch-macos-x64-${{ github.sha }}
+          path: release-assets/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish to GitHub Release (optional)
+        if: inputs.release_tag != ''
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ inputs.release_tag }}"
+          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" release-assets/* -R "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" release-assets/* -R "$GITHUB_REPOSITORY" \
+              --title "cc switch live $TAG (macOS x64)" \
+              --notes "手动触发的 macOS x86_64 构建（未使用 Apple Developer ID 签名/公证）。" \
+              --prerelease
+          fi

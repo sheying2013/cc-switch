@@ -314,7 +314,6 @@ impl ProfileService {
                     }
                 }
             }
-
         }
 
         state

@@ -99,7 +99,6 @@ export function SettingsPage({
     resetStatus,
   } = useImportExport({ onImportSuccess });
 
-
   const [activeTab, setActiveTab] = useState<string>("general");
   const [showRestartPrompt, setShowRestartPrompt] = useState(false);
   const tabScrollContainerRef = useRef<HTMLDivElement>(null);

@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::str::FromStr;
 
-
 use crate::config::{copy_file, get_app_config_dir, get_app_config_path, write_json_file};
 use crate::error::AppError;
 use crate::provider::ProviderManager;
@@ -318,6 +317,7 @@ impl MultiAppConfig {
                 .insert(app.as_str().to_string(), ProviderManager::default());
         }
     }
+}
 
 #[cfg(test)]
 mod tests {

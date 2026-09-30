@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 
 use cc_switch_lib::{
     get_codex_auth_path, get_codex_config_path, import_default_config_test_hook, read_json_file,
-    switch_provider_test_hook, write_codex_live_atomic, AppError, AppType, MultiAppConfig, Provider,
-    ProviderService,
+    switch_provider_test_hook, write_codex_live_atomic, AppError, AppType, MultiAppConfig,
+    Provider, ProviderService,
 };
 
 #[path = "support.rs"]

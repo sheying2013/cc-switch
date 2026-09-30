@@ -188,7 +188,8 @@ export function McodeProviderForm({
               name: identity.name.trim(),
               meta: {
                 ...(initialData?.meta ?? {}),
-                outboundProxyUrl: identity.outboundProxyUrl?.trim() || undefined,
+                outboundProxyUrl:
+                  identity.outboundProxyUrl?.trim() || undefined,
               },
               providerKey: isEdit ? providerId : providerKey,
               presetCategory: category,

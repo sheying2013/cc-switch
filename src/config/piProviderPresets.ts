@@ -298,8 +298,7 @@ const piProviderPresetDefinitions: PiProviderPreset[] = [
     name: "FennoAI",
     providerKey: "cc-switch-fenno-ai",
     websiteUrl: "https://api.fenno.ai",
-    apiKeyUrl:
-      "https://api.fenno.ai/register",
+    apiKeyUrl: "https://api.fenno.ai/register",
     settingsConfig: {
       name: "FennoAI",
       baseUrl: "https://api.fenno.ai/v1",
@@ -572,8 +571,7 @@ const piProviderPresetDefinitions: PiProviderPreset[] = [
     name: "TeamoRouter",
     providerKey: "cc-switch-teamo-router",
     websiteUrl: "https://teamorouter.cn",
-    apiKeyUrl:
-      "https://teamorouter.cn",
+    apiKeyUrl: "https://teamorouter.cn",
     settingsConfig: {
       name: "TeamoRouter",
       baseUrl: "https://api.teamorouter.cn/v1",
@@ -667,10 +665,8 @@ const piProviderPresetDefinitions: PiProviderPreset[] = [
   {
     name: "BytePlus",
     providerKey: "cc-switch-byte-plus",
-    websiteUrl:
-      "https://www.byteplus.com/en/product/modelark",
-    apiKeyUrl:
-      "https://www.byteplus.com/en/product/modelark",
+    websiteUrl: "https://www.byteplus.com/en/product/modelark",
+    apiKeyUrl: "https://www.byteplus.com/en/product/modelark",
     settingsConfig: {
       name: "BytePlus",
       baseUrl: "https://ark.ap-southeast.bytepluses.com/api/coding/v3",
@@ -934,8 +930,7 @@ const piProviderPresetDefinitions: PiProviderPreset[] = [
     name: "SudoCode.chat",
     providerKey: "cc-switch-sudo-code-chat",
     websiteUrl: "https://sudocode.chat",
-    apiKeyUrl:
-      "https://sudocode.chat/sign-up",
+    apiKeyUrl: "https://sudocode.chat/sign-up",
     settingsConfig: {
       name: "SudoCode.chat",
       baseUrl: "https://api.sudocode.chat/v1",
@@ -1107,8 +1102,7 @@ const piProviderPresetDefinitions: PiProviderPreset[] = [
     name: "千问AI平台",
     providerKey: "cc-switch-qianwenai",
     websiteUrl: "https://platform.qianwenai.com",
-    apiKeyUrl:
-      "https://platform.qianwenai.com/home/api-keys",
+    apiKeyUrl: "https://platform.qianwenai.com/home/api-keys",
     settingsConfig: {
       name: "千问AI平台",
       baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
@@ -1130,10 +1124,8 @@ const piProviderPresetDefinitions: PiProviderPreset[] = [
   {
     name: "千问AI平台 Token Plan",
     providerKey: "cc-switch-qianwenai-token-plan",
-    websiteUrl:
-      "https://platform.qianwenai.com/pricing/token-plan",
-    apiKeyUrl:
-      "https://platform.qianwenai.com/home/api-keys",
+    websiteUrl: "https://platform.qianwenai.com/pricing/token-plan",
+    apiKeyUrl: "https://platform.qianwenai.com/home/api-keys",
     settingsConfig: {
       name: "千问AI平台 Token Plan",
       baseUrl:
@@ -1212,8 +1204,7 @@ const piProviderPresetDefinitions: PiProviderPreset[] = [
   {
     name: "QwenCloud Token Plan",
     providerKey: "cc-switch-qwencloud-token-plan",
-    websiteUrl:
-      "https://www.qwencloud.com/pricing/token-plan",
+    websiteUrl: "https://www.qwencloud.com/pricing/token-plan",
     apiKeyUrl: "https://home.qwencloud.com/api-keys",
     settingsConfig: {
       name: "QwenCloud Token Plan",

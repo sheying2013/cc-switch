@@ -224,7 +224,9 @@ export function BasicFormFields({
                     await testProxyMutation.mutateAsync({
                       proxyUrl: field.value.trim(),
                       frontProxy:
-                        isChainingEnabled && globalProxyUrl ? globalProxyUrl : null,
+                        isChainingEnabled && globalProxyUrl
+                          ? globalProxyUrl
+                          : null,
                     });
                   }
                 }}

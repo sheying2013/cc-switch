@@ -56,11 +56,7 @@ pub(crate) fn should_trigger_auto_sync_for_table(table: &str) -> bool {
     let normalized = table.trim().to_ascii_lowercase();
     matches!(
         normalized.as_str(),
-        "providers"
-            | "provider_endpoints"
-            | "profiles"
-            | "settings"
-            | "proxy_config"
+        "providers" | "provider_endpoints" | "profiles" | "settings" | "proxy_config"
     )
 }
 

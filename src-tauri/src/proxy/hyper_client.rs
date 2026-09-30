@@ -348,8 +348,12 @@ pub struct ProxyHop {
 
 impl ProxyHop {
     pub fn parse(proxy_url: &str) -> Result<Self, ProxyError> {
-        let parsed = url::Url::parse(proxy_url)
-            .map_err(|e| ProxyError::ForwardFailed(format!("Invalid proxy URL '{}': {e}", super::http_client::mask_url(proxy_url))))?;
+        let parsed = url::Url::parse(proxy_url).map_err(|e| {
+            ProxyError::ForwardFailed(format!(
+                "Invalid proxy URL '{}': {e}",
+                super::http_client::mask_url(proxy_url)
+            ))
+        })?;
         let scheme = parsed.scheme().to_ascii_lowercase();
         if !["http", "https", "socks5", "socks5h"].contains(&scheme.as_str()) {
             return Err(ProxyError::ForwardFailed(format!(
@@ -359,7 +363,12 @@ impl ProxyHop {
         }
         let host = parsed
             .host_str()
-            .ok_or_else(|| ProxyError::ForwardFailed(format!("Proxy URL '{}' has no host", super::http_client::mask_url(proxy_url))))?
+            .ok_or_else(|| {
+                ProxyError::ForwardFailed(format!(
+                    "Proxy URL '{}' has no host",
+                    super::http_client::mask_url(proxy_url)
+                ))
+            })?
             .to_string();
         let port = parsed.port().unwrap_or(if scheme == "https" {
             443
@@ -447,10 +456,9 @@ where
                 .map_err(|e| ProxyError::ForwardFailed(format!("SOCKS5 auth flush failed: {e}")))?;
 
             let mut auth_resp = [0u8; 2];
-            stream
-                .read_exact(&mut auth_resp)
-                .await
-                .map_err(|e| ProxyError::ForwardFailed(format!("SOCKS5 auth response read failed: {e}")))?;
+            stream.read_exact(&mut auth_resp).await.map_err(|e| {
+                ProxyError::ForwardFailed(format!("SOCKS5 auth response read failed: {e}"))
+            })?;
 
             if auth_resp[1] != 0x00 {
                 return Err(ProxyError::AuthError(format!(
@@ -541,15 +549,13 @@ where
         }
         0x03 => {
             let mut len_buf = [0u8; 1];
-            stream
-                .read_exact(&mut len_buf)
-                .await
-                .map_err(|e| ProxyError::ForwardFailed(format!("SOCKS5 drain domain len failed: {e}")))?;
+            stream.read_exact(&mut len_buf).await.map_err(|e| {
+                ProxyError::ForwardFailed(format!("SOCKS5 drain domain len failed: {e}"))
+            })?;
             let mut domain_and_port = vec![0u8; len_buf[0] as usize + 2];
-            stream
-                .read_exact(&mut domain_and_port)
-                .await
-                .map_err(|e| ProxyError::ForwardFailed(format!("SOCKS5 drain domain failed: {e}")))?;
+            stream.read_exact(&mut domain_and_port).await.map_err(|e| {
+                ProxyError::ForwardFailed(format!("SOCKS5 drain domain failed: {e}"))
+            })?;
         }
         atyp => {
             return Err(ProxyError::ForwardFailed(format!(
@@ -815,7 +821,9 @@ pub async fn test_proxy_chain(
                         }
                     }
                     Err(e) => {
-                        last_err = Some(ProxyError::ForwardFailed(format!("TLS handshake failed: {e}")));
+                        last_err = Some(ProxyError::ForwardFailed(format!(
+                            "TLS handshake failed: {e}"
+                        )));
                     }
                 }
             }
@@ -825,7 +833,8 @@ pub async fn test_proxy_chain(
         }
     }
 
-    Err(last_err.unwrap_or_else(|| ProxyError::ForwardFailed("All test targets failed".to_string())))
+    Err(last_err
+        .unwrap_or_else(|| ProxyError::ForwardFailed("All test targets failed".to_string())))
 }
 
 /// Lazily-initialized TLS connector for raw connections.

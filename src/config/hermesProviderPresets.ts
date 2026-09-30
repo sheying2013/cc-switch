@@ -310,8 +310,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
   {
     name: "FennoAI",
     websiteUrl: "https://api.fenno.ai",
-    apiKeyUrl:
-      "https://api.fenno.ai/register",
+    apiKeyUrl: "https://api.fenno.ai/register",
     settingsConfig: {
       name: "fenno",
       base_url: "https://api.fenno.ai/v1",
@@ -619,8 +618,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
   {
     name: "TeamoRouter",
     websiteUrl: "https://teamorouter.cn",
-    apiKeyUrl:
-      "https://teamorouter.cn",
+    apiKeyUrl: "https://teamorouter.cn",
     settingsConfig: {
       name: "teamorouter",
       base_url: "https://api.teamorouter.cn/v1",
@@ -757,10 +755,8 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
   },
   {
     name: "BytePlus",
-    websiteUrl:
-      "https://www.byteplus.com/en/product/modelark",
-    apiKeyUrl:
-      "https://www.byteplus.com/en/product/modelark",
+    websiteUrl: "https://www.byteplus.com/en/product/modelark",
+    apiKeyUrl: "https://www.byteplus.com/en/product/modelark",
     settingsConfig: {
       name: "byteplus",
       base_url: "https://ark.ap-southeast.bytepluses.com/api/coding",
@@ -883,8 +879,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     name: "Compshare",
     nameKey: "providerForm.presets.ucloud",
     websiteUrl: "https://www.compshare.cn",
-    apiKeyUrl:
-      "https://www.compshare.cn/coding-plan",
+    apiKeyUrl: "https://www.compshare.cn/coding-plan",
     settingsConfig: {
       name: "compshare",
       base_url: "https://api.modelverse.cn/v1",
@@ -906,8 +901,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     name: "Compshare Coding Plan",
     nameKey: "providerForm.presets.ucloudCoding",
     websiteUrl: "https://www.compshare.cn",
-    apiKeyUrl:
-      "https://www.compshare.cn/coding-plan",
+    apiKeyUrl: "https://www.compshare.cn/coding-plan",
     settingsConfig: {
       name: "compshare_coding",
       base_url: "https://cp.compshare.cn/v1",
@@ -1134,8 +1128,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
   {
     name: "SudoCode.chat",
     websiteUrl: "https://sudocode.chat",
-    apiKeyUrl:
-      "https://sudocode.chat/sign-up",
+    apiKeyUrl: "https://sudocode.chat/sign-up",
     settingsConfig: {
       name: "sudocode",
       base_url: "https://api.sudocode.chat/v1",
@@ -1691,8 +1684,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
   {
     name: "千问AI平台",
     websiteUrl: "https://platform.qianwenai.com",
-    apiKeyUrl:
-      "https://platform.qianwenai.com/home/api-keys",
+    apiKeyUrl: "https://platform.qianwenai.com/home/api-keys",
     settingsConfig: {
       name: "qianwenai",
       base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1",
@@ -1735,10 +1727,8 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
   },
   {
     name: "千问AI平台 Token Plan",
-    websiteUrl:
-      "https://platform.qianwenai.com/pricing/token-plan",
-    apiKeyUrl:
-      "https://platform.qianwenai.com/home/api-keys",
+    websiteUrl: "https://platform.qianwenai.com/pricing/token-plan",
+    apiKeyUrl: "https://platform.qianwenai.com/home/api-keys",
     settingsConfig: {
       name: "qianwenai_token_plan",
       base_url:
@@ -1811,8 +1801,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
   },
   {
     name: "QwenCloud Token Plan",
-    websiteUrl:
-      "https://www.qwencloud.com/pricing/token-plan",
+    websiteUrl: "https://www.qwencloud.com/pricing/token-plan",
     apiKeyUrl: "https://home.qwencloud.com/api-keys",
     settingsConfig: {
       name: "qwencloud_token_plan",
