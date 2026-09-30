@@ -35,10 +35,16 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Setup Rust (x86_64-apple-darwin)
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: x86_64-apple-darwin
+      # 注意：仓库根目录的 rust-toolchain.toml 会把 rustup 切到固定 channel，
+      # 因此 target 必须显式装到“当前生效的工具链”上（在仓库目录内执行）。
+      - name: Setup Rust + x86_64-apple-darwin target
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rustup show
+          rustup target add x86_64-apple-darwin
+          rustup target list --installed
+          rustc --version
 
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
