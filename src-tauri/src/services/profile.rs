@@ -119,6 +119,14 @@ impl<T> PerApp<T> {
 pub struct ProfilePayload {
     /// 每 app 的当前供应商 id
     pub providers: PerApp<Option<String>>,
+    /// 拍过快照的分组（scope）列表。
+    ///
+    /// MCP / Skills / Prompt 槽位移除后，providers 是唯一快照内容，"该分组拍过
+    /// 但当时没有任何当前供应商"与"从未拍过"仅靠 providers 无法区分（两者都是
+    /// None）。这里显式记录拍过的分组，避免在 Codex 页新建项目后应用时给出
+    /// 误导性的"没有捕获到配置"提示。旧 payload 无该字段时回退到 providers 判断。
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub captured_scopes: Vec<String>,
 }
 
 impl ProfilePayload {
@@ -132,10 +140,26 @@ impl ProfilePayload {
                 *dst = src.clone();
             }
         }
+        // 只要这一侧被拍过（哪怕拍到的内容为空），就记住该分组已快照
+        if other.scope_captured(scope) {
+            self.mark_scope_captured(scope);
+        }
     }
 
-    /// 某分组是否拍过快照（任一槽位非 None 即视为拍过）
+    /// 标记某分组已拍过快照
+    pub fn mark_scope_captured(&mut self, scope: ProfileScope) {
+        if !self.scope_captured(scope) {
+            self.captured_scopes.push(scope.as_str().to_string());
+        }
+    }
+
+    /// 某分组是否拍过快照。
+    ///
+    /// 优先看显式标记；旧 payload 没有标记时回退到"任一供应商槽位有值"。
     pub fn scope_captured(&self, scope: ProfileScope) -> bool {
+        if self.captured_scopes.iter().any(|s| s == scope.as_str()) {
+            return true;
+        }
         scope
             .apps()
             .iter()
@@ -152,6 +176,9 @@ impl ProfileService {
         scope: ProfileScope,
     ) -> Result<ProfilePayload, AppError> {
         let mut payload = ProfilePayload::default();
+        // 即使分组内当前没有可用配置，也要记住"这一侧已经拍过"，
+        // 否则应用该快照时会误报"没有捕获到配置"。
+        payload.mark_scope_captured(scope);
 
         for app in scope.apps().iter() {
             if let Some(slot) = payload.providers.get_mut(app) {

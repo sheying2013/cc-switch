@@ -25,6 +25,11 @@ export interface PerApp<T> {
  */
 export interface ProfilePayload {
   providers: PerApp<string | null>;
+  /**
+   * 拍过快照的分组列表（后端 capturedScopes），旧数据可能没有该字段。
+   * 用于区分"该分组拍过但当时没有当前供应商"与"从未拍过"。
+   */
+  capturedScopes?: string[];
 }
 
 export interface Profile {
