@@ -363,6 +363,7 @@ mod tests {
                 claude_desktop: Some("d1".into()),
                 codex: None,
             },
+            ..Default::default()
         };
         let json = serde_json::to_string(&payload).unwrap();
         // per-app key 必须与 AppType 的 serde 形式一致（claude-desktop 是连字符）
@@ -399,6 +400,7 @@ mod tests {
                 claude_desktop: Some("d1".into()),
                 codex: Some("c1".into()),
             },
+            ..Default::default()
         };
         // 在 Claude 页"以当前状态更新"：只覆盖 claude 组槽位
         let fresh = ProfilePayload {
@@ -407,6 +409,7 @@ mod tests {
                 claude_desktop: None,
                 codex: Some("SHOULD-NOT-LEAK".into()),
             },
+            ..Default::default()
         };
         payload.merge_scope_from(&fresh, ProfileScope::Claude);
 
