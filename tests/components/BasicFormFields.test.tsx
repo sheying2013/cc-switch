@@ -5,6 +5,17 @@ import { BasicFormFields } from "@/components/providers/forms/BasicFormFields";
 import { Form } from "@/components/ui/form";
 import type { ProviderFormData } from "@/lib/schemas/provider";
 
+vi.mock("@/hooks/useGlobalProxy", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/hooks/useGlobalProxy")>()),
+  useGlobalProxyUrl: () => ({ data: "", isLoading: false }),
+  useGlobalProxyChaining: () => ({ data: false, isLoading: false }),
+  useTestOutboundProxy: () => ({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn(),
+    isPending: false,
+  }),
+}));
+
 vi.mock("@/components/ProviderIcon", () => ({
   ProviderIcon: () => <div data-testid="provider-icon" />,
 }));

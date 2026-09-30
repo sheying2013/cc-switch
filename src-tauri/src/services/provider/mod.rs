@@ -45,7 +45,6 @@ pub use claude_editor::{EditorSave, EditorView};
 // Internal re-exports (pub(crate))
 pub(crate) use live::{
     provider_exists_in_live_config, sync_additive_app_to_live, write_live_for_state,
-    LiveSyncOutcome,
 };
 
 // Internal re-exports
@@ -5554,7 +5553,7 @@ impl ProviderService {
         state.db.save_provider(app_type.as_str(), &provider)?;
 
         if is_current {
-            let outcome = live::sync_live_for_provider_respecting_mode(
+            live::sync_live_for_provider_respecting_mode(
                 state,
                 &app_type,
                 &provider,

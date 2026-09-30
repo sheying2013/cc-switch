@@ -25,6 +25,17 @@ function completeModel(id: string, name = id.trim() || "Model") {
   };
 }
 
+vi.mock("@/hooks/useGlobalProxy", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/hooks/useGlobalProxy")>()),
+  useGlobalProxyUrl: () => ({ data: "", isLoading: false }),
+  useGlobalProxyChaining: () => ({ data: false, isLoading: false }),
+  useTestOutboundProxy: () => ({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn(),
+    isPending: false,
+  }),
+}));
+
 vi.mock("@/components/JsonEditor", () => ({
   default: ({
     id,

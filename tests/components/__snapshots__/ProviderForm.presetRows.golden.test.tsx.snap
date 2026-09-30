@@ -14,6 +14,7 @@ exports[`ProviderForm 预设新增行金标 > claude > AWS Bedrock (API Key) 1`]
     },
     "name": "AWS Bedrock (API Key)",
     "notes": "",
+    "outboundProxyUrl": "",
     "presetCategory": "cloud_provider",
     "presetId": "claude-<index>",
     "settingsConfig": {
@@ -44,6 +45,7 @@ exports[`ProviderForm 预设新增行金标 > claude > Claude Official 1`] = `
     },
     "name": "Claude Official",
     "notes": "",
+    "outboundProxyUrl": "",
     "presetCategory": "official",
     "presetId": "claude-<index>",
     "settingsConfig": {
@@ -68,6 +70,7 @@ exports[`ProviderForm 预设新增行金标 > claude > E-FlowCode 1`] = `
     },
     "name": "E-FlowCode",
     "notes": "",
+    "outboundProxyUrl": "",
     "presetCategory": "third_party",
     "presetId": "claude-<index>",
     "settingsConfig": {
@@ -96,6 +99,7 @@ exports[`ProviderForm 预设新增行金标 > claude > Kimi For Coding 1`] = `
     },
     "name": "Kimi For Coding",
     "notes": "",
+    "outboundProxyUrl": "",
     "presetCategory": "cn_official",
     "presetId": "claude-<index>",
     "settingsConfig": {
@@ -129,6 +133,7 @@ exports[`ProviderForm 预设新增行金标 > claude > Nvidia 1`] = `
     },
     "name": "Nvidia",
     "notes": "",
+    "outboundProxyUrl": "",
     "presetCategory": "aggregator",
     "presetId": "claude-<index>",
     "settingsConfig": {
@@ -160,6 +165,7 @@ exports[`ProviderForm 预设新增行金标 > claude > RelaxyCode 1`] = `
     },
     "name": "RelaxyCode",
     "notes": "",
+    "outboundProxyUrl": "",
     "presetCategory": "third_party",
     "presetId": "claude-<index>",
     "settingsConfig": {
@@ -187,6 +193,7 @@ exports[`ProviderForm 预设新增行金标 > codex > E-FlowCode 1`] = `
     },
     "name": "E-FlowCode",
     "notes": "",
+    "outboundProxyUrl": "",
     "presetCategory": "third_party",
     "presetId": "codex-<index>",
     "settingsConfig": {
@@ -233,6 +240,7 @@ exports[`ProviderForm 预设新增行金标 > codex > Nvidia 1`] = `
     },
     "name": "Nvidia",
     "notes": "",
+    "outboundProxyUrl": "",
     "presetCategory": "aggregator",
     "presetId": "codex-<index>",
     "settingsConfig": {
@@ -285,6 +293,7 @@ exports[`ProviderForm 预设新增行金标 > codex > OpenAI Official 1`] = `
     },
     "name": "OpenAI Official",
     "notes": "",
+    "outboundProxyUrl": "",
     "presetCategory": "official",
     "presetId": "codex-<index>",
     "settingsConfig": {
@@ -310,6 +319,7 @@ exports[`ProviderForm 预设新增行金标 > codex > xAI (Grok) 1`] = `
     },
     "name": "xAI (Grok)",
     "notes": "",
+    "outboundProxyUrl": "",
     "presetCategory": "third_party",
     "presetId": "codex-<index>",
     "settingsConfig": {

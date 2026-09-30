@@ -11,6 +11,17 @@ import { AddProviderDialog } from "@/components/providers/AddProviderDialog";
 import type { ProviderFormValues } from "@/components/providers/forms/ProviderForm";
 import { codexProviderPresets } from "@/config/codexProviderPresets";
 
+vi.mock("@/hooks/useGlobalProxy", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/hooks/useGlobalProxy")>()),
+  useGlobalProxyUrl: () => ({ data: "", isLoading: false }),
+  useGlobalProxyChaining: () => ({ data: false, isLoading: false }),
+  useTestOutboundProxy: () => ({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn(),
+    isPending: false,
+  }),
+}));
+
 vi.mock("@/components/ui/dialog", () => ({
   Dialog: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>

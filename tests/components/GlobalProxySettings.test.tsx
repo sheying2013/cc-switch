@@ -9,6 +9,7 @@ vi.mock("react-i18next", () => ({
 const mutateAsyncMock = vi.fn();
 const testMutateAsyncMock = vi.fn();
 const scanMutateAsyncMock = vi.fn();
+const setChainingMutateAsyncMock = vi.fn();
 
 vi.mock("@/hooks/useGlobalProxy", () => ({
   useGlobalProxyUrl: () => ({ data: "http://127.0.0.1:7890", isLoading: false }),
@@ -24,6 +25,11 @@ vi.mock("@/hooks/useGlobalProxy", () => ({
     mutateAsync: scanMutateAsyncMock,
     isPending: false,
   }),
+  useGlobalProxyChaining: () => ({ data: false, isLoading: false }),
+  useSetGlobalProxyChaining: () => ({
+    mutateAsync: setChainingMutateAsyncMock,
+    isPending: false,
+  }),
 }));
 
 describe("GlobalProxySettings", () => {
@@ -31,6 +37,7 @@ describe("GlobalProxySettings", () => {
     mutateAsyncMock.mockReset();
     testMutateAsyncMock.mockReset();
     scanMutateAsyncMock.mockReset();
+    setChainingMutateAsyncMock.mockReset();
   });
 
   it("renders proxy URL input with saved value", async () => {
