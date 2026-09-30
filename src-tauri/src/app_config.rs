@@ -221,7 +221,7 @@ impl MultiAppConfig {
 
         // 先解析为 Value，以便严格判定是否为 v1 结构；
         // 满足：顶层同时包含 providers(object) + current(string)，且不包含 version/apps 关键键，即视为 v1
-        let value: serde_json::Value =
+        let mut value: serde_json::Value =
             serde_json::from_str(&content).map_err(|e| AppError::json(&config_path, e))?;
         let is_v1 = value.as_object().is_some_and(|map| {
             let has_providers = map.get("providers").map(|v| v.is_object()).unwrap_or(false);
@@ -238,16 +238,37 @@ impl MultiAppConfig {
             ));
         }
 
+        // 已移除功能的顶层分组（mcp / prompts / skills 等）必须在反序列化前剔除：
+        // apps 使用 #[serde(flatten)]，任何未知顶层键都会被当成应用条目去解析成
+        // ProviderManager，形状不符时会让整份配置直接加载失败（历史遗留配置打不开）。
+        let known_apps: std::collections::HashSet<String> =
+            AppType::all().map(|app| app.as_str().to_string()).collect();
+        let mut pruned_groups: Vec<String> = Vec::new();
+        if let Some(map) = value.as_object_mut() {
+            map.retain(|key, _| {
+                let keep = known_apps.contains(key)
+                    || matches!(
+                        key.as_str(),
+                        "version" | "common_config_snippets" | "claude_common_config_snippet"
+                    );
+                if !keep {
+                    pruned_groups.push(key.clone());
+                }
+                keep
+            });
+        }
+        for key in &pruned_groups {
+            log::info!("丢弃配置中已移除的顶层分组: {key}");
+        }
+
         // 解析 v2 结构
         let mut config: Self =
             serde_json::from_value(value).map_err(|e| AppError::json(&config_path, e))?;
-        let mut updated = false;
+        let mut updated = !pruned_groups.is_empty();
 
         // 旧版把 mcp / prompts / skills 作为顶层字段写进 config.json；这些字段已移除。
         // 因为 apps 用了 #[serde(flatten)]，它们会被解析成“应用”条目。这里按真实
         // AppType 白名单清掉这些幽灵条目，避免它们在下次保存时被写回文件。
-        let known_apps: std::collections::HashSet<String> =
-            AppType::all().map(|app| app.as_str().to_string()).collect();
         let orphan_apps: Vec<String> = config
             .apps
             .keys()
