@@ -5898,6 +5898,60 @@ model_provider = "c"
             .expect("parse desktop profile")
     }
 
+    /// 「直连那家改成模型映射卡」曾经是个死循环：默认入口要求先切到路由模式再改，
+    /// 而切路由模式又要求这张卡先有模型映射。带补偿的入口把两步连起来。
+    #[tokio::test]
+    #[serial]
+    async fn desktop_direct_card_becomes_a_mapping_card_without_the_route_deadlock() {
+        let home = Home::new();
+        let _dirs = DesktopDirs::under(&home);
+        seed_settings(USER_SETTINGS);
+        let state = state_with(
+            AppType::Claude,
+            &[claude("a", "https://a.example", json!({}))],
+            "a",
+        )
+        .await;
+        let desktop = AppType::ClaudeDesktop;
+        let direct = desktop_card("solo", false);
+        state
+            .db
+            .save_provider(desktop.as_str(), &direct)
+            .expect("save desktop card");
+        crate::settings::set_current_provider(&desktop, Some("solo")).expect("desktop current");
+
+        // 判定条件：直连那家 + 要经路由 + 现在不是路由模式。别家不要经路由的卡不算。
+        assert!(ProviderService::desktop_route_takeover_required(
+            &state,
+            &desktop_card("solo", true)
+        )
+        .expect("judge takeover"));
+        assert!(!ProviderService::desktop_route_takeover_required(
+            &state,
+            &desktop_card("other", true)
+        )
+        .expect("judge takeover"));
+
+        // 默认入口仍然拒绝：直连模式下把直连那家改成映射卡，先切路由再改（原来的行为不变）
+        let mapping = desktop_card("solo", true);
+        assert!(
+            ProviderService::update(&state, AppType::ClaudeDesktop, None, mapping.clone()).is_err(),
+            "直连模式下把直连那家改成映射卡应先被拒绝"
+        );
+
+        // 带补偿的入口：先把带映射的行存好，再切路由用到它 —— 两步合起来不留死循环
+        ProviderService::update_using_route_takeover(&state, AppType::ClaudeDesktop, None, mapping)
+            .expect("save the card as a mapping card");
+        enter_with_route(&state, &desktop, false, Some("solo"))
+            .await
+            .expect("enter desktop route with the edited card");
+        assert!(current::is_proxy(&desktop));
+        assert_eq!(
+            desktop_profile()["inferenceModels"],
+            json!(["claude-sonnet-5"])
+        );
+    }
+
     #[tokio::test]
     #[serial]
     async fn claude_desktop_route_mode_writes_the_gateway_and_keeps_the_server_running() {

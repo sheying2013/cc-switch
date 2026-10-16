@@ -398,8 +398,13 @@ pub struct ClaudeDesktopModelRoute {
     /// Claude Desktop 模型菜单显示名；写入 profile 的 `labelOverride`。
     #[serde(rename = "labelOverride", skip_serializing_if = "Option::is_none")]
     pub label_override: Option<String>,
-    /// Claude Desktop 3P 识别的 1M 上下文能力标记。
-    #[serde(rename = "supports1m", skip_serializing_if = "Option::is_none")]
+    /// Claude Desktop 3P 识别的 1M 上下文能力标记。旧数据里写过 `1`/`"true"`，按宽松布尔收。
+    #[serde(
+        rename = "supports1m",
+        default,
+        deserialize_with = "deserialize_loose_bool",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub supports_1m: Option<bool>,
 }
 
@@ -467,6 +472,64 @@ impl LocalProxyRequestOverrides {
     }
 }
 
+/// 旧数据 / 手写 JSON 里的布尔字段可能是 `0`/`1`、`"true"` 这类写法：按字面意思收下。
+/// 一个字段类型不符不再让整份 meta 退回默认值 —— 那会把模式、模型映射、出站代理一起抹掉。
+fn deserialize_loose_bool<'de, D>(deserializer: D) -> Result<Option<bool>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let raw = Option::<Value>::deserialize(deserializer)?;
+    Ok(match raw {
+        None | Some(Value::Null) => None,
+        Some(Value::Bool(flag)) => Some(flag),
+        Some(Value::Number(number)) => Some(number.as_f64().is_some_and(|value| value != 0.0)),
+        Some(Value::String(text)) => match text.trim().to_ascii_lowercase().as_str() {
+            "true" | "1" | "yes" | "on" => Some(true),
+            "false" | "0" | "no" | "off" | "" => Some(false),
+            _ => None,
+        },
+        Some(_) => None,
+    })
+}
+
+/// 逐条解析 Claude Desktop 的模型路由：单条坏数据只丢那一条（并记一条警告），
+/// 不影响同一张表里其它路由，更不会把整份 meta 拖成默认值。
+fn deserialize_model_routes<'de, D>(
+    deserializer: D,
+) -> Result<HashMap<String, ClaudeDesktopModelRoute>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let raw = Option::<HashMap<String, Value>>::deserialize(deserializer)?;
+    let mut routes = HashMap::new();
+    for (route_id, value) in raw.unwrap_or_default() {
+        match serde_json::from_value::<ClaudeDesktopModelRoute>(value) {
+            Ok(route) => {
+                routes.insert(route_id, route);
+            }
+            Err(error) => log::warn!(
+                "[ProviderMeta] 忽略解析失败的 Claude Desktop 模型路由 {route_id}: {error}"
+            ),
+        }
+    }
+    Ok(routes)
+}
+
+impl ProviderMeta {
+    /// DB / 云同步带回来的 meta JSON。解析失败时先记警告再退回默认值：静默地
+    /// `unwrap_or_default()` 会让一张卡的「模式 + 模型映射 + 出站代理」整份消失，
+    /// 界面上看起来就是「这张卡没有模型映射」，而写回时又带着映射 —— 两边对不上。
+    pub fn from_stored_json(raw: &str, subject: &str) -> Self {
+        match serde_json::from_str(raw) {
+            Ok(meta) => meta,
+            Err(error) => {
+                log::warn!("[ProviderMeta] {subject} 的 meta 解析失败，按默认值处理: {error}");
+                Self::default()
+            }
+        }
+    }
+}
+
 /// 供应商元数据
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ProviderMeta {
@@ -486,6 +549,7 @@ pub struct ProviderMeta {
     #[serde(
         default,
         rename = "claudeDesktopModelRoutes",
+        deserialize_with = "deserialize_model_routes",
         skip_serializing_if = "HashMap::is_empty"
     )]
     pub claude_desktop_model_routes: HashMap<String, ClaudeDesktopModelRoute>,
@@ -1720,6 +1784,61 @@ mod tests {
                 "sk-pi".to_string()
             )
         );
+    }
+
+    #[test]
+    fn meta_keeps_going_when_one_route_is_bad_or_written_as_0_or_1() {
+        // 旧数据里 supports1m 可能是 0/1、字符串；坏的一条只丢自己，不能拖垮整份 meta
+        let meta: ProviderMeta = serde_json::from_str(
+            r#"{
+                "claudeDesktopMode": "proxy",
+                "outboundProxyUrl": "socks5://127.0.0.1:1080",
+                "claudeDesktopModelRoutes": {
+                    "claude-sonnet-5": {"model": "gpt-6-luna", "supports1m": 1},
+                    "claude-opus-5": {"model": "gpt-6.1-sol", "supports1m": 0},
+                    "claude-fable-5": {"model": "claude-opus-5-5", "supports1m": "true"},
+                    "claude-haiku-4-5": {"model": 42}
+                }
+            }"#,
+        )
+        .expect("meta 解析");
+
+        assert_eq!(
+            meta.claude_desktop_mode,
+            Some(crate::provider::ClaudeDesktopMode::Proxy)
+        );
+        assert_eq!(
+            meta.outbound_proxy_url.as_deref(),
+            Some("socks5://127.0.0.1:1080")
+        );
+        assert_eq!(
+            meta.claude_desktop_model_routes.len(),
+            3,
+            "坏的那一条只丢自己"
+        );
+        assert_eq!(
+            meta.claude_desktop_model_routes["claude-sonnet-5"].supports_1m,
+            Some(true)
+        );
+        assert_eq!(
+            meta.claude_desktop_model_routes["claude-opus-5"].supports_1m,
+            Some(false)
+        );
+        assert_eq!(
+            meta.claude_desktop_model_routes["claude-fable-5"].supports_1m,
+            Some(true)
+        );
+    }
+
+    #[test]
+    fn stored_meta_parses_or_falls_back_to_default() {
+        let ok = ProviderMeta::from_stored_json(r#"{"claudeDesktopMode":"proxy"}"#, "测试卡");
+        assert_eq!(
+            ok.claude_desktop_mode,
+            Some(crate::provider::ClaudeDesktopMode::Proxy)
+        );
+        let broken = ProviderMeta::from_stored_json("{ 这不是 JSON", "测试卡");
+        assert!(broken.claude_desktop_model_routes.is_empty());
     }
 
     #[test]

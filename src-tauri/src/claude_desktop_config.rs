@@ -2257,6 +2257,37 @@ mod tests {
             .is_none());
     }
 
+    /// 旧版把 `supports1m` 写成 0/1：整份 meta 曾经因为这一个字段类型不符退回默认值，
+    /// 于是「表单里是映射卡、DB 里读出来没有映射」，进路由模式直接报「至少需要一个模型映射」。
+    #[test]
+    fn claude_desktop_legacy_numeric_supports1m_still_yields_routes() {
+        let mut provider = proxy_provider("legacy");
+        provider.meta = Some(
+            serde_json::from_value(json!({
+                "claudeDesktopMode": "proxy",
+                "claudeDesktopModelRoutes": {
+                    "claude-sonnet-5": {"model": "gpt-6-luna", "supports1m": 1},
+                    "claude-opus-5": {"model": "gpt-6.1-sol", "supports1m": 0}
+                }
+            }))
+            .expect("legacy meta 解析"),
+        );
+
+        let routes = proxy_model_routes(&provider).expect("routes");
+        assert_eq!(routes.len(), 2, "0/1 写法不能把路由读丢");
+        let sonnet = routes
+            .iter()
+            .find(|route| route.route_id == "claude-sonnet-5")
+            .expect("sonnet route");
+        assert_eq!(sonnet.upstream_model, "gpt-6-luna");
+        assert!(sonnet.supports_1m, "1 按字面意思读成 true");
+        let opus = routes
+            .iter()
+            .find(|route| route.route_id == "claude-opus-5")
+            .expect("opus route");
+        assert!(!opus.supports_1m, "0 按字面意思读成 false");
+    }
+
     #[test]
     fn claude_desktop_proxy_repairs_legacy_unsafe_route_without_colliding() {
         let mut provider = proxy_provider("proxy");

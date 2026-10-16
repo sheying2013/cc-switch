@@ -66,21 +66,64 @@ pub async fn update_provider(
     #[allow(non_snake_case)] editorSave: Option<EditorSave>,
 ) -> Result<bool, String> {
     let app_type = AppType::from_str(&app).map_err(|e| e.to_string())?;
-    tauri::async_runtime::spawn_blocking(move || {
+    // 直连模式下正在用的 Claude Desktop 卡改成要经路由才能用的（模型映射 / 托管账号）：
+    // 直连 live 表达不了这张卡，唯一自洽的状态是「路由模式 + 路由到这张卡」。先把带映射的
+    // 行存下来，存成功再切路由 —— 只按「先切路由模式再改」要求用户，会卡在
+    // 「切路由模式要先有映射」和「填映射要先切路由模式」之间出不来。
+    let takeover = if matches!(app_type, AppType::ClaudeDesktop) && editorSave.is_none() {
         let state = app_handle
             .try_state::<AppState>()
             .ok_or_else(|| "应用状态不可用".to_string())?;
-        ProviderService::update_from_editor(
-            state.inner(),
-            app_type,
-            originalId.as_deref(),
-            provider,
-            editorSave,
-        )
-        .map_err(|e| e.to_string())
+        ProviderService::desktop_route_takeover_required(state.inner(), &provider)
+            .map_err(|e| e.to_string())?
+    } else {
+        false
+    };
+    let provider_id = provider.id.clone();
+    let save_handle = app_handle.clone();
+    let save_app_type = app_type.clone();
+    let save_original = originalId.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let state = save_handle
+            .try_state::<AppState>()
+            .ok_or_else(|| "应用状态不可用".to_string())?;
+        let saved = if takeover {
+            ProviderService::update_using_route_takeover(
+                state.inner(),
+                save_app_type,
+                save_original.as_deref(),
+                provider,
+            )
+        } else {
+            ProviderService::update_from_editor(
+                state.inner(),
+                save_app_type,
+                save_original.as_deref(),
+                provider,
+                editorSave,
+            )
+        };
+        saved.map_err(|e| e.to_string())
     })
     .await
-    .map_err(|e| format!("供应商更新任务执行失败: {e}"))?
+    .map_err(|e| format!("供应商更新任务执行失败: {e}"))??;
+
+    if takeover {
+        let state = app_handle
+            .try_state::<AppState>()
+            .ok_or_else(|| "应用状态不可用".to_string())?;
+        crate::mode::controller::enter_with_route(
+            state.inner(),
+            &AppType::ClaudeDesktop,
+            false,
+            Some(&provider_id),
+        )
+        .await
+        .map_err(|error| format!("供应商已保存为模型映射卡，但切换到路由模式失败：{error}"))?;
+        crate::tray::refresh_tray_menu(&app_handle);
+    }
+
+    Ok(true)
 }
 
 /// 供应商编辑器底部 JSON 的显示内容：切到这个供应商之后配置文件会是什么样。

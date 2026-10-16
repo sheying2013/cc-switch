@@ -115,6 +115,16 @@ export const useAddProviderMutation = (appId: AppId) => {
         });
       }
 
+      if (appId === "claude-desktop") {
+        // 直连那家卡片被改成要经路由才能用时，后端会顺手把 Claude Desktop 切到路由模式
+        // 并用它（见 commands::update_provider，解开「先切模式 / 先填映射」的死循环），
+        // 路由服务状态和托盘都要跟着变。模式行在 ["providers", appId] 前缀下，已随上面失效。
+        await queryClient.invalidateQueries({ queryKey: proxyKeys.status });
+        await queryClient.invalidateQueries({
+          queryKey: proxyKeys.takeoverStatus,
+        });
+        providersApi.updateTrayMenu().catch(() => undefined);
+      }
       if (appId === "openclaw") {
         await queryClient.invalidateQueries({
           queryKey: openclawKeys.health,

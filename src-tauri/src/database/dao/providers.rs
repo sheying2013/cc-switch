@@ -16,6 +16,19 @@ type OmoProviderRow = (
     String,
 );
 
+/// `settings_config` 解析失败时记一条警告再退回 `Null`：静默退回会让一张卡看起来是空的。
+fn parse_settings_config(raw: &str, id: &str, app_type: &str) -> serde_json::Value {
+    match serde_json::from_str(raw) {
+        Ok(value) => value,
+        Err(error) => {
+            log::warn!(
+                "[DB] 供应商 {id} ({app_type}) 的 settings_config 解析失败，按空配置处理: {error}"
+            );
+            serde_json::Value::Null
+        }
+    }
+}
+
 impl Database {
     /// Detach Codex providers bound to these deleted local accounts, atomically.
     /// Only this device's account IDs are passed in: provider rows sync across
@@ -129,9 +142,9 @@ impl Database {
                 let meta_str: String = row.get(10)?;
                 let in_failover_queue: bool = row.get(11)?;
 
-                let settings_config =
-                    serde_json::from_str(&settings_config_str).unwrap_or(serde_json::Value::Null);
-                let meta: ProviderMeta = serde_json::from_str(&meta_str).unwrap_or_default();
+                let settings_config = parse_settings_config(&settings_config_str, &id, app_type);
+                let meta =
+                    ProviderMeta::from_stored_json(&meta_str, &format!("供应商 {id} ({app_type})"));
 
                 Ok((
                     id,
@@ -236,8 +249,10 @@ impl Database {
                 let meta_str: String = row.get(9)?;
                 let in_failover_queue: bool = row.get(10)?;
 
-                let settings_config = serde_json::from_str(&settings_config_str).unwrap_or(serde_json::Value::Null);
-                let meta: ProviderMeta = serde_json::from_str(&meta_str).unwrap_or_default();
+                let settings_config =
+                    parse_settings_config(&settings_config_str, id, app_type);
+                let meta =
+                    ProviderMeta::from_stored_json(&meta_str, &format!("供应商 {id} ({app_type})"));
 
                 Ok(Provider {
                     id: id.to_string(),

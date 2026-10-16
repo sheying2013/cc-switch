@@ -6108,6 +6108,49 @@ impl ProviderService {
         original_id: Option<&str>,
         provider: Provider,
     ) -> Result<bool, AppError> {
+        Self::update_impl(state, app_type, original_id, provider, false)
+    }
+
+    /// 带「随后切路由」补偿的保存：[`Self::update`] 的同一个实现，只是不再拒绝
+    /// 「直连模式下正在用的 Claude Desktop 卡改成要经路由的」这一种改动 —— 调用方
+    /// （`commands::update_provider`）存完行会紧接着把 Desktop 切到路由模式并用这张卡。
+    /// 少了这一步，用户会卡在「先切到路由模式」和「先填模型映射」之间谁也满足不了。
+    pub fn update_using_route_takeover(
+        state: &AppState,
+        app_type: AppType,
+        original_id: Option<&str>,
+        provider: Provider,
+    ) -> Result<bool, AppError> {
+        Self::update_impl(state, app_type, original_id, provider, true)
+    }
+
+    /// 直连模式下的 Claude Desktop 正在用这张卡，而这张卡要经路由才能用（模型映射 /
+    /// 托管账号）：保存后必须跟一次「切路由」，见 [`Self::update_using_route_takeover`]。
+    pub fn desktop_route_takeover_required(
+        state: &AppState,
+        provider: &Provider,
+    ) -> Result<bool, AppError> {
+        let app_type = AppType::ClaudeDesktop;
+        if !crate::claude_desktop_config::needs_routing(provider)
+            || crate::mode::current::mode_state(&app_type).is_proxy()
+        {
+            return Ok(false);
+        }
+        let direct = crate::mode::current::provider_for(
+            &state.db,
+            &app_type,
+            crate::mode::current::Purpose::Direct,
+        )?;
+        Ok(direct.as_deref() == Some(provider.id.as_str()))
+    }
+
+    fn update_impl(
+        state: &AppState,
+        app_type: AppType,
+        original_id: Option<&str>,
+        provider: Provider,
+        allow_route_takeover: bool,
+    ) -> Result<bool, AppError> {
         if app_type == AppType::Pi {
             return pi::update(state, original_id, provider);
         }
@@ -6288,13 +6331,19 @@ impl ProviderService {
             );
         }
         // Desktop 直连模式下正在用的这张卡改成了要经路由的（模型映射、托管账号）：直连写不
-        // 进去，存了行也同步不到 Desktop。先进入路由模式再改。
+        // 进去，存了行也同步不到 Desktop。默认仍让用户「先进入路由模式再改」；带补偿的入口
+        // 则先把行存好，由调用方紧接着切路由 —— 否则「先切模式 / 先填映射」互相卡住。
         if matches!(app_type, AppType::ClaudeDesktop)
             && is_direct_current
             && !mode.is_proxy()
             && crate::claude_desktop_config::needs_routing(&provider)
         {
-            return Err(desktop_needs_routing_error());
+            if !allow_route_takeover {
+                return Err(desktop_needs_routing_error());
+            }
+            // 只存行：直连 live 表达不了这张卡，随后由调用方切到路由模式用它
+            state.db.save_provider(app_type.as_str(), &provider)?;
+            return Ok(true);
         }
 
         // Save to database
