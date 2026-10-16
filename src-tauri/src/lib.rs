@@ -992,7 +992,7 @@ pub fn run() {
 
             // 构建托盘
             let mut tray_builder = TrayIconBuilder::with_id(tray::TRAY_ID)
-                .tooltip("CC Switch") // 鼠标悬停提示
+                .tooltip("cc switch live") // 鼠标悬停提示
                 .on_tray_icon_event(|tray, event| {
                     // Windows 的习惯是左键打开应用、右键出菜单（按平台给默认值，不加开关）；
                     // macOS 左键仍出菜单；Linux（AppIndicator）不派发点击事件，只能出菜单。

@@ -298,7 +298,7 @@ export function GlobalProxySettings() {
           })}
           description={t("settings.globalProxy.chainingDescription", {
             defaultValue:
-              "将全局出站代理作为供应商单独代理的前置代理 (CC Switch → 全局出站代理 → 供应商代理 → 目标 API)。",
+              "将全局出站代理作为供应商单独代理的前置代理 (cc switch live → 全局出站代理 → 供应商代理 → 目标 API)。",
           })}
           checked={isChainingEnabled ?? false}
           onCheckedChange={(checked) => setChainingMutation.mutate(checked)}

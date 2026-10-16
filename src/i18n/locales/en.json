@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "CC Switch",
+    "title": "cc switch live",
     "description": "All-in-One Assistant for Claude Code, Codex & Gemini CLI"
   },
   "common": {
@@ -50,9 +50,9 @@
     "required": "required"
   },
   "firstRunNotice": {
-    "title": "Welcome to CC Switch",
-    "bodyDefault": "CC Switch lets you switch between multiple Claude Code / Codex / Gemini CLI providers with a single click. If you already had these tools configured, CC Switch has saved your existing setup as a provider named “default” so none of your previous configuration is lost.",
-    "bodyOfficial": "An “Official” preset is also included in the list — click it any time you want to switch back to the official default. CC Switch automatically backs up your current config to “default” before switching, so you can move back and forth freely. That's how CC Switch works 😊",
+    "title": "Welcome to cc switch live",
+    "bodyDefault": "cc switch live lets you switch between multiple Claude Code / Codex / Gemini CLI providers with a single click. If you already had these tools configured, cc switch live has saved your existing setup as a provider named “default” so none of your previous configuration is lost.",
+    "bodyOfficial": "An “Official” preset is also included in the list — click it any time you want to switch back to the official default. cc switch live automatically backs up your current config to “default” before switching, so you can move back and forth freely. That's how cc switch live works 😊",
     "confirm": "Got it"
   },
   "apiKeyInput": {
@@ -116,8 +116,8 @@
     "stackBadgeNoModels": "This provider has no models configured, so nothing shows up in the model picker",
     "stackSaved": "Saved. Restart {{client}} to apply",
     "stackSavedLive": "Saved. Takes effect in {{client}} right away",
-    "stackReselectHint": "Whenever CC Switch rewrites the client config, pick the aggregated model again in the model picker",
-    "stackPartial": "Partly written; it will be finished on the next change or when CC Switch restarts",
+    "stackReselectHint": "Whenever cc switch live rewrites the client config, pick the aggregated model again in the model picker",
+    "stackPartial": "Partly written; it will be finished on the next change or when cc switch live restarts",
     "stackFailed": "Failed to save aggregated models: {{error}}",
     "stackDefaultCannotRemove": "The default provider cannot be removed; set another provider as the default first",
     "stackDefaultHint": "This is the default provider: the first model in its list handles Claude Code's startup and background tasks",
@@ -136,9 +136,9 @@
       "nothingUsable": "Codex built-in list: it has no usable models. Update Codex to the latest version"
     },
     "routeOwnsCatalog": "Aggregated models won't show up in Codex: the routed provider uses its own model catalog file (model_catalog_json)",
-    "adoptCatalog": "Use CC Switch's model catalog",
-    "adoptCatalogDone": "Now using CC Switch's model catalog. Restart Codex to apply",
-    "adoptCatalogFailed": "Failed to switch to CC Switch's model catalog: {{error}}",
+    "adoptCatalog": "Use cc switch live's model catalog",
+    "adoptCatalogDone": "Now using cc switch live's model catalog. Restart Codex to apply",
+    "adoptCatalogFailed": "Failed to switch to cc switch live's model catalog: {{error}}",
     "noRoutingSupport": "No Routing Support",
     "blockedByProxyHint": "Can't switch to an official provider in Routing mode",
     "editProvider": "Edit Provider",
@@ -333,7 +333,7 @@
     "deleteProvider": "Delete Provider",
     "deleteProviderMessage": "Are you sure you want to delete provider \"{{name}}\"? This action cannot be undone.",
     "removeProvider": "Remove Provider",
-    "removeProviderMessage": "Are you sure you want to remove provider \"{{name}}\" from the configuration?\n\nAfter removal, this provider will no longer be active, but the configuration data will be retained in CC Switch. You can re-add it at any time.",
+    "removeProviderMessage": "Are you sure you want to remove provider \"{{name}}\" from the configuration?\n\nAfter removal, this provider will no longer be active, but the configuration data will be retained in cc switch live. You can re-add it at any time.",
     "piDefaultProviderWarning": "Pi's global default currently points to this provider. If you continue, Pi will try another available model; use /model to choose one or /login to sign in to another provider.",
     "proxy": {
       "title": "Enable Local Routing",
@@ -381,9 +381,9 @@
       "goToApps": "Open Apps",
       "updates": "New versions of your apps",
       "checkToolUpdates": "Check for new versions of your apps at launch",
-      "checkToolUpdatesHelp": "When on, CC Switch checks your installed command-line apps for new versions each time it starts, and shows a dot on Apps in the sidebar if it finds one. Nothing is upgraded automatically.",
+      "checkToolUpdatesHelp": "When on, cc switch live checks your installed command-line apps for new versions each time it starts, and shows a dot on Apps in the sidebar if it finds one. Nothing is upgraded automatically.",
       "windowAndTerminal": "Window and terminal",
-      "minimizeToTrayHelp": "When on, the close button only hides the window and CC Switch keeps running in the system tray (lightweight mode is in the tray menu). When off, the close button quits.",
+      "minimizeToTrayHelp": "When on, the close button only hides the window and cc switch live keeps running in the system tray (lightweight mode is in the tray menu). When off, the close button quits.",
       "terminalHelp": "The terminal used by “Open terminal” on provider cards. If it isn't available, the system default terminal is used."
     },
     "tabGeneral": "General",
@@ -424,7 +424,7 @@
       },
       "globalProxy": {
         "title": "Global Outbound Proxy",
-        "description": "Configure proxy for CC Switch to access external APIs"
+        "description": "Configure proxy for cc switch live to access external APIs"
       },
       "data": {
         "title": "Data Management",
@@ -497,7 +497,7 @@
     "themeDark": "Dark Side of the Moon",
     "themeSystem": "System",
     "importExport": "SQL Import/Export",
-    "importExportHint": "Import or export database SQL backups for migration or restore (import supports only backups exported by CC Switch).",
+    "importExportHint": "Import or export database SQL backups for migration or restore (import supports only backups exported by cc switch live).",
     "exportConfig": "Export SQL Backup",
     "selectConfigFile": "Select SQL File",
     "noFileSelected": "No configuration file selected.",
@@ -574,15 +574,15 @@
         },
         "codexHistoryUnifyRestore": {
           "name": "Codex session unify restore backups",
-          "hint": "Session copies kept before \"Restore backup\" ran. CC Switch never reads them again."
+          "hint": "Session copies kept before \"Restore backup\" ran. cc switch live never reads them again."
         },
         "codexHistoryProviderMigration": {
           "name": "Codex session group migration backups",
-          "hint": "Copies kept before session groups were migrated. CC Switch never reads them again."
+          "hint": "Copies kept before session groups were migrated. cc switch live never reads them again."
         },
         "liveFirstWrite": {
           "name": "Config first-write backups",
-          "hint": "Original client config files from before CC Switch first rewrote them. After deleting, those originals are gone; the next write backs up the file as it is then."
+          "hint": "Original client config files from before cc switch live first rewrote them. After deleting, those originals are gone; the next write backs up the file as it is then."
         },
         "hermes": {
           "name": "Hermes config backups",
@@ -594,7 +594,7 @@
         },
         "proxyLiveBackup": {
           "name": "Legacy routing takeover backups",
-          "hint": "Config copies moved out of the old routing takeover backups during upgrade. CC Switch never reads them again."
+          "hint": "Config copies moved out of the old routing takeover backups during upgrade. cc switch live never reads them again."
         },
         "envVars": {
           "name": "Environment variable cleanup backups",
@@ -808,7 +808,7 @@
     "windowBehavior": "Window Behavior",
     "windowBehaviorHint": "Configure window minimize and Claude plugin integration policies.",
     "launchOnStartup": "Launch on Startup",
-    "launchOnStartupDescription": "Automatically run CC Switch when system starts",
+    "launchOnStartupDescription": "Automatically run cc switch live when system starts",
     "silentStartup": "Silent Startup",
     "silentStartupDescription": "Start in background mode without showing main window",
     "autoLaunchFailed": "Failed to set auto-launch",
@@ -829,7 +829,7 @@
     "codexStackClassicSubagentsDescription": "Must be on when the main agent and a sub-agent use different providers, or the sub-agent cannot receive its task.",
     "codexStackClassicSubagentsForcedV2": "Codex config.toml turns on [features] multi_agent_v2, which takes precedence over this setting, so it has no effect.",
     "codexSessionCompression": "Compress old Codex sessions",
-    "codexSessionCompressionDescription": "When on, Codex compresses session files that haven't changed for 7 days in the background each time it starts, which saves a lot of disk space. Codex decompresses a session automatically when you continue it. CC Switch still lists and counts compressed sessions; the list just doesn't show a preview of their last reply. This is a Codex feature still under development: Codex shows a notice on every start while it's on. Requires a recent Codex version and takes effect after restarting Codex. Turning it off stops compressing; sessions already compressed stay as they are.",
+    "codexSessionCompressionDescription": "When on, Codex compresses session files that haven't changed for 7 days in the background each time it starts, which saves a lot of disk space. Codex decompresses a session automatically when you continue it. cc switch live still lists and counts compressed sessions; the list just doesn't show a preview of their last reply. This is a Codex feature still under development: Codex shows a notice on every start while it's on. Requires a recent Codex version and takes effect after restarting Codex. Turning it off stops compressing; sessions already compressed stay as they are.",
     "codexSessionCompressionUsage": "Sessions currently use {{size}}",
     "codexSessionCompressionFailed": "Failed to change the Codex session compression setting",
     "unifyCodexHistoryRestoreCompleted": "Official session history restored from backup ({{files}} session files, {{rows}} index rows)",
@@ -881,8 +881,8 @@
     },
     "configDirectoryOverride": "Configuration Directory Override (Advanced)",
     "configDirectoryDescription": "When using Claude Code or Codex in environments like WSL, you can manually specify the configuration directory to the one in WSL to keep provider data consistent with the main environment.",
-    "appConfigDir": "CC Switch Configuration Directory",
-    "appConfigDirDescription": "Customize the storage location for CC Switch configuration (point to cloud sync folder to enable config sync)",
+    "appConfigDir": "cc switch live Configuration Directory",
+    "appConfigDirDescription": "Customize the storage location for cc switch live configuration (point to cloud sync folder to enable config sync)",
     "browsePlaceholderApp": "e.g., C:\\Users\\Administrator\\.cc-switch",
     "claudeConfigDir": "Claude Code Configuration Directory",
     "claudeConfigDirDescription": "Override Claude configuration directory (settings.json). Custom directories store .claude.json (MCP) inside the directory; the default ~/.claude directory keeps Claude Code's split ~/.claude.json path.",
@@ -927,7 +927,7 @@
     "viewReleaseNotes": "View release notes for this version",
     "viewCurrentReleaseNotes": "View current version release notes",
     "github": "GitHub",
-    "starPrompt": "If CC Switch has helped you, please star us on GitHub — it means a lot to us",
+    "starPrompt": "If cc switch live has helped you, please star us on GitHub — it means a lot to us",
     "starOnGithub": "Star on GitHub",
     "manualInstallCommands": "Manual Install Commands",
     "manualUninstallCommands": "Manual uninstall commands",
@@ -989,7 +989,7 @@
     "toolUpgradeConfirmBtn": "Confirm upgrade",
     "toolUpgradeUnanchoredHint": "Can't determine which install your command line uses; will run the default upgrade command (may install to the first npm on PATH).",
     "toolUpgradeUnmanagedTitle": "Skipped upgrading these tools",
-    "toolUpgradeUnmanagedDetail": "{{tool}} ({{path}}) wasn't installed by npm or a recognized installer, so CC Switch can't tell how to upgrade it. Upgrade it the way you installed it (e.g. winget, Scoop, or re-running the official install script).",
+    "toolUpgradeUnmanagedDetail": "{{tool}} ({{path}}) wasn't installed by npm or a recognized installer, so cc switch live can't tell how to upgrade it. Upgrade it the way you installed it (e.g. winget, Scoop, or re-running the official install script).",
     "envBadge": {
       "wsl": "WSL",
       "windows": "Win",
@@ -1003,7 +1003,7 @@
     "importFailedError": "Import config failed: {{message}}",
     "exportFailedError": "Export config failed:",
     "restartRequired": "Restart Required",
-    "restartRequiredMessage": "Modifying the CC Switch configuration directory requires restarting the application to take effect. Restart now?",
+    "restartRequiredMessage": "Modifying the cc switch live configuration directory requires restarting the application to take effect. Restart now?",
     "restartNow": "Restart Now",
     "restartLater": "Restart Later",
     "restartFailed": "Application restart failed, please manually close and reopen.",
@@ -1141,7 +1141,7 @@
     },
     "current": {
       "readFailed": "Could not read Pi's provider configuration",
-      "stateUnavailableHint": "Provider changes are disabled until CC Switch can read Pi's provider configuration."
+      "stateUnavailableHint": "Provider changes are disabled until cc switch live can read Pi's provider configuration."
     }
   },
   "appSwitcher": {
@@ -1195,7 +1195,7 @@
     "expandContent": "Expand full content",
     "collapseContent": "Collapse",
     "helpTitle": "Where sessions come from",
-    "helpBody": "CC Switch reads the session records each app keeps on this computer. See “Where sessions are stored” in the ⋯ menu. Claude Desktop has no session records of its own.",
+    "helpBody": "cc switch live reads the session records each app keeps on this computer. See “Where sessions are stored” in the ⋯ menu. Claude Desktop has no session records of its own.",
     "moreActions": "More session actions",
     "refreshList": "Refresh list",
     "listRefreshed": "Session list refreshed",
@@ -1203,7 +1203,7 @@
     "preferredTerminal": "Preferred terminal",
     "whereMenu": "Where sessions are stored",
     "whereTitle": "Where sessions are stored",
-    "whereLead": "CC Switch reads sessions from these locations. Claude Desktop has no session records of its own.",
+    "whereLead": "cc switch live reads sessions from these locations. Claude Desktop has no session records of its own.",
     "whereNote": "Apps with a custom config directory in Settings are read from that directory.",
     "appPrefix": "App: ",
     "chooseApp": "Choose app",
@@ -1246,7 +1246,7 @@
     "hermesLimit": "Hermes shows only the latest 500 sessions",
     "emptyApp": "No {{app}} sessions yet",
     "emptyAll": "No sessions yet",
-    "emptyAppHint": "CC Switch reads session data from {{path}}",
+    "emptyAppHint": "cc switch live reads session data from {{path}}",
     "emptySearch": "No session titles, folders or first/last messages match “{{query}}”",
     "clearSearchAction": "Clear search",
     "backToList": "Back to sessions",
@@ -1735,8 +1735,8 @@
     "remove": {
       "titleOne": "Delete account “{{login}}”?",
       "titleAll": "Delete all {{service}} accounts?",
-      "leadOne": "This deletes the sign-in credentials CC Switch keeps for this account. This can’t be undone.",
-      "leadAll": "This deletes the sign-in credentials CC Switch keeps for these {{count}} accounts. This can’t be undone.",
+      "leadOne": "This deletes the sign-in credentials cc switch live keeps for this account. This can’t be undone.",
+      "leadAll": "This deletes the sign-in credentials cc switch live keeps for these {{count}} accounts. This can’t be undone.",
       "brokenOne": "These providers will stop working until you sign in again or pick another account:",
       "brokenAll": "These providers will stop working until you sign in again:",
       "moved": "These providers use the default account and will switch to the new default:",
@@ -1901,7 +1901,7 @@
     "headerName": "Header",
     "headerValue": "Value",
     "headerNamePlaceholder": "X-Title",
-    "headerValuePlaceholder": "CC Switch",
+    "headerValuePlaceholder": "cc switch live",
     "removeHeader": "Remove header",
     "noHeaders": "No custom headers configured",
     "extraOptions": "Extra Options",
@@ -2188,11 +2188,11 @@
     "modelsDevDefaultHint": "Showing the {{shown}} most recently released models (of {{total}}) — type to search all",
     "modelsDevAutoSync": {
       "title": "Automatic models.dev pricing sync",
-      "description": "When enabled, periodically fetch selected prices when CC Switch launches and keep them in your local pricing file.",
+      "description": "When enabled, periodically fetch selected prices when cc switch live launches and keep them in your local pricing file.",
       "enabled": "Enabled",
       "disabled": "Disabled",
       "enableConfirmTitle": "Enable automatic pricing sync?",
-      "enableConfirmMessage": "After enabling, CC Switch will periodically update prices for the selected models from models.dev when it launches (at most once every 6 hours). Built-in and manually configured prices with the same model ID will be overwritten.",
+      "enableConfirmMessage": "After enabling, cc switch live will periodically update prices for the selected models from models.dev when it launches (at most once every 6 hours). Built-in and manually configured prices with the same model ID will be overwritten.",
       "enableConfirmAction": "Enable automatic sync",
       "configure": "Choose models",
       "configureTitle": "Choose models for automatic pricing sync",
@@ -2320,7 +2320,7 @@
     "sources": {
       "scanTitle": "Scan session logs automatically",
       "scanHelpTitle": "What are session logs?",
-      "scanHelp": "The conversation records each app writes on this computer. CC Switch reads usage from them, so you get data even without routing.",
+      "scanHelp": "The conversation records each app writes on this computer. cc switch live reads usage from them, so you get data even without routing.",
       "coverage": "Covers 7 apps: {{apps}}",
       "cadenceOn": "Scans at startup and every 10 minutes in the background; opening the Usage page scans right away, then at the selected interval",
       "cadenceOff": "Auto scan is off; logs are scanned only when you click Sync Now",
@@ -2452,7 +2452,7 @@
   },
   "dbUpgrade": {
     "title": "Database version is too new",
-    "description": "This database was created by a newer version of CC Switch. Upgrade the app to continue. Upgrading will not delete your data.",
+    "description": "This database was created by a newer version of cc switch live. Upgrade the app to continue. Upgrading will not delete your data.",
     "versionInfo": "Database v{{db}} · App supports v{{supported}}",
     "dbPath": "Database file",
     "checking": "Checking for available updates…",
@@ -2524,7 +2524,7 @@
     "deleteBlocked": "Disable it before deleting",
     "emptyTitle": "No {{app}} prompts yet",
     "emptyTarget": "The enabled prompt is written to {{path}}.",
-    "emptyFile": "{{path}} already has {{size}} of content that isn't in CC Switch yet",
+    "emptyFile": "{{path}} already has {{size}} of content that isn't in cc switch live yet",
     "importExisting": "Import existing content",
     "formDescription": "Name, note and the text written to {{file}}",
     "requiredMark": "(required)",
@@ -2834,7 +2834,7 @@
   },
   "deeplink": {
     "confirmImport": "Confirm Import Provider",
-    "confirmImportDescription": "The following configuration will be imported from deep link into CC Switch",
+    "confirmImportDescription": "The following configuration will be imported from deep link into cc switch live",
     "importPrompt": "Import Prompt",
     "importPromptDescription": "Please confirm whether to import this system prompt",
     "importMcp": "Import MCP Servers",
@@ -2864,7 +2864,7 @@
     "import": "Import",
     "importing": "Importing...",
     "warning": "Please confirm the information above is correct before importing. You can edit or delete it later in the provider list.",
-    "providerEnabledWarning": "After import, CC Switch will switch to this provider immediately, and client requests will go to the endpoint above",
+    "providerEnabledWarning": "After import, cc switch live will switch to this provider immediately, and client requests will go to the endpoint above",
     "apiFormat": "API format",
     "switchAfterImport": "Switch to this provider after import",
     "addToAppAfterImport": "Add to the {{app}} config after import",
@@ -3095,7 +3095,7 @@
         "authTitle": "Codex may still cache the previous account; restart its background server to load the new login",
         "title": "Codex is still using an old model list, so the current models won't show",
         "unverifiedTitle": "Codex apps that were open before the switch may still use the previous account or model list",
-        "unverifiedHint": "CC Switch can't tell whether the desktop app or editor extensions are running. If they aren't open, just close this notice.",
+        "unverifiedHint": "cc switch live can't tell whether the desktop app or editor extensions are running. If they aren't open, just close this notice.",
         "daemon": "CLI: reopening codex isn't enough; its background daemon needs a restart.",
         "others": "Desktop app: quit it completely and reopen it (⌘Q on macOS; closing the window isn't enough). Editor extensions: reopen the editor window.",
         "restart": "Restart Codex daemon",
@@ -3494,7 +3494,7 @@
     "appsTitle": "Apps: install, upgrade, choose which show in the sidebar",
     "appsHasUpdate": "Apps · updates available",
     "settings": "Settings",
-    "settingsHasUpdate": "Settings · a new CC Switch version is available",
+    "settingsHasUpdate": "Settings · a new cc switch live version is available",
     "mode": {
       "route": "Routing",
       "stack": "Aggregation"
@@ -3516,7 +3516,7 @@
     "columnVersion": "Version",
     "columnVisible": "Show",
     "visibleHelp": "When off, the app no longer appears in the sidebar, the tray menu, the MCP / Skills app columns, or the app pickers on Prompts and Sessions. It is only hidden: its providers, MCP servers and other settings stay, and its own config files are left untouched.",
-    "desktopHelp": "Claude Desktop is a desktop app and can't be installed or upgraded here; CC Switch connects to it through its config file.",
+    "desktopHelp": "Claude Desktop is a desktop app and can't be installed or upgraded here; cc switch live connects to it through its config file.",
     "desktopUnsupported": "Not supported on this system",
     "desktopConnected": "Connected",
     "desktopNotConnected": "Not connected",
@@ -3618,18 +3618,18 @@
       "routeTitle": "Use routing for {{app}}?",
       "stackTitle": "Use Aggregation for {{app}}?",
       "switchTitle": "Switch {{app}} from “{{from}}” to “{{to}}”?",
-      "routeLead": "Requests go through CC Switch on this machine first, then to the provider you pick.",
+      "routeLead": "Requests go through cc switch live on this machine first, then to the provider you pick.",
       "stackLead": "The default provider takes requests without a prefix.",
       "routeTo": "Route to",
       "stackDefault": "Default provider",
       "officialOption": "{{name}} (official)",
       "stackOfficialNote": "If you use an official subscription, set the official account as the default provider.",
-      "routeNoteFile": "Rewrites the address and key in {{file}}. The real key stays in CC Switch; other settings are untouched.",
+      "routeNoteFile": "Rewrites the address and key in {{file}}. The real key stays in cc switch live; other settings are untouched.",
       "routeNoteSwitch": "Changing providers later on the Routing tab won't rewrite the config file.",
-      "routeNoteKeepRunning": "Keep CC Switch running. Quitting writes the direct config back; it reconnects on the next start.",
+      "routeNoteKeepRunning": "Keep cc switch live running. Quitting writes the direct config back; it reconnects on the next start.",
       "desktopRouteNoteModels": "Claude Desktop's model list becomes the routed provider's models; switching the routed provider later rewrites the config file.",
       "desktopRouteNoteRestart": "{{app}} only reads its config at launch: restart {{app}} after confirming.",
-      "desktopRouteNoteKeepRunning": "Keep CC Switch running so {{app}}'s requests can go out.",
+      "desktopRouteNoteKeepRunning": "Keep cc switch live running so {{app}}'s requests can go out.",
       "stackNoteMembers": "{{names}} add {{count}} models, shown in /model with the ccs- prefix.",
       "desktopStackNoteMembers": "{{names}} add {{count}} models to the Claude Desktop model list, shown as \"Provider / model\".",
       "stackNoteEmpty": "No other providers added yet, so only the default is available. You can add more on the Aggregation tab later.",
@@ -3639,7 +3639,7 @@
       "leaveStackNote": "The ccs- aggregated models disappear from /model. The aggregation list is kept and they come back when you switch to aggregation again. If you're using one of them, pick a regular model in /model.",
       "desktopLeaveStackNote": "Aggregated models are withdrawn from the Claude Desktop model list after a restart. The aggregation list is kept and they come back when you switch to aggregation again. If you're using one of them, pick a regular model.",
       "exitTitle": "Switch {{app}} from “{{from}}” back to direct?",
-      "exitLead": "{{app}} will connect to {{provider}} directly; requests no longer go through CC Switch.",
+      "exitLead": "{{app}} will connect to {{provider}} directly; requests no longer go through cc switch live.",
       "exitNoteFile": "Rewrites the address and key in {{file}} back to {{provider}}'s; other settings are untouched.",
       "exitNoteRouteKept": "The routing target, failover queue and settings are kept and come back the next time you start routing.",
       "desktopExitNoteRouteKept": "The routing target is kept and comes back the next time you start routing.",
@@ -3653,8 +3653,8 @@
     },
     "help": {
       "title": "How the connection modes differ",
-      "direct": "Direct: CC Switch never touches your requests; the client talks to the chosen provider itself for the most native experience.",
-      "route": "Routing: requests go through CC Switch on this machine, unlocking hot-switching providers, failover, format conversion, and other advanced features.",
+      "direct": "Direct: cc switch live never touches your requests; the client talks to the chosen provider itself for the most native experience.",
+      "route": "Routing: requests go through cc switch live on this machine, unlocking hot-switching providers, failover, format conversion, and other advanced features.",
       "stack": "Aggregation: models from several providers sit together in /model, so you can switch between them seamlessly inside the client."
     }
   },
@@ -3746,7 +3746,7 @@
     "clientHost": "Connection address",
     "clientHostHint": "Where clients connect. Empty: the listen address",
     "clientHostInvalid": "Enter an IP address or hostname that clients can reach",
-    "clientHostHelp": "The host CC Switch writes into client configs (including Claude Desktop's gateway URL). Leave it empty to derive it from the listen address. Set it when clients can't reach this machine through loopback, e.g. Claude Desktop sessions inside WSL2 (NAT mode): set the listen address to 0.0.0.0 and enter a Windows IP that WSL can reach (such as the vEthernet (WSL) adapter address), and allow the port through the firewall.",
+    "clientHostHelp": "The host cc switch live writes into client configs (including Claude Desktop's gateway URL). Leave it empty to derive it from the listen address. Set it when clients can't reach this machine through loopback, e.g. Claude Desktop sessions inside WSL2 (NAT mode): set the listen address to 0.0.0.0 and enter a Windows IP that WSL can reach (such as the vEthernet (WSL) adapter address), and allow the port through the firewall.",
     "logging": "Record request usage",
     "loggingHelp": "When off, Usage has no per-request details for routed requests.",
     "usingApps": "Apps using routing · {{count}}",
@@ -3827,7 +3827,7 @@
     }
   },
   "newLayoutNotice": {
-    "title": "CC Switch has a new look",
+    "title": "cc switch live has a new look",
     "body": "This version redesigns the interface, so a few things have moved:\n• Modes now sit at the top of each app page\n• Usage and Accounts are in the sidebar\nSee the release notes for everything that changed.",
     "viewReleaseNotes": "View release notes",
     "confirm": "Got it"

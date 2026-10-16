@@ -2148,10 +2148,10 @@ fn icon_with_problem_dot(icon: &Image<'_>, template: bool) -> Image<'static> {
     Image::new_owned(rgba, width, height)
 }
 
-/// 悬停提示：平时 `CC Switch`，出问题时 `CC Switch · 需要处理：<问题区第一条>`。额度不算问题。
+/// 悬停提示：平时 `cc switch live`，出问题时 `cc switch live · 需要处理：<问题区第一条>`。额度不算问题。
 fn tray_tooltip(texts: &TrayTexts, problems: &[TrayProblem]) -> String {
     match problems.first() {
-        None => "CC Switch".to_string(),
+        None => "cc switch live".to_string(),
         Some(problem) => truncate_chars(
             &fill(
                 texts.tooltip_problem,
@@ -4052,7 +4052,7 @@ mod tests {
 
     #[test]
     fn tooltip_names_the_first_problem_and_is_plain_otherwise() {
-        assert_eq!(tray_tooltip(&zh(), &[]), "CC Switch");
+        assert_eq!(tray_tooltip(&zh(), &[]), "cc switch live");
         let problems = [
             TrayProblem::ServiceDown { port: 15721 },
             TrayProblem::SwitchFailed {
