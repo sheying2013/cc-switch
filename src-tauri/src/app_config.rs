@@ -62,6 +62,13 @@ impl AppType {
         )
     }
 
+    /// 有设备级的直连 / 路由模式（`live-state.json`，`mode::controller`）：本地路由的四个应用，
+    /// 加上 Claude Desktop。Desktop 经同一个路由服务转发，但没有 `proxy_config` 行、不做故障
+    /// 转移，所以不算 [`Self::supports_local_proxy`]。
+    pub fn has_route_mode(&self) -> bool {
+        self.supports_local_proxy() || matches!(self, AppType::ClaudeDesktop)
+    }
+
     /// Return an iterator over all app types
     pub fn all() -> impl Iterator<Item = AppType> {
         [
@@ -190,8 +197,6 @@ impl Default for MultiAppConfig {
         apps.insert("opencode".to_string(), ProviderManager::default());
         apps.insert("openclaw".to_string(), ProviderManager::default());
         apps.insert("hermes".to_string(), ProviderManager::default());
-        apps.insert("pi".to_string(), ProviderManager::default());
-        apps.insert("mcode".to_string(), ProviderManager::default());
 
         Self {
             version: 2,
@@ -208,8 +213,9 @@ impl MultiAppConfig {
         let config_path = get_app_config_path();
 
         if !config_path.exists() {
-            log::info!("配置文件不存在，创建新的多应用配置");
-            let config = Self::default();
+            log::info!("配置文件不存在，创建新的多应用配置并自动导入提示词");
+            // 使用新的方法，支持自动导入提示词
+            let config = Self::default_with_auto_import()?;
             // 立即保存到磁盘
             config.save()?;
             return Ok(config);
@@ -220,66 +226,28 @@ impl MultiAppConfig {
             std::fs::read_to_string(&config_path).map_err(|e| AppError::io(&config_path, e))?;
 
         // 先解析为 Value，以便严格判定是否为 v1 结构；
-        // 满足：顶层同时包含 providers(object) + current(string)，且不包含 version/apps 关键键，即视为 v1
-        let mut value: serde_json::Value =
+        // 满足：顶层同时包含 providers(object) + current(string)，且不包含 version/apps/mcp 关键键，即视为 v1
+        let value: serde_json::Value =
             serde_json::from_str(&content).map_err(|e| AppError::json(&config_path, e))?;
         let is_v1 = value.as_object().is_some_and(|map| {
             let has_providers = map.get("providers").map(|v| v.is_object()).unwrap_or(false);
             let has_current = map.get("current").map(|v| v.is_string()).unwrap_or(false);
-            // v1 的充分必要条件：有 providers 和 current，且 apps 不存在
+            // v1 的充分必要条件：有 providers 和 current，且 apps 不存在（version/mcp 可能存在但不作为 v2 判据）
             let has_apps = map.contains_key("apps");
             has_providers && has_current && !has_apps
         });
         if is_v1 {
             return Err(AppError::localized(
                 "config.unsupported_v1",
-                "检测到旧版 v1 配置格式。当前版本已不再支持运行时自动迁移。\n\n解决方案：\n1. 安装 v3.2.x 版本进行一次性自动迁移\n2. 或手动编辑 ~/.cc-switch/config.json，将顶层结构调整为：\n   {\"version\": 2, \"claude\": {...}, \"codex\": {...}}\n\n",
-                "Detected legacy v1 config. Runtime auto-migration is no longer supported.\n\nSolutions:\n1. Install v3.2.x for one-time auto-migration\n2. Or manually edit ~/.cc-switch/config.json to adjust the top-level structure:\n   {\"version\": 2, \"claude\": {...}, \"codex\": {...}}\n\n",
+                "检测到旧版 v1 配置格式。当前版本已不再支持运行时自动迁移。\n\n解决方案：\n1. 安装 v3.2.x 版本进行一次性自动迁移\n2. 或手动编辑 ~/.cc-switch/config.json，将顶层结构调整为：\n   {\"version\": 2, \"claude\": {...}, \"codex\": {...}, \"mcp\": {...}}\n\n",
+                "Detected legacy v1 config. Runtime auto-migration is no longer supported.\n\nSolutions:\n1. Install v3.2.x for one-time auto-migration\n2. Or manually edit ~/.cc-switch/config.json to adjust the top-level structure:\n   {\"version\": 2, \"claude\": {...}, \"codex\": {...}, \"mcp\": {...}}\n\n",
             ));
-        }
-
-        // 已移除功能的顶层分组（mcp / prompts / skills 等）必须在反序列化前剔除：
-        // apps 使用 #[serde(flatten)]，任何未知顶层键都会被当成应用条目去解析成
-        // ProviderManager，形状不符时会让整份配置直接加载失败（历史遗留配置打不开）。
-        let known_apps: std::collections::HashSet<String> =
-            AppType::all().map(|app| app.as_str().to_string()).collect();
-        let mut pruned_groups: Vec<String> = Vec::new();
-        if let Some(map) = value.as_object_mut() {
-            map.retain(|key, _| {
-                let keep = known_apps.contains(key)
-                    || matches!(
-                        key.as_str(),
-                        "version" | "common_config_snippets" | "claude_common_config_snippet"
-                    );
-                if !keep {
-                    pruned_groups.push(key.clone());
-                }
-                keep
-            });
-        }
-        for key in &pruned_groups {
-            log::info!("丢弃配置中已移除的顶层分组: {key}");
         }
 
         // 解析 v2 结构
         let mut config: Self =
             serde_json::from_value(value).map_err(|e| AppError::json(&config_path, e))?;
-        let mut updated = !pruned_groups.is_empty();
-
-        // 旧版把 mcp / prompts / skills 作为顶层字段写进 config.json；这些字段已移除。
-        // 因为 apps 用了 #[serde(flatten)]，它们会被解析成“应用”条目。这里按真实
-        // AppType 白名单清掉这些幽灵条目，避免它们在下次保存时被写回文件。
-        let orphan_apps: Vec<String> = config
-            .apps
-            .keys()
-            .filter(|key| !known_apps.contains(*key))
-            .cloned()
-            .collect();
-        for key in orphan_apps {
-            log::info!("丢弃配置中已废弃的顶层分组: {key}");
-            config.apps.remove(&key);
-            updated = true;
-        }
+        let mut updated = false;
 
         // 确保 gemini 应用存在（兼容旧配置文件）
         if !config.apps.contains_key("gemini") {
@@ -337,6 +305,12 @@ impl MultiAppConfig {
             self.apps
                 .insert(app.as_str().to_string(), ProviderManager::default());
         }
+    }
+
+    /// 创建默认配置
+    fn default_with_auto_import() -> Result<Self, AppError> {
+        log::info!("首次启动，创建默认配置");
+        Ok(Self::default())
     }
 }
 

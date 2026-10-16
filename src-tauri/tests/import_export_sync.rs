@@ -16,7 +16,12 @@ fn write_codex_live_atomic_persists_auth_and_config() {
     reset_test_fs();
 
     let auth = json!({ "OPENAI_API_KEY": "dev-key" });
-    let config_text = "model = \"gpt-5.5\"\n";
+    let config_text = r#"
+[mcp_servers.echo]
+type = "stdio"
+command = "echo"
+args = ["ok"]
+"#;
 
     cc_switch_lib::write_codex_live_atomic(&auth, Some(config_text))
         .expect("atomic write should succeed");
@@ -32,8 +37,8 @@ fn write_codex_live_atomic_persists_auth_and_config() {
 
     let stored_config = std::fs::read_to_string(&config_path).expect("read config");
     assert!(
-        stored_config.contains("gpt-5.5"),
-        "config.toml should contain the written content"
+        stored_config.contains("mcp_servers.echo"),
+        "config.toml should contain serialized table"
     );
 }
 
@@ -52,7 +57,10 @@ fn write_codex_live_atomic_rolls_back_auth_when_config_write_fails() {
     std::fs::create_dir_all(&config_path).expect("create blocking directory");
 
     let auth = json!({ "OPENAI_API_KEY": "new-key" });
-    let config_text = "model = \"gpt-5.5\"\n";
+    let config_text = r#"[mcp_servers.sample]
+type = "stdio"
+command = "noop"
+"#;
 
     let err = cc_switch_lib::write_codex_live_atomic(&auth, Some(config_text))
         .expect_err("config write should fail when target is directory");

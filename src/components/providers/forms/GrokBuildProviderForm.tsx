@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -179,7 +179,6 @@ export function GrokBuildProviderForm({
       name: initialData?.name ?? initialConfig.name,
       websiteUrl: initialData?.websiteUrl ?? "",
       notes: initialData?.notes ?? "",
-      outboundProxyUrl: initialData?.meta?.outboundProxyUrl ?? "",
       settingsConfig: JSON.stringify({ config: rawConfig }),
       icon:
         resolveProviderIcon(
@@ -193,6 +192,10 @@ export function GrokBuildProviderForm({
   });
   const { isSubmitting } = form.formState;
   const websiteUrl = form.watch("websiteUrl") ?? "";
+  // 「获取 API Key」优先用预设的 apiKeyUrl（带推广参数），与 useApiKeyLink 一致
+  const apiKeyLinkUrl =
+    grokPresetEntries.find((entry) => entry.id === selectedPresetId)?.preset
+      .apiKeyUrl || websiteUrl;
 
   useEffect(() => {
     onSubmittingChange?.(isSubmitting);
@@ -282,7 +285,8 @@ export function GrokBuildProviderForm({
     form.setValue("icon", preset.icon ?? "");
     form.setValue("iconColor", preset.iconColor ?? "");
     setCategory(preset.category ?? "custom");
-    setBaseUrl(presetBaseUrl);
+    outboundProxyUrl: (initialData?.meta?.outboundProxyUrl ?? "",
+      setBaseUrl(presetBaseUrl));
     setApiKey(presetApiKey);
     setUpstreamModel(presetModel);
     setApiFormat(presetApiFormat);
@@ -395,11 +399,11 @@ export function GrokBuildProviderForm({
     delete initialMeta.custom_endpoints;
     const meta: ProviderMeta = {
       ...initialMeta,
-      outboundProxyUrl: values.outboundProxyUrl?.trim() || undefined,
       apiFormat,
       apiKeyField: anthropicAuthField,
       isFullUrl,
       endpointAutoSelect,
+      outboundProxyUrl: values.outboundProxyUrl?.trim() || undefined,
       impersonateClaudeCode,
       promptCacheRouting,
       codexChatReasoning,
@@ -434,7 +438,7 @@ export function GrokBuildProviderForm({
       <form
         id="provider-form"
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="space-y-6 glass rounded-xl p-6 border border-white/10"
+        className="space-y-6"
       >
         {!initialData && (
           <ProviderPresetSelector
@@ -459,8 +463,8 @@ export function GrokBuildProviderForm({
                 syncStructuredConfig({ apiKey: value });
               }}
               category={category}
-              shouldShowApiKeyLink={Boolean(websiteUrl)}
-              websiteUrl={websiteUrl}
+              shouldShowApiKeyLink={Boolean(apiKeyLinkUrl)}
+              websiteUrl={apiKeyLinkUrl}
               shouldShowSpeedTest
               codexBaseUrl={baseUrl}
               onBaseUrlChange={(value) => {
@@ -527,7 +531,7 @@ export function GrokBuildProviderForm({
               <FormLabel htmlFor="grokbuild-config-toml">
                 {t("grokBuild.rawConfig", { defaultValue: "config.toml" })}
               </FormLabel>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-fg-2">
                 {t("grokBuild.keyFieldsHint", {
                   defaultValue:
                     "默认模型（models.default）和它指向的模型表随供应商切换；其余是 Grok Build 全局设置，保存后对所有供应商生效。",
@@ -553,9 +557,8 @@ export function GrokBuildProviderForm({
               <InactiveFieldsPanel
                 fields={inactiveFields}
                 hint={t("grokBuild.inactiveFieldsHint", {
-                  count: inactiveFields.length,
                   defaultValue:
-                    "这个供应商还保存着 {{count}} 个不随切换生效的设置。点击复制它的 TOML，按需粘贴到上方；供应商里保存的原值不会删除。",
+                    "这些是旧版存进卡里的设置，现在切换不会写出去。点一下复制 TOML，需要时粘贴到上方。",
                 })}
                 action={{
                   kind: "copy",

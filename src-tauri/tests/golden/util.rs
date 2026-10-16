@@ -200,18 +200,3 @@ pub fn sort_objects(value: &mut Value, pointers: &[&str]) {
         }
     }
 }
-
-/// 读 JSON 文件，锁住它是 `to_string_pretty` 的原样输出（格式、键序），
-/// 再把 `pointers` 处排序后返回，供快照比对。
-pub fn stable_json_file(rel: &str, pointers: &[&str]) -> String {
-    let raw = read_home_file(rel);
-    let mut parsed: Value =
-        serde_json::from_str(&raw).unwrap_or_else(|e| panic!("parse {rel}: {e}"));
-    assert_eq!(
-        raw.trim_end(),
-        serde_json::to_string_pretty(&parsed).expect("serialize"),
-        "{rel} is no longer written as pretty-printed JSON"
-    );
-    sort_objects(&mut parsed, pointers);
-    serde_json::to_string_pretty(&parsed).expect("serialize") + "\n"
-}

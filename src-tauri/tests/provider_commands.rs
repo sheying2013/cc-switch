@@ -34,6 +34,15 @@ context_window = 500000
     )
 }
 
+/// 切换时 `models.session_summary` 跟着目标模型表走（#7003），live 比行多这一行。
+fn with_session_summary(config: &str) -> String {
+    config.replacen(
+        "default = \"grok-4.5\"\n",
+        "default = \"grok-4.5\"\nsession_summary = \"grok-4.5\"\n",
+        1,
+    )
+}
+
 #[test]
 fn grokbuild_import_and_switch_write_live_config() {
     let _guard = test_mutex().lock().unwrap_or_else(|e| e.into_inner());
@@ -81,7 +90,7 @@ fn grokbuild_import_and_switch_write_live_config() {
 
     assert_eq!(
         std::fs::read_to_string(&live_path).expect("read switched Grok Build config"),
-        next_config
+        with_session_summary(&next_config)
     );
     assert_eq!(
         state
@@ -127,11 +136,12 @@ fn grokbuild_switch_back_after_client_changed_default_model() {
     switch_provider_test_hook(&state, AppType::GrokBuild, "a").expect("switch to provider a");
     assert_eq!(
         std::fs::read_to_string(&live_path).expect("read live after switching to a"),
-        relay_a
+        with_session_summary(&relay_a)
     );
 
     // Simulate Grok's `/settings` → Default model picking the built-in grok-4.6.
-    let client_edited = relay_a.replace("default = \"grok-4.5\"", "default = \"grok-4.6\"");
+    let client_edited =
+        with_session_summary(&relay_a).replace("default = \"grok-4.5\"", "default = \"grok-4.6\"");
     std::fs::write(&live_path, &client_edited).expect("simulate client edit");
 
     switch_provider_test_hook(&state, AppType::GrokBuild, "b").expect("switch to provider b");
@@ -375,109 +385,6 @@ fn codex_startup_import_skips_when_only_official_seed_exists() {
 }
 
 #[test]
-fn switch_provider_updates_codex_live_and_state() {
-    let _guard = test_mutex().lock().unwrap_or_else(|e| e.into_inner());
-    reset_test_fs();
-    enable_codex_official_auth_preservation();
-    let _home = ensure_test_home();
-
-    let legacy_auth = json!({"OPENAI_API_KEY": "legacy-key"});
-    let legacy_config = r#"[mcp_servers.legacy]
-type = "stdio"
-command = "echo"
-"#;
-    write_codex_live_atomic(&legacy_auth, Some(legacy_config))
-        .expect("seed existing codex live config");
-
-    let mut config = MultiAppConfig::default();
-    {
-        let manager = config
-            .get_manager_mut(&AppType::Codex)
-            .expect("codex manager");
-        manager.current = "old-provider".to_string();
-        manager.providers.insert(
-            "old-provider".to_string(),
-            Provider::with_id(
-                "old-provider".to_string(),
-                "Legacy".to_string(),
-                json!({
-                    "auth": {"OPENAI_API_KEY": "stale"},
-                    "config": "stale-config"
-                }),
-                None,
-            ),
-        );
-        manager.providers.insert(
-            "new-provider".to_string(),
-            Provider::with_id(
-                "new-provider".to_string(),
-                "Latest".to_string(),
-                json!({
-                    "auth": {"OPENAI_API_KEY": "fresh-key"},
-                    "config": r#"[mcp_servers.latest]
-type = "stdio"
-command = "say"
-"#
-                }),
-                None,
-            ),
-        );
-    }
-
-    let app_state = create_test_state_with_config(&config).expect("create test state");
-
-    switch_provider_test_hook(&app_state, AppType::Codex, "new-provider")
-        .expect("switch provider should succeed");
-
-    let auth_value: serde_json::Value =
-        read_json_file(&get_codex_auth_path()).expect("read auth.json");
-    assert_eq!(
-        auth_value
-            .get("OPENAI_API_KEY")
-            .and_then(|v| v.as_str())
-            .unwrap_or(""),
-        "legacy-key",
-        "Codex provider switching should preserve the existing live auth.json"
-    );
-
-    let config_text = std::fs::read_to_string(get_codex_config_path()).expect("read config.toml");
-    // 只替换关键字段：live 里用户的 MCP 原样留着，行里的 MCP 不投影；这张卡没有路由，
-    // Key 没有第三方地址可发，不写进 live。
-    assert!(
-        config_text.contains("[mcp_servers.legacy]"),
-        "{config_text}"
-    );
-    assert!(!config_text.contains("mcp_servers.latest"), "{config_text}");
-    assert!(
-        !config_text.contains("experimental_bearer_token"),
-        "{config_text}"
-    );
-
-    let current_id = app_state
-        .db
-        .get_current_provider(AppType::Codex.as_str())
-        .expect("get current provider");
-    assert_eq!(
-        current_id.as_deref(),
-        Some("new-provider"),
-        "current provider updated"
-    );
-
-    let providers = app_state
-        .db
-        .get_all_providers(AppType::Codex.as_str())
-        .expect("get all providers");
-    let legacy = providers
-        .get("old-provider")
-        .expect("legacy provider still exists");
-    assert_eq!(
-        legacy.settings_config,
-        json!({ "auth": {"OPENAI_API_KEY": "stale"}, "config": "stale-config" }),
-        "switching away never writes live content back into the row"
-    );
-}
-
-#[test]
 fn switch_provider_missing_provider_returns_error() {
     let _guard = test_mutex().lock().unwrap_or_else(|e| e.into_inner());
     reset_test_fs();
@@ -710,5 +617,108 @@ fn import_refuses_live_config_under_proxy_takeover() {
     assert!(
         providers.is_empty(),
         "taken-over live import must not create providers"
+    );
+}
+
+#[test]
+fn switch_provider_updates_codex_live_and_state() {
+    let _guard = test_mutex().lock().unwrap_or_else(|e| e.into_inner());
+    reset_test_fs();
+    enable_codex_official_auth_preservation();
+    let _home = ensure_test_home();
+
+    let legacy_auth = json!({"OPENAI_API_KEY": "legacy-key"});
+    let legacy_config = r#"[mcp_servers.legacy]
+type = "stdio"
+command = "echo"
+"#;
+    write_codex_live_atomic(&legacy_auth, Some(legacy_config))
+        .expect("seed existing codex live config");
+
+    let mut config = MultiAppConfig::default();
+    {
+        let manager = config
+            .get_manager_mut(&AppType::Codex)
+            .expect("codex manager");
+        manager.current = "old-provider".to_string();
+        manager.providers.insert(
+            "old-provider".to_string(),
+            Provider::with_id(
+                "old-provider".to_string(),
+                "Legacy".to_string(),
+                json!({
+                    "auth": {"OPENAI_API_KEY": "stale"},
+                    "config": "stale-config"
+                }),
+                None,
+            ),
+        );
+        manager.providers.insert(
+            "new-provider".to_string(),
+            Provider::with_id(
+                "new-provider".to_string(),
+                "Latest".to_string(),
+                json!({
+                    "auth": {"OPENAI_API_KEY": "fresh-key"},
+                    "config": r#"[mcp_servers.latest]
+type = "stdio"
+command = "say"
+"#
+                }),
+                None,
+            ),
+        );
+    }
+
+    let app_state = create_test_state_with_config(&config).expect("create test state");
+
+    switch_provider_test_hook(&app_state, AppType::Codex, "new-provider")
+        .expect("switch provider should succeed");
+
+    let auth_value: serde_json::Value =
+        read_json_file(&get_codex_auth_path()).expect("read auth.json");
+    assert_eq!(
+        auth_value
+            .get("OPENAI_API_KEY")
+            .and_then(|v| v.as_str())
+            .unwrap_or(""),
+        "legacy-key",
+        "Codex provider switching should preserve the existing live auth.json"
+    );
+
+    let config_text = std::fs::read_to_string(get_codex_config_path()).expect("read config.toml");
+    // 只替换关键字段：live 里用户的 MCP 原样留着，行里的 MCP 不投影；这张卡没有路由，
+    // Key 没有第三方地址可发，不写进 live。
+    assert!(
+        config_text.contains("[mcp_servers.legacy]"),
+        "{config_text}"
+    );
+    assert!(!config_text.contains("mcp_servers.latest"), "{config_text}");
+    assert!(
+        !config_text.contains("experimental_bearer_token"),
+        "{config_text}"
+    );
+
+    let current_id = app_state
+        .db
+        .get_current_provider(AppType::Codex.as_str())
+        .expect("get current provider");
+    assert_eq!(
+        current_id.as_deref(),
+        Some("new-provider"),
+        "current provider updated"
+    );
+
+    let providers = app_state
+        .db
+        .get_all_providers(AppType::Codex.as_str())
+        .expect("get all providers");
+    let legacy = providers
+        .get("old-provider")
+        .expect("legacy provider still exists");
+    assert_eq!(
+        legacy.settings_config,
+        json!({ "auth": {"OPENAI_API_KEY": "stale"}, "config": "stale-config" }),
+        "switching away never writes live content back into the row"
     );
 }
