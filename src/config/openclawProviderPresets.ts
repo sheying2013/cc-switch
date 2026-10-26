@@ -920,14 +920,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           maxTokens: 131072,
         },
         {
-          id: "deepseek-v4-pro-0813",
-          name: "DeepSeek V4 Pro",
-          reasoning: true,
-          input: ["text"],
-          contextWindow: 1048576,
-          maxTokens: 384000,
-        },
-        {
           id: "deepseek-v4.1-flash",
           name: "DeepSeek V4.1 Flash",
           reasoning: true,
@@ -1003,13 +995,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
       api: "openai-completions",
       models: [
         {
-          id: "deepseek-v4-pro",
-          name: "DeepSeek V4 Pro",
-          input: ["text"],
-          contextWindow: 1048576,
-          maxTokens: 393216,
-        },
-        {
           id: "deepseek-v4-flash-0731",
           name: "DeepSeek V4 Flash 0731",
           input: ["text"],
@@ -1072,9 +1057,9 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
       },
     },
     suggestedDefaults: {
-      model: { primary: "fluxa-tokenplan/deepseek-v4-pro" },
+      model: { primary: "fluxa-tokenplan/deepseek-v4.1-flash" },
       modelCatalog: {
-        "fluxa-tokenplan/deepseek-v4-pro": { alias: "DeepSeek V4 Pro" },
+        "fluxa-tokenplan/deepseek-v4.1-flash": { alias: "DeepSeek V4.1 Flash" },
         "fluxa-tokenplan/glm-5.3": { alias: "GLM-5.3" },
       },
     },
@@ -1643,6 +1628,78 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
     },
   },
   {
+    name: "TeamoRouter Claude",
+    websiteUrl: "https://teamorouter.cn",
+    apiKeyUrl:
+      "https://teamorouter.cn/?utm_source=cc_switch&utm_medium=referral&utm_campaign=ai_directory",
+    settingsConfig: {
+      baseUrl: "https://api.teamorouter.cn",
+      apiKey: "",
+      api: "anthropic-messages",
+      models: [
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1000000,
+          maxTokens: 128000,
+          cost: {
+            input: 1.116,
+            output: 5.58,
+            cacheRead: 0.0558,
+            cacheWrite: 1.395,
+          },
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1000000,
+          maxTokens: 128000,
+          cost: {
+            input: 0.544,
+            output: 2.72,
+            cacheRead: 0.0544,
+            cacheWrite: 0.68,
+          },
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1000000,
+          maxTokens: 128000,
+          cost: { input: 3, output: 15, cacheRead: 0.075, cacheWrite: 3.75 },
+        },
+      ],
+    },
+    category: "aggregator",
+    isPartner: true,
+    partnerPromotionKey: "teamorouter",
+    icon: "teamorouter",
+    templateValues: {
+      apiKey: {
+        label: "API Key",
+        placeholder: "",
+        editorValue: "",
+      },
+    },
+    suggestedDefaults: {
+      model: {
+        primary: "teamorouter-claude/claude-opus-5-5",
+        fallbacks: ["teamorouter-claude/claude-sonnet-5-5"],
+      },
+      modelCatalog: {
+        "teamorouter-claude/claude-opus-5-5": { alias: "Opus" },
+        "teamorouter-claude/claude-sonnet-5-5": { alias: "Sonnet" },
+        "teamorouter-claude/claude-fable-5-1": { alias: "Fable" },
+      },
+    },
+  },
+  {
     name: "PPIO",
     websiteUrl: "https://ppio.com",
     apiKeyUrl: "https://ppio.com/activity/ccswitch",
@@ -1674,13 +1731,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           input: ["text"],
           contextWindow: 1000000,
           maxTokens: 128000,
-        },
-        {
-          id: "deepseek/deepseek-v4-pro",
-          name: "DeepSeek V4 Pro",
-          reasoning: true,
-          contextWindow: 1000000,
-          maxTokens: 384000,
         },
         {
           id: "xiaomimimo/mimo-v2.6-pro",
@@ -3093,12 +3143,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
       api: "openai-completions",
       models: [
         {
-          id: "deepseek-v4-pro",
-          name: "DeepSeek V4 Pro",
-          contextWindow: 1000000,
-          cost: { input: 1.32, output: 3.96, cacheRead: 0.044, cacheWrite: 0 },
-        },
-        {
           id: "deepseek-flash",
           name: "DeepSeek V4.1 Flash",
           contextWindow: 1000000,
@@ -3120,13 +3164,9 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
       },
     },
     suggestedDefaults: {
-      model: {
-        primary: "deepseek/deepseek-flash",
-        fallbacks: ["deepseek/deepseek-v4-pro"],
-      },
+      model: { primary: "deepseek/deepseek-flash" },
       modelCatalog: {
         "deepseek/deepseek-flash": { alias: "Flash" },
-        "deepseek/deepseek-v4-pro": { alias: "Pro" },
       },
     },
   },
@@ -3266,15 +3306,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           contextWindow: 1000000,
           maxTokens: 384000,
         },
-        {
-          id: "deepseek-v4-pro-202606",
-          name: "DeepSeek V4 Pro",
-          reasoning: false,
-          input: ["text"],
-          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-          contextWindow: 1000000,
-          maxTokens: 384000,
-        },
         // 接入页未列：maxTokens 按平台列表（128k）；reasoning 同族接入页口径
         {
           id: "minimax-m2.7",
@@ -3405,15 +3436,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
           contextWindow: 262144,
           maxTokens: 262144,
-        },
-        {
-          id: "deepseek-v4-pro-202606",
-          name: "DeepSeek V4 Pro",
-          reasoning: false,
-          input: ["text"],
-          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-          contextWindow: 1000000,
-          maxTokens: 384000,
         },
         {
           id: "deepseek-v4-flash-202605",
@@ -3581,15 +3603,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           contextWindow: 1048576,
           maxTokens: 393216,
         },
-        {
-          id: "deepseek-v4-pro",
-          name: "DeepSeek V4 Pro",
-          reasoning: false,
-          input: ["text"],
-          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-          contextWindow: 1048576,
-          maxTokens: 393216,
-        },
         // 接入页未列：maxTokens 按平台列表（384k，与企业版接入页同口径）
         {
           id: "deepseek-v4-flash-0731",
@@ -3600,28 +3613,9 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           contextWindow: 1048576,
           maxTokens: 393216,
         },
-        // 接入页未列：maxTokens 按平台列表（384k，与企业版接入页同口径）
-        {
-          id: "deepseek-v4-pro-0813",
-          name: "DeepSeek V4 Pro 0813 GA",
-          reasoning: false,
-          input: ["text"],
-          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-          contextWindow: 1048576,
-          maxTokens: 393216,
-        },
         {
           id: "deepseek-v4-flash-202605",
           name: "DeepSeek V4 Flash Official",
-          reasoning: false,
-          input: ["text"],
-          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-          contextWindow: 1048576,
-          maxTokens: 393216,
-        },
-        {
-          id: "deepseek-v4-pro-202606",
-          name: "DeepSeek V4 Pro Official",
           reasoning: false,
           input: ["text"],
           cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
@@ -3734,15 +3728,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           contextWindow: 1048576,
           maxTokens: 393216,
         },
-        {
-          id: "deepseek-v4-pro",
-          name: "DeepSeek V4 Pro",
-          reasoning: false,
-          input: ["text"],
-          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-          contextWindow: 1048576,
-          maxTokens: 393216,
-        },
         // 接入页未列：maxTokens 按平台列表（384k，与企业版接入页同口径）
         {
           id: "deepseek-v4-flash-0731",
@@ -3753,28 +3738,9 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           contextWindow: 1048576,
           maxTokens: 393216,
         },
-        // 接入页未列：maxTokens 按平台列表（384k，与企业版接入页同口径）
-        {
-          id: "deepseek-v4-pro-0813",
-          name: "DeepSeek V4 Pro 0813 GA",
-          reasoning: false,
-          input: ["text"],
-          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-          contextWindow: 1048576,
-          maxTokens: 393216,
-        },
         {
           id: "deepseek-v4-flash-202605",
           name: "DeepSeek V4 Flash Official",
-          reasoning: false,
-          input: ["text"],
-          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-          contextWindow: 1048576,
-          maxTokens: 393216,
-        },
-        {
-          id: "deepseek-v4-pro-202606",
-          name: "DeepSeek V4 Pro Official",
           reasoning: false,
           input: ["text"],
           cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
@@ -3915,13 +3881,15 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
       baseUrl: "https://qianfan.baidubce.com/v2/tokenplan/personal",
       apiKey: "",
       api: "openai-completions",
+      // 2026-10-25 起 DeepSeek 一律用 Flash（Pro 贵且效果不如 Flash）：
+      // 模型换成同套餐的 deepseek-v4-flash；官方接入页只给了 Pro 的 cost，
+      // Flash 未核对故不写，窗口沿用官方 OpenClaw 口径
       models: [
         {
-          id: "deepseek-v4-pro",
-          name: "deepseek-v4-pro",
+          id: "deepseek-v4-flash",
+          name: "deepseek-v4-flash",
           reasoning: false,
           input: ["text"],
-          cost: { input: 0.0025, output: 0.01, cacheRead: 0, cacheWrite: 0 },
           contextWindow: 98304,
           maxTokens: 65536,
         },
@@ -3944,9 +3912,9 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
       },
     },
     suggestedDefaults: {
-      model: { primary: "qianfan-tokenplan/deepseek-v4-pro" },
+      model: { primary: "qianfan-tokenplan/deepseek-v4-flash" },
       modelCatalog: {
-        "qianfan-tokenplan/deepseek-v4-pro": { alias: "DeepSeek" },
+        "qianfan-tokenplan/deepseek-v4-flash": { alias: "DeepSeek" },
       },
     },
   },
@@ -4398,7 +4366,13 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           cost: { input: 0.15, output: 0.6, cacheRead: 0.015, cacheWrite: 0 },
           compat: {
             supportsReasoningEffort: true,
-            supportedReasoningEfforts: ["low", "medium", "high", "xhigh"],
+            supportedReasoningEfforts: [
+              "low",
+              "medium",
+              "high",
+              "xhigh",
+              "max",
+            ],
           },
         },
         {
@@ -4454,7 +4428,13 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           cost: { input: 0.15, output: 0.6, cacheRead: 0.015, cacheWrite: 0 },
           compat: {
             supportsReasoningEffort: true,
-            supportedReasoningEfforts: ["low", "medium", "high", "xhigh"],
+            supportedReasoningEfforts: [
+              "low",
+              "medium",
+              "high",
+              "xhigh",
+              "max",
+            ],
           },
         },
         {
@@ -5286,15 +5266,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           cost: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 0 },
         },
         {
-          id: "deepseek-v4-pro:0813",
-          name: "DeepSeek V4 Pro",
-          reasoning: true,
-          input: ["text"],
-          contextWindow: 1048576,
-          maxTokens: 384000,
-          cost: { input: 1.32, output: 3.96, cacheRead: 0.044, cacheWrite: 0 },
-        },
-        {
           id: "deepseek-v4.1-flash",
           name: "DeepSeek V4.1 Flash",
           reasoning: true,
@@ -5544,15 +5515,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           cost: { input: 0.06, output: 0.18, cacheRead: 0.015, cacheWrite: 0 },
         },
         {
-          id: "deepseek-ai/DeepSeek-V4-Pro-0813",
-          name: "DeepSeek V4 Pro 0813",
-          reasoning: true,
-          input: ["text"],
-          contextWindow: 1048576,
-          maxTokens: 384000,
-          cost: { input: 1.3, output: 2.6, cacheRead: 0.1, cacheWrite: 0 },
-        },
-        {
           id: "moonshotai/Kimi-K3",
           name: "Kimi K3",
           reasoning: true,
@@ -5764,15 +5726,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           cost: { input: 0.95, output: 4 },
         },
         {
-          id: "deepseek-ai/DeepSeek-V4-Pro-0813",
-          name: "DeepSeek V4 Pro 0813",
-          reasoning: true,
-          input: ["text"],
-          contextWindow: 979000,
-          maxTokens: 384000,
-          cost: { input: 1.32, output: 3.96 },
-        },
-        {
           id: "deepseek-ai/DeepSeek-V4.1-Flash",
           name: "DeepSeek V4.1 Flash",
           reasoning: true,
@@ -5809,6 +5762,133 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
       model: { primary: "nebius/zai-org/GLM-5.3" },
       modelCatalog: {
         "nebius/zai-org/GLM-5.3": { alias: "GLM-5.3" },
+      },
+    },
+  },
+  {
+    name: "ClinePass",
+    websiteUrl: "https://docs.cline.bot/getting-started/clinepass",
+    apiKeyUrl: "https://app.cline.bot",
+    // 官方只有 OpenAI Chat 端点（docs.cline.bot/getting-started/clinepass），
+    // Bearer 鉴权。阵容取 2026-10-26 官方公开列表 api.cline.bot/api/v1/ai/
+    // cline/recommended-models 的 clinePass 段，窗口与最大输出按 models.dev。
+    // 月费订阅，官方单价只是额度参考价，不写 cost
+    settingsConfig: {
+      baseUrl: "https://api.cline.bot/api/v1",
+      apiKey: "",
+      api: "openai-completions",
+      models: [
+        {
+          id: "cline-pass/kimi-k3.1-pro",
+          name: "Kimi K3.1 Pro",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1048576,
+          maxTokens: 131072,
+        },
+        {
+          id: "cline-pass/glm-5.3",
+          name: "GLM-5.3",
+          reasoning: true,
+          input: ["text"],
+          contextWindow: 1000000,
+          maxTokens: 131072,
+        },
+        {
+          id: "cline-pass/glm-5.3-flash",
+          name: "GLM-5.3 Flash",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1000000,
+          maxTokens: 131072,
+        },
+        {
+          id: "cline-pass/kimi-k3",
+          name: "Kimi K3",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1048576,
+          maxTokens: 131072,
+        },
+        {
+          id: "cline-pass/deepseek-v4-pro",
+          name: "DeepSeek V4 Pro",
+          reasoning: true,
+          input: ["text"],
+          contextWindow: 1000000,
+          maxTokens: 384000,
+        },
+        {
+          id: "cline-pass/deepseek-v4.1-flash",
+          name: "DeepSeek V4.1 Flash",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1000000,
+          maxTokens: 384000,
+        },
+        {
+          id: "cline-pass/qwen3.8-max",
+          name: "Qwen3.8 Max",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1000000,
+          maxTokens: 131072,
+        },
+        {
+          id: "cline-pass/qwen3.7-plus",
+          name: "Qwen3.7 Plus",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1000000,
+          maxTokens: 64000,
+        },
+        {
+          id: "cline-pass/minimax-m3",
+          name: "MiniMax M3",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1048576,
+          maxTokens: 512000,
+        },
+        {
+          id: "cline-pass/minimax-m3.1-flash",
+          name: "MiniMax M3.1 Flash",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1000000,
+          maxTokens: 128000,
+        },
+        {
+          id: "cline-pass/mimo-v2.6-pro",
+          name: "MiMo V2.6 Pro",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1048576,
+          maxTokens: 131072,
+        },
+        {
+          id: "cline-pass/mimo-v2.6-flash",
+          name: "MiMo V2.6 Flash",
+          reasoning: true,
+          input: ["text", "image"],
+          contextWindow: 1048576,
+          maxTokens: 131072,
+        },
+      ],
+    },
+    category: "third_party",
+    icon: "cline",
+    templateValues: {
+      apiKey: {
+        label: "API Key",
+        placeholder: "",
+        editorValue: "",
+      },
+    },
+    suggestedDefaults: {
+      model: { primary: "clinepass/cline-pass/kimi-k3.1-pro" },
+      modelCatalog: {
+        "clinepass/cline-pass/kimi-k3.1-pro": { alias: "Kimi K3.1 Pro" },
       },
     },
   },
@@ -5922,8 +6002,10 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
     // digitalocean 供应商 + https://inference.do-ai.run/v1 + openai-completions，
     // Bearer 鉴权。窗口与最大输出取平台模型表、cost 取平台价目表（每百万
     // token，docs.digitalocean.com/products/inference/details/pricing 同日）；
-    // Kimi K3 平台未公布最大输出，按 models.dev 写 131072；DeepSeek V4 Pro 0813
-    // 平台表写的最大输出等于窗口，可疑，按 V4 Pro 官方值 384000 写。Sonnet 5.5
+    // Kimi K3 平台未公布最大输出，按 models.dev 写 131072；DeepSeek 原为
+    // V4 Pro 0813，2026-10-25 起改用平台表所列 V4.1 Flash 1017（Pro 贵且效果
+    // 不如 Flash；原生识图），最大输出按 DeepSeek 官方 384000 写，价目未核对
+    // 故不写 cost。Sonnet 5.5
     // 须 Tier 3+ 账号，缓存写入取 5 分钟价。默认 GLM-5.3，所有等级可用
     settingsConfig: {
       baseUrl: "https://inference.do-ai.run/v1",
@@ -5949,13 +6031,12 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           cost: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 0 },
         },
         {
-          id: "deepseek-v4-pro-0813",
-          name: "DeepSeek V4 Pro 0813",
+          id: "deepseek-v4.1-flash-1017",
+          name: "DeepSeek V4.1 Flash 1017",
           reasoning: true,
-          input: ["text"],
+          input: ["text", "image"],
           contextWindow: 1048576,
           maxTokens: 384000,
-          cost: { input: 1.32, output: 3.96, cacheRead: 0.044, cacheWrite: 0 },
         },
         {
           id: "anthropic-claude-sonnet-5.5",
@@ -6027,14 +6108,15 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
           maxTokens: 131072,
           cost: { input: 3, output: 15 },
         },
+        // 2026-10-25 起 DeepSeek 一律用 Flash（Pro 贵且效果不如 Flash）；
+        // id 与 Codex / Pi 的 Hugging Face 预设一致，价目未核对故不写 cost
         {
-          id: "deepseek-ai/DeepSeek-V4-Pro-0813:baseten",
-          name: "DeepSeek V4 Pro 0813 (Baseten)",
+          id: "deepseek-ai/DeepSeek-V4.1-Flash-1017:baseten",
+          name: "DeepSeek V4.1 Flash 1017 (Baseten)",
           reasoning: true,
           input: ["text"],
           contextWindow: 1048576,
-          maxTokens: 384000,
-          cost: { input: 1.32, output: 3.96 },
+          maxTokens: 262144,
         },
       ],
     },
@@ -6613,13 +6695,6 @@ export const openclawProviderPresets: OpenClawProviderPreset[] = [
         {
           id: "deepseek-v4.1-flash",
           name: "DeepSeek V4.1 Flash",
-          reasoning: true,
-          contextWindow: 1000000,
-          maxTokens: 384000,
-        },
-        {
-          id: "DeepSeek-V4-Pro-0813",
-          name: "DeepSeek V4 Pro 0813",
           reasoning: true,
           contextWindow: 1000000,
           maxTokens: 384000,
