@@ -21,6 +21,7 @@ export type {
   GitHubAccount,
 } from "./copilot";
 export type {
+  AuthCenterTarget,
   ManagedAuthProvider,
   ManagedAuthAccount,
   ManagedAuthStatus,

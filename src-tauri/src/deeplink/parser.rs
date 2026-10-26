@@ -85,10 +85,28 @@ fn parse_provider_deeplink(
         .ok_or_else(|| AppError::InvalidInput("Missing 'app' parameter".to_string()))?
         .clone();
 
-    // Validate app type
+    // Validate app type.
+    //
+    // Oh My Pi is refused with the same guidance as the import path
+    // (`deeplink/provider.rs`): a models.yml entry needs its models listed, which
+    // the Oh My Pi provider form composes. Accepting the link here would only
+    // fail later with a generic "invalid app" error.
+    if matches!(app.as_str(), "omp" | "ohmypi" | "oh-my-pi" | "oh_my_pi") {
+        return Err(AppError::InvalidInput(
+            "Oh My Pi providers must be added from the Oh My Pi provider page".to_string(),
+        ));
+    }
     if !matches!(
         app.as_str(),
-        "claude" | "codex" | "gemini" | "grokbuild" | "opencode" | "openclaw" | "hermes" | "pi"
+        "agy"
+            | "claude"
+            | "codex"
+            | "gemini"
+            | "grokbuild"
+            | "opencode"
+            | "openclaw"
+            | "hermes"
+            | "pi"
     ) {
         return Err(AppError::InvalidInput(format!(
             "Invalid provider app type: '{app}'"

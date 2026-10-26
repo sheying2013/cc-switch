@@ -46,4 +46,13 @@ describe("ApiKeySection", () => {
       screen.queryByRole("link", { name: /providerForm\.getApiKey/ }),
     ).not.toBeInTheDocument();
   });
+
+  it("turns off autocorrect and auto-capitalization on the key input", () => {
+    const { container } = renderSection({ value: "sk-test" });
+    const input = container.querySelector("input");
+
+    expect(input).toHaveAttribute("autocorrect", "off");
+    expect(input).toHaveAttribute("autocapitalize", "off");
+    expect(input).toHaveAttribute("spellcheck", "false");
+  });
 });

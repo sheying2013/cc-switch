@@ -26,6 +26,35 @@ fn explicit_data_dir(minimax: Option<&str>, mavis: Option<&str>) -> Option<PathB
         .map(PathBuf::from)
 }
 
+pub(crate) fn write_and_commit<T>(
+    path: &Path,
+    write: impl FnOnce() -> Result<(), AppError>,
+    commit: impl FnOnce() -> Result<T, AppError>,
+) -> Result<T, AppError> {
+    let previous = match fs::read(path) {
+        Ok(bytes) => Some(bytes),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
+        Err(error) => return Err(AppError::io(path, error)),
+    };
+    write()?;
+    match commit() {
+        Ok(result) => Ok(result),
+        Err(error) => {
+            let rollback = match previous {
+                Some(bytes) => atomic_write_private(path, &bytes),
+                None => fs::remove_file(path).map_err(|error| AppError::io(path, error)),
+            };
+            if let Err(rollback_error) = rollback {
+                return Err(AppError::Message(format!(
+                    "Config update failed ({error}); restoring {} also failed: {rollback_error}",
+                    path.display()
+                )));
+            }
+            Err(error)
+        }
+    }
+}
+
 pub(crate) fn config_path() -> PathBuf {
     data_dir().join("config.yaml")
 }

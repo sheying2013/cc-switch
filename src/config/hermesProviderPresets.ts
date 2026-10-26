@@ -52,6 +52,12 @@ export interface HermesModel {
   name?: string;
   /** Override the auto-detected context window. */
   context_length?: number;
+  /**
+   * Declares that the model accepts image input. Hermes reads it per model
+   * (`agent/image_routing.py`, `vision` is an alias); when absent it falls
+   * back to its own catalog and treats unknown models as text-only.
+   */
+  supports_vision?: boolean;
 }
 
 /**
@@ -112,6 +118,12 @@ export interface HermesProviderPreset extends PresetFamilyFields {
   isCustomTemplate?: boolean;
   /** Optional top-level `model:` defaults written on switch. */
   suggestedDefaults?: HermesSuggestedDefaults;
+  /**
+   * Provider key prefilled when the preset is picked. Set it when the obvious
+   * name is a Hermes built-in provider id (e.g. `minimax`): Hermes routes
+   * `model.provider` to the built-in, ignoring a same-named custom_provider.
+   */
+  providerKey?: string;
 }
 
 export interface HermesProviderSettingsConfig {
@@ -139,6 +151,11 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
+        {
+          id: "kimi-k3.1-pro",
+          name: "Kimi K3.1 Pro",
+          context_length: 1048576,
+        },
         { id: "kimi-k2.7-code", name: "Kimi K2.7 Code" },
         { id: "kimi-k3", name: "Kimi K3", context_length: 1048576 },
         {
@@ -169,6 +186,11 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
+        {
+          id: "kimi-k3.1-pro",
+          name: "Kimi K3.1 Pro",
+          context_length: 1048576,
+        },
         { id: "kimi-k2.7-code", name: "Kimi K2.7 Code" },
         { id: "kimi-k3", name: "Kimi K3", context_length: 1048576 },
         {
@@ -237,12 +259,19 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
-        { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
         {
           id: "claude-opus-5-5",
           name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
           context_length: 1000000,
         },
         {
@@ -285,17 +314,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        {
-          id: "gpt-5.6-sol",
-          name: "GPT-5.6 Sol",
-        },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol" },
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
       ],
     },
     category: "third_party",
     icon: "apinebula",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "apinebula" },
+      model: { default: "gpt-6.1-sol", provider: "apinebula" },
     },
   },
   {
@@ -308,8 +334,16 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
         { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
       ],
     },
@@ -317,8 +351,36 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     icon: "aicodemirror",
     iconColor: "#000000",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "aicodemirror" },
+      model: { default: "claude-opus-5-5", provider: "aicodemirror" },
     },
+  },
+  {
+    name: "hao.ai",
+    websiteUrl: "https://hao.ai",
+    apiKeyUrl: "https://hao.ai",
+    settingsConfig: {
+      name: "hao_ai",
+      base_url: "https://api.hao.ai/anthropic",
+      api_key: "",
+      api_mode: "anthropic_messages",
+      models: [
+        {
+          id: "anthropic/claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "anthropic/claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+      ],
+    },
+    category: "aggregator",
+    suggestedDefaults: {
+      model: { default: "anthropic/claude-opus-5-5", provider: "hao_ai" },
+    },
+    icon: "haoai",
   },
   {
     name: "FennoAI",
@@ -329,12 +391,12 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       base_url: "https://api.fenno.ai/v1",
       api_key: "",
       api_mode: "chat_completions",
-      models: [{ id: "gpt-5.6-sol", name: "GPT-5.6 Sol" }],
+      models: [{ id: "gpt-6.1-sol", name: "GPT-6.1 Sol" }],
     },
     category: "aggregator",
     icon: "fenno",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "fenno" },
+      model: { default: "gpt-6.1-sol", provider: "fenno" },
     },
   },
   {
@@ -347,12 +409,19 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
-        { id: "claude-haiku-4-5", name: "Claude Haiku 4.5" },
         {
           id: "claude-opus-5-5",
           name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
           context_length: 1000000,
         },
         {
@@ -372,7 +441,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       },
     },
     suggestedDefaults: {
-      model: { default: "claude-sonnet-5", provider: "runapi" },
+      model: { default: "claude-sonnet-5-5", provider: "runapi" },
     },
   },
   {
@@ -396,9 +465,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5-20251001",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
         },
       ],
     },
@@ -437,7 +511,97 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     icon: "grooroute",
   },
   {
+    name: "DIT.ai",
+    websiteUrl: "https://dit.ai",
+    apiKeyUrl: "https://dit.ai?utm_source=ccswitch",
+    settingsConfig: {
+      name: "dit_ai",
+      base_url: "https://api.dit.ai",
+      api_key: "",
+      api_mode: "anthropic_messages",
+      models: [
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+      ],
+    },
+    category: "aggregator",
+    suggestedDefaults: {
+      model: { default: "claude-opus-5-5", provider: "dit_ai" },
+    },
+    icon: "dit",
+  },
+  {
+    name: "BuyToken",
+    websiteUrl: "https://buytoken.work",
+    apiKeyUrl: "https://buytoken.work/sign-up",
+    settingsConfig: {
+      name: "buytoken",
+      base_url: "https://api.buytoken.work",
+      api_key: "",
+      api_mode: "anthropic_messages",
+      models: [
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+      ],
+    },
+    category: "aggregator",
+    suggestedDefaults: {
+      model: { default: "claude-opus-5-5", provider: "buytoken" },
+    },
+    icon: "buytoken",
+  },
+  {
+    name: "V-API",
+    websiteUrl: "https://gpt.ge",
+    apiKeyUrl: "https://gpt.ge/signup",
+    settingsConfig: {
+      name: "vapi",
+      base_url: "https://api.gpt.ge",
+      api_key: "",
+      api_mode: "anthropic_messages",
+      models: [
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
+        },
+      ],
+    },
+    category: "aggregator",
+    suggestedDefaults: {
+      model: { default: "claude-opus-5-5", provider: "vapi" },
+    },
+    icon: "vapi",
+  },
+  {
     name: "TokenFactory",
+    nameKey: "providerForm.presets.tokenfactory",
     websiteUrl: "https://tokenfactory.cn",
     apiKeyUrl: "https://console.tokenfactory.cn/login",
     settingsConfig: {
@@ -460,10 +624,11 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1048576,
         },
         {
-          id: "glm-5.3-flash",
-          name: "GLM-5.3-Flash",
-          context_length: 1048576,
+          id: "deepseek-v4.1-flash-1017",
+          name: "DeepSeek V4.1 Flash 1017",
+          context_length: 1000000,
         },
+        { id: "glm-5.3-flash", name: "GLM-5.3-Flash", context_length: 1048576 },
         { id: "qwen3.8-flash", name: "Qwen3.8 Flash", context_length: 1000000 },
       ],
     },
@@ -474,28 +639,40 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     icon: "tokenfactory",
   },
   {
-    name: "Shengsuanyun",
-    nameKey: "providerForm.presets.shengsuanyun",
-    websiteUrl: "https://www.shengsuanyun.com",
-    apiKeyUrl: "https://www.shengsuanyun.com",
+    // FluxA AgentMarket 以合作价转售的百度智能云 TokenPlan：产品页写明
+    // "purchase it through AgentMarket, then use Baidu AI Cloud's endpoint and
+    // API key directly"，端点取其所链的百度国际站 Token Plan Enterprise 文档
+    // （2026-09-16 版）team 专属基址 —— 与国内个人版 qianfan.baidubce.com/
+    // .../personal 是两套部署，勿合并。OpenAI 兼容基址走
+    // chat_completions。阵容与窗口按 FluxA 产品页模型表
+    // （glm-5.2 500k ≠ 国内版千帆平台 1M，国际 team 部署口径，勿按国内预设
+    // "修正"）；标注 Coming soon 的 deepseek-v4-pro-0813 / glm-5.3 不收。
+    // Kimi K2.6 是定稿赞助文案点名的模型，FluxA 产品页模型表与百度国际站
+    // team 文档都没列它：id / 窗口取 FluxA baidu-ai-cloud 模型目录（categories
+    // 只有 text）与国内 Token Plan 预设（262144）双重印证，非臆造
+    name: "FluxA Token Plan",
+    websiteUrl: "https://agentmarket.fluxapay.xyz/",
+    apiKeyUrl: "https://agentmarket.fluxapay.xyz/marketplace/tokenplans",
     settingsConfig: {
-      name: "shengsuanyun",
-      base_url: "https://router.shengsuanyun.com/api/v1",
+      name: "fluxa_tokenplan",
+      base_url: "https://api.baiduqianfan.ai/v2/tokenplan/team",
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        { id: "openai/gpt-5.6-sol", name: "GPT-5.6 Sol" },
-        {
-          id: "openai/gpt-6-astra",
-          name: "GPT-6 Astra",
-          context_length: 272000,
-        },
+        { id: "deepseek-v4-pro", name: "DeepSeek V4 Pro" },
+        { id: "deepseek-v4-flash-0731", name: "DeepSeek V4 Flash 0731" },
+        { id: "deepseek-v4.1-flash", name: "DeepSeek V4.1 Flash" },
+        { id: "deepseek-v3.2", name: "DeepSeek V3.2" },
+        { id: "glm-5.3", name: "GLM-5.3" },
+        { id: "glm-5.1", name: "GLM-5.1" },
+        { id: "glm-5", name: "GLM-5" },
+        { id: "kimi-k2.6", name: "Kimi K2.6" },
       ],
     },
     category: "aggregator",
     icon: "shengsuanyun",
     suggestedDefaults: {
-      model: { default: "openai/gpt-5.6-sol", provider: "shengsuanyun" },
+      model: { default: "deepseek-v4-pro", provider: "fluxa_tokenplan" },
     },
   },
   {
@@ -508,16 +685,33 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
-        { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
+        },
       ],
     },
     category: "third_party",
     icon: "aigocode",
     iconColor: "#5B7FFF",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "aigocode" },
+      model: { default: "claude-opus-5-5", provider: "aigocode" },
     },
   },
   {
@@ -557,16 +751,28 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
-        { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
       ],
     },
     category: "third_party",
     icon: "aicoding",
     iconColor: "#000000",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "aicoding" },
+      model: { default: "claude-opus-5-5", provider: "aicoding" },
     },
   },
   {
@@ -579,55 +785,40 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        {
-          id: "gpt-5.6-sol",
-          name: "GPT-5.6 Sol",
-          context_length: 272000,
-        },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol", context_length: 272000 },
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
       ],
     },
     category: "aggregator",
     icon: "subrouter",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "subrouter" },
+      model: { default: "gpt-6.1-sol", provider: "subrouter" },
     },
   },
   {
-    // FluxA AgentMarket 以合作价转售的百度智能云 TokenPlan：产品页写明
-    // "purchase it through AgentMarket, then use Baidu AI Cloud's endpoint and
-    // API key directly"，端点取其所链的百度国际站 Token Plan Enterprise 文档
-    // （2026-09-16 版）team 专属基址 —— 与国内个人版 qianfan.baidubce.com/
-    // .../personal 是两套部署，勿合并。OpenAI 兼容基址走
-    // chat_completions。阵容与窗口按 FluxA 产品页模型表
-    // （glm-5.2 500k ≠ 国内版千帆平台 1M，国际 team 部署口径，勿按国内预设
-    // "修正"）；标注 Coming soon 的 deepseek-v4-pro-0813 / glm-5.3 不收。
-    // Kimi K2.6 是定稿赞助文案点名的模型，FluxA 产品页模型表与百度国际站
-    // team 文档都没列它：id / 窗口取 FluxA baidu-ai-cloud 模型目录（categories
-    // 只有 text）与国内 Token Plan 预设（262144）双重印证，非臆造
-    name: "FluxA Token Plan",
-    websiteUrl: "https://agentmarket.fluxapay.xyz/",
-    apiKeyUrl: "https://agentmarket.fluxapay.xyz/marketplace/tokenplans",
+    name: "Shengsuanyun",
+    nameKey: "providerForm.presets.shengsuanyun",
+    websiteUrl: "https://www.shengsuanyun.com/",
+    apiKeyUrl: "https://www.shengsuanyun.com/",
     settingsConfig: {
-      name: "fluxa_tokenplan",
-      base_url: "https://api.baiduqianfan.ai/v2/tokenplan/team",
+      name: "shengsuanyun",
+      base_url: "https://router.shengsuanyun.com/api/v1",
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        { id: "deepseek-v4-pro", name: "DeepSeek V4 Pro" },
-        { id: "deepseek-v4-flash-0731", name: "DeepSeek V4 Flash 0731" },
-        { id: "deepseek-v4-flash", name: "DeepSeek V4 Flash" },
-        { id: "deepseek-v3.2", name: "DeepSeek V3.2" },
-        { id: "glm-5.2", name: "GLM-5.2" },
-        { id: "glm-5.1", name: "GLM-5.1" },
-        { id: "glm-5", name: "GLM-5" },
-        { id: "kimi-k2.6", name: "Kimi K2.6" },
+        { id: "openai/gpt-6.1-sol", name: "GPT-6.1 Sol" },
+        {
+          id: "openai/gpt-6-astra",
+          name: "GPT-6 Astra",
+          context_length: 272000,
+        },
+        { id: "openai/gpt-6-luna", name: "GPT-6 Luna", context_length: 272000 },
       ],
     },
     category: "aggregator",
     icon: "fluxa",
     suggestedDefaults: {
-      model: { default: "deepseek-v4-pro", provider: "fluxa_tokenplan" },
+      model: { default: "openai/gpt-6.1-sol", provider: "shengsuanyun" },
     },
   },
   {
@@ -651,9 +842,9 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
         },
         {
           id: "claude-fable-5-1",
@@ -679,26 +870,31 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_mode: "anthropic_messages",
       models: [
         {
-          id: "claude-opus-5",
-          name: "Claude Opus 5",
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
           context_length: 1000000,
         },
         {
-          id: "claude-sonnet-5",
-          name: "Claude Sonnet 5",
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
         },
       ],
     },
     category: "third_party",
     icon: "apikeyfun",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "apikeyfun" },
+      model: { default: "claude-opus-5-5", provider: "apikeyfun" },
     },
   },
   {
@@ -712,23 +908,18 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_mode: "anthropic_messages",
       models: [
         {
-          id: "claude-opus-5",
-          name: "Claude Opus 5",
-          context_length: 1000000,
-        },
-        {
-          id: "claude-sonnet-5",
-          name: "Claude Sonnet 5",
-          context_length: 1000000,
-        },
-        {
-          id: "claude-haiku-4-5",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
-        },
-        {
           id: "claude-opus-5-5",
           name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
           context_length: 1000000,
         },
         {
@@ -741,7 +932,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     category: "aggregator",
     icon: "9527code",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "9527code" },
+      model: { default: "claude-opus-5-5", provider: "9527code" },
     },
   },
   {
@@ -754,14 +945,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        { id: "gpt-5.6-sol", name: "GPT-5.6 Sol" },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol" },
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
       ],
     },
     category: "aggregator",
     icon: "code0",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "code0" },
+      model: { default: "gpt-6.1-sol", provider: "code0" },
     },
   },
   {
@@ -773,12 +964,16 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       base_url: "https://api.teamorouter.cn/v1",
       api_key: "",
       api_mode: "chat_completions",
-      models: [{ id: "gpt-5.6-sol", name: "GPT-5.6 Sol" }],
+      models: [
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol" },
+        { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
+        { id: "gpt-5.6-sol", name: "GPT-5.6 Sol" },
+      ],
     },
     category: "aggregator",
     icon: "teamorouter",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "teamorouter" },
+      model: { default: "gpt-6.1-sol", provider: "teamorouter" },
     },
   },
   {
@@ -792,9 +987,20 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_mode: "chat_completions",
       models: [
         {
-          id: "deepseek/deepseek-v4-flash-0731",
-          name: "Deepseek V4 Flash 0731",
+          id: "deepseek/deepseek-v4.1-flash",
+          name: "DeepSeek V4.1 Flash",
           context_length: 1048576,
+        },
+        {
+          id: "moonshotai/kimi-k3.1-pro",
+          name: "Kimi K3.1 Pro",
+          context_length: 1048576,
+        },
+        { id: "zai-org/glm-5.3", name: "GLM-5.3", context_length: 1000000 },
+        {
+          id: "deepseek/deepseek-v4-pro",
+          name: "DeepSeek V4 Pro",
+          context_length: 1000000,
         },
       ],
     },
@@ -803,7 +1009,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     iconColor: "#2874FF",
     suggestedDefaults: {
       model: {
-        default: "deepseek/deepseek-v4-flash-0731",
+        default: "deepseek/deepseek-v4.1-flash",
         provider: "ppio",
       },
     },
@@ -818,12 +1024,19 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
-        { id: "claude-haiku-4-5", name: "Claude Haiku 4.5" },
         {
           id: "claude-opus-5-5",
           name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
           context_length: 1000000,
         },
         {
@@ -843,7 +1056,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       },
     },
     suggestedDefaults: {
-      model: { default: "claude-sonnet-5", provider: "claudecn" },
+      model: { default: "claude-sonnet-5-5", provider: "claudecn" },
     },
   },
   {
@@ -948,7 +1161,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_mode: "anthropic_messages",
       models: [
         {
-          id: "doubao-seed-2-1-pro-260628",
+          id: "doubao-seed-2-1-pro-260915",
           name: "Doubao Seed 2.1 Pro",
         },
       ],
@@ -958,7 +1171,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     iconColor: "#3370FF",
     suggestedDefaults: {
       model: {
-        default: "doubao-seed-2-1-pro-260628",
+        default: "doubao-seed-2-1-pro-260915",
         provider: "doubao_seed",
       },
     },
@@ -974,10 +1187,12 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       base_url: "https://api.siliconflow.cn/v1",
       api_key: "",
       api_mode: "chat_completions",
+      // 国内站 M2.5 已于 2026-09-11 下线，与 Codex/OpenCode 同换 V4 Flash
       models: [
         {
-          id: "Pro/MiniMaxAI/MiniMax-M2.5",
-          name: "Pro / MiniMax M2.5",
+          id: "deepseek-ai/DeepSeek-V4-Flash",
+          name: "DeepSeek V4 Flash",
+          context_length: 1048576,
         },
       ],
     },
@@ -986,7 +1201,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     iconColor: "#6E29F6",
     suggestedDefaults: {
       model: {
-        default: "Pro/MiniMaxAI/MiniMax-M2.5",
+        default: "deepseek-ai/DeepSeek-V4-Flash",
         provider: "siliconflow",
       },
     },
@@ -1002,7 +1217,21 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       base_url: "https://api.siliconflow.com/v1",
       api_key: "",
       api_mode: "chat_completions",
-      models: [{ id: "MiniMaxAI/MiniMax-M3", name: "MiniMax M3" }],
+      models: [
+        { id: "MiniMaxAI/MiniMax-M3", name: "MiniMax M3" },
+        { id: "zai-org/GLM-5.3", name: "GLM-5.3", context_length: 1000000 },
+        {
+          id: "zai-org/GLM-5.3-Flash",
+          name: "GLM-5.3 Flash",
+          context_length: 1000000,
+        },
+        { id: "moonshotai/Kimi-K3", name: "Kimi K3", context_length: 1048576 },
+        {
+          id: "deepseek-ai/DeepSeek-V4-Pro",
+          name: "DeepSeek V4 Pro",
+          context_length: 1000000,
+        },
+      ],
     },
     category: "aggregator",
     icon: "siliconflow",
@@ -1024,14 +1253,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        { id: "gpt-5.6-sol", name: "GPT-5.6 Sol" },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol" },
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
       ],
     },
     category: "aggregator",
     icon: "a6api",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "a6api" },
+      model: { default: "gpt-6.1-sol", provider: "a6api" },
     },
   },
   {
@@ -1049,6 +1278,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       models: [
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
         { id: "kimi-k3", name: "Kimi K3", context_length: 1048576 },
+        { id: "glm-5.3", name: "GLM-5.3", context_length: 1000000 },
+        {
+          id: "deepseek-v4.1-flash",
+          name: "DeepSeek V4.1 Flash",
+          context_length: 1000000,
+        },
+        { id: "qwen3.8-max", name: "Qwen3.8 Max", context_length: 1000000 },
+        { id: "mimo-v2.6-pro", name: "MiMo V2.6 Pro", context_length: 1048576 },
       ],
     },
     category: "aggregator",
@@ -1089,17 +1326,13 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        {
-          id: "gpt-6-astra",
-          name: "GPT-6 Astra",
-          context_length: 272000,
-        },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol", context_length: 272000 },
       ],
     },
     category: "aggregator",
     icon: "ccsub",
     suggestedDefaults: {
-      model: { default: "gpt-6-astra", provider: "ccsub" },
+      model: { default: "gpt-6.1-sol", provider: "ccsub" },
     },
   },
   {
@@ -1112,16 +1345,28 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
-        { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
       ],
     },
     category: "third_party",
     icon: "sssaicode",
     iconColor: "#000000",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "sssaicode" },
+      model: { default: "claude-opus-5-5", provider: "sssaicode" },
     },
   },
   {
@@ -1135,26 +1380,26 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_mode: "anthropic_messages",
       models: [
         {
-          id: "claude-opus-5",
-          name: "Claude Opus 5",
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
           context_length: 1000000,
         },
         {
-          id: "claude-sonnet-5",
-          name: "Claude Sonnet 5",
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5-20251001",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
         },
       ],
     },
     category: "aggregator",
     icon: "soleapi",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "soleapi" },
+      model: { default: "claude-opus-5-5", provider: "soleapi" },
     },
   },
   {
@@ -1167,16 +1412,33 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
-        { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
+        },
       ],
     },
     category: "third_party",
     icon: "micu",
     iconColor: "#000000",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "micu" },
+      model: { default: "claude-opus-5-5", provider: "micu" },
     },
   },
   {
@@ -1189,16 +1451,28 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
-        { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
       ],
     },
     category: "third_party",
     icon: "rc",
     iconColor: "#E96B2C",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "rightcode" },
+      model: { default: "claude-opus-5-5", provider: "rightcode" },
     },
   },
   {
@@ -1211,16 +1485,28 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
-        { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
       ],
     },
     category: "third_party",
     icon: "cubence",
     iconColor: "#000000",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "cubence" },
+      model: { default: "claude-opus-5-5", provider: "cubence" },
     },
   },
   {
@@ -1233,9 +1519,21 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
-        { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
+        {
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
         {
           id: "claude-fable-5-1",
           name: "Claude Fable 5.1",
@@ -1247,7 +1545,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     icon: "crazyrouter",
     iconColor: "#000000",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "crazyrouter" },
+      model: { default: "claude-opus-5-5", provider: "crazyrouter" },
     },
   },
   {
@@ -1259,11 +1557,11 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       base_url: "https://www.dmxapi.cn/v1",
       api_key: "",
       api_mode: "chat_completions",
-      models: [{ id: "gpt-5.6-sol", name: "GPT-5.6 Sol" }],
+      models: [{ id: "gpt-6.1-sol", name: "GPT-6.1 Sol" }],
     },
     category: "aggregator",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "dmxapi" },
+      model: { default: "gpt-6.1-sol", provider: "dmxapi" },
     },
     icon: "dmxapi",
   },
@@ -1278,10 +1576,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "codex_responses",
       models: [
-        {
-          id: "gpt-5.6-sol",
-          name: "GPT-5.6 Sol",
-        },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol" },
         { id: "gpt-6-sol", name: "GPT-6 Sol", context_length: 272000 },
         { id: "gpt-6-luna", name: "GPT-6 Luna", context_length: 272000 },
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
@@ -1290,7 +1585,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     category: "third_party",
     icon: "sudocode",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "sudocode" },
+      model: { default: "gpt-6.1-sol", provider: "sudocode" },
     },
   },
   {
@@ -1304,10 +1599,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "codex_responses",
       models: [
-        {
-          id: "gpt-5.6-sol",
-          name: "GPT-5.6 Sol",
-        },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol" },
         { id: "gpt-6-sol", name: "GPT-6 Sol", context_length: 272000 },
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
       ],
@@ -1315,7 +1607,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     category: "third_party",
     icon: "sudocode-us",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "sudocode_us" },
+      model: { default: "gpt-6.1-sol", provider: "sudocode_us" },
     },
   },
   {
@@ -1328,14 +1620,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        { id: "gpt-5.6-sol", name: "GPT-5.6 Sol" },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol" },
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
       ],
     },
     category: "aggregator",
     icon: "xycai",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "xycai" },
+      model: { default: "gpt-6.1-sol", provider: "xycai" },
     },
   },
   {
@@ -1350,17 +1642,63 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        { id: "gpt-5.6-sol", name: "GPT-5.6 Sol", context_length: 272000 },
-        { id: "gpt-6-sol", name: "GPT-6 Sol", context_length: 272000 },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol", context_length: 272000 },
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
       ],
     },
     category: "aggregator",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "modelflare" },
+      model: { default: "gpt-6.1-sol", provider: "modelflare" },
     },
     icon: "modelflare",
   },
+  {
+    name: "AllTokens",
+    websiteUrl: "https://alltokens.cc",
+    apiKeyUrl: "https://alltokens.cc/register",
+    settingsConfig: {
+      name: "alltokens",
+      // Sub2API 网关：Key 绑定单个分组，须用 GPT 分组的 Key；GPT 账号池原生走
+      // Responses（分组与模型见 alltokens.cc/api/v1/model-plaza，2026-10-17 核对）
+      base_url: "https://alltokens.cc/v1",
+      api_key: "",
+      api_mode: "codex_responses",
+      models: [
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol", context_length: 272000 },
+        { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
+        { id: "gpt-6-luna", name: "GPT-6 Luna", context_length: 272000 },
+      ],
+    },
+    category: "aggregator",
+    suggestedDefaults: {
+      model: { default: "gpt-6.1-sol", provider: "alltokens" },
+    },
+    icon: "alltokens",
+  },
+  {
+    name: "AllTokens SI",
+    websiteUrl: "https://alltokens.si",
+    // 站点关闭了个人注册（/api/status 的 register_enabled=false），只能企业注册
+    apiKeyUrl: "https://alltokens.si/enterprise-register",
+    settingsConfig: {
+      name: "alltokens_si",
+      // new-api 网关，目录见 alltokens.si/api/pricing（2026-10-19 核对）：GPT 分组
+      // 只声明 Chat Completions，窗口按中转口径封顶 272K
+      base_url: "https://alltokens.si/v1",
+      api_key: "",
+      api_mode: "chat_completions",
+      models: [
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol", context_length: 272000 },
+        { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
+      ],
+    },
+    category: "aggregator",
+    suggestedDefaults: {
+      model: { default: "gpt-6.1-sol", provider: "alltokens_si" },
+    },
+    icon: "alltokens-si",
+  },
+  // ===== 非赞助商预设：应用内展示按显示名排序，此处文件顺序不影响展示 =====
   {
     name: "Tu-zi",
     nameKey: "providerForm.presets.tuzi",
@@ -1373,26 +1711,31 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_mode: "anthropic_messages",
       models: [
         {
-          id: "claude-opus-5",
-          name: "Claude Opus 5",
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
           context_length: 1000000,
         },
         {
-          id: "claude-sonnet-5",
-          name: "Claude Sonnet 5",
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
         },
       ],
     },
     category: "aggregator",
     icon: "tuzi",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "tuzi" },
+      model: { default: "claude-opus-5-5", provider: "tuzi" },
     },
   },
   {
@@ -1405,14 +1748,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        { id: "gpt-5.6-sol", name: "GPT-5.6 Sol" },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol" },
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
       ],
     },
     category: "aggregator",
     icon: "amux",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "amux" },
+      model: { default: "gpt-6.1-sol", provider: "amux" },
     },
   },
   {
@@ -1425,16 +1768,19 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
+        { id: "zai-org/glm-5.3", name: "GLM-5.3", context_length: 1048576 },
         {
-          id: "zai-org/glm-5.1",
-          name: "GLM 5.1",
+          id: "zai-org/glm-5.3-flash",
+          name: "GLM-5.3 Flash",
+          context_length: 1000000,
         },
+        { id: "moonshotai/kimi-k3", name: "Kimi K3", context_length: 1048576 },
       ],
     },
     category: "aggregator",
     icon: "atlascloud",
     suggestedDefaults: {
-      model: { default: "zai-org/glm-5.1", provider: "atlascloud" },
+      model: { default: "zai-org/glm-5.3", provider: "atlascloud" },
     },
   },
   {
@@ -1469,34 +1815,29 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_mode: "chat_completions",
       models: [
         {
-          id: "anthropic/claude-opus-5",
-          name: "Claude Opus 5",
-          context_length: 1000000,
-        },
-        {
-          id: "anthropic/claude-sonnet-5",
-          name: "Claude Sonnet 5",
-          context_length: 1000000,
-        },
-        {
-          id: "anthropic/claude-haiku-4.5",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
-        },
-        {
-          id: "openai/gpt-5.6-sol",
-          name: "GPT-5.6 Sol",
-          context_length: 272000,
-        },
-        {
-          id: "google/gemini-3.6-flash",
-          name: "Gemini 3.6 Flash",
-          context_length: 1000000,
-        },
-        {
           id: "anthropic/claude-opus-5.5",
           name: "Claude Opus 5.5",
           context_length: 1000000,
+        },
+        {
+          id: "anthropic/claude-sonnet-5.5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "anthropic/claude-haiku-5.5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "openai/gpt-6.1-sol",
+          name: "GPT-6.1 Sol",
+          context_length: 1050000,
+        },
+        {
+          id: "google/gemini-3.8-flash",
+          name: "Gemini 3.8 Flash",
+          context_length: 1048576,
         },
         {
           id: "anthropic/claude-fable-5.1",
@@ -1506,11 +1847,11 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
         {
           id: "openai/gpt-6-astra",
           name: "GPT-6 Astra",
-          context_length: 272000,
+          context_length: 1050000,
         },
         {
-          id: "google/gemini-3.8-flash",
-          name: "Gemini 3.8 Flash",
+          id: "google/gemini-4-argon",
+          name: "Gemini 4 Argon",
           context_length: 1048576,
         },
       ],
@@ -1519,7 +1860,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     icon: "openrouter",
     iconColor: "#6366F1",
     suggestedDefaults: {
-      model: { default: "anthropic/claude-opus-5", provider: "openrouter" },
+      model: { default: "anthropic/claude-opus-5.5", provider: "openrouter" },
     },
   },
   {
@@ -1564,19 +1905,26 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_mode: "chat_completions",
       models: [
         {
-          id: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
-          name: "Qwen3 Coder 480B",
-          context_length: 262144,
+          id: "Qwen/Qwen3.7-Max",
+          name: "Qwen3.7 Max",
+          context_length: 1000000,
         },
         {
-          id: "deepseek-ai/DeepSeek-V3.2",
-          name: "DeepSeek V3.2",
-          context_length: 64000,
+          id: "deepseek-ai/DeepSeek-V4.1-Flash",
+          name: "DeepSeek V4.1 Flash",
+          context_length: 1048576,
+        },
+        { id: "moonshotai/Kimi-K3", name: "Kimi K3", context_length: 1048576 },
+        { id: "zai-org/GLM-5.3", name: "GLM-5.3", context_length: 1048575 },
+        {
+          id: "zai-org/GLM-5.3-Flash",
+          name: "GLM-5.3 Flash",
+          context_length: 1048575,
         },
         {
-          id: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-          name: "Llama 4 Maverick",
-          context_length: 131072,
+          id: "MiniMaxAI/MiniMax-M3",
+          name: "MiniMax M3",
+          context_length: 524288,
         },
       ],
     },
@@ -1585,7 +1933,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     iconColor: "#0F6FFF",
     suggestedDefaults: {
       model: {
-        default: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+        default: "Qwen/Qwen3.7-Max",
         provider: "together",
       },
     },
@@ -1630,7 +1978,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     family: "zhipu",
     regionKey: "cn",
     websiteUrl: "https://open.bigmodel.cn",
-    apiKeyUrl: "https://www.bigmodel.cn/claude-code?ic=RRVJPB5SII",
+    apiKeyUrl: "https://www.bigmodel.cn/claude-code",
     settingsConfig: {
       name: "zhipu_glm",
       base_url: "https://open.bigmodel.cn/api/coding/paas/v4",
@@ -1653,7 +2001,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     family: "zhipu",
     regionKey: "intl",
     websiteUrl: "https://z.ai",
-    apiKeyUrl: "https://z.ai/subscribe?ic=8JVLJQFSKB",
+    apiKeyUrl: "https://z.ai/subscribe",
     settingsConfig: {
       name: "zhipu_glm_en",
       base_url: "https://api.z.ai/api/coding/paas/v4",
@@ -1764,7 +2112,6 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
         { id: "kimi-k2.7-code", name: "Kimi K2.7 Code" },
         { id: "kimi-k2.7-code-highspeed", name: "Kimi K2.7 Code HighSpeed" },
         { id: "kimi-k2.6", name: "Kimi K2.6" },
-        { id: "minimax-m2.7", name: "MiniMax M2.7" },
         { id: "minimax-m3", name: "MiniMax M3" },
         { id: "deepseek-v4-flash", name: "DeepSeek V4 Flash" },
         { id: "deepseek-v4-pro", name: "DeepSeek V4 Pro" },
@@ -2097,7 +2444,19 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       base_url: "https://api-inference.modelscope.cn/v1",
       api_key: "",
       api_mode: "chat_completions",
-      models: [{ id: "ZhipuAI/GLM-5.2", name: "ZhipuAI / GLM-5.2" }],
+      models: [
+        { id: "ZhipuAI/GLM-5.2", name: "ZhipuAI / GLM-5.2" },
+        {
+          id: "deepseek-ai/DeepSeek-V4.1-Flash",
+          name: "DeepSeek V4.1 Flash",
+          context_length: 1048576,
+        },
+        {
+          id: "MiniMax/MiniMax-M3",
+          name: "MiniMax M3",
+          context_length: 1000000,
+        },
+      ],
     },
     category: "aggregator",
     icon: "modelscope",
@@ -2170,19 +2529,30 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     regionKey: "cn",
     websiteUrl: "https://platform.minimax.cn",
     apiKeyUrl: "https://platform.minimax.cn/subscribe/token-plan",
+    // `minimax` / `minimax-cn` are Hermes built-ins that shadow custom_providers
+    providerKey: "cc-switch-minimax",
     settingsConfig: {
-      name: "minimax",
+      name: "cc-switch-minimax",
       base_url: "https://api.minimax.cn/v1",
       api_key: "",
       api_mode: "chat_completions",
-      models: [{ id: "MiniMax-M3", name: "MiniMax M3" }],
+      models: [
+        {
+          id: "MiniMax-M3.1-Flash",
+          name: "MiniMax M3.1 Flash",
+          supports_vision: true,
+        },
+        { id: "MiniMax-M3", name: "MiniMax M3" },
+      ],
+      // M3.1 can't disable thinking; Hermes' title request sends reasoning_effort:none
+      title_generation_model: "MiniMax-M3",
     },
     category: "cn_official",
     theme: { backgroundColor: "#f64551", textColor: "#FFFFFF" },
     icon: "minimax",
     iconColor: "#FF6B6B",
     suggestedDefaults: {
-      model: { default: "MiniMax-M3", provider: "minimax" },
+      model: { default: "MiniMax-M3.1-Flash", provider: "cc-switch-minimax" },
     },
   },
   {
@@ -2191,19 +2561,32 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     regionKey: "intl",
     websiteUrl: "https://platform.minimax.io",
     apiKeyUrl: "https://platform.minimax.io/subscribe/coding-plan",
+    providerKey: "cc-switch-minimax-en",
     settingsConfig: {
-      name: "minimax_en",
+      name: "cc-switch-minimax-en",
       base_url: "https://api.minimax.io/v1",
       api_key: "",
       api_mode: "chat_completions",
-      models: [{ id: "MiniMax-M3", name: "MiniMax M3" }],
+      models: [
+        {
+          id: "MiniMax-M3.1-Flash",
+          name: "MiniMax M3.1 Flash",
+          supports_vision: true,
+        },
+        { id: "MiniMax-M3", name: "MiniMax M3" },
+      ],
+      // M3.1 can't disable thinking; Hermes' title request sends reasoning_effort:none
+      title_generation_model: "MiniMax-M3",
     },
     category: "cn_official",
     theme: { backgroundColor: "#f64551", textColor: "#FFFFFF" },
     icon: "minimax",
     iconColor: "#FF6B6B",
     suggestedDefaults: {
-      model: { default: "MiniMax-M3", provider: "minimax_en" },
+      model: {
+        default: "MiniMax-M3.1-Flash",
+        provider: "cc-switch-minimax-en",
+      },
     },
   },
   {
@@ -2233,7 +2616,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        { id: "gpt-5.6-sol", name: "GPT-5.6 Sol" },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol" },
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
       ],
     },
@@ -2241,7 +2624,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     icon: "aihubmix",
     iconColor: "#006FFB",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "aihubmix" },
+      model: { default: "gpt-6.1-sol", provider: "aihubmix" },
     },
   },
   {
@@ -2254,8 +2637,16 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "anthropic/claude-opus-5", name: "Claude Opus 5" },
-        { id: "anthropic/claude-sonnet-5", name: "Claude Sonnet 5" },
+        {
+          id: "anthropic/claude-opus-5.5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "anthropic/claude-sonnet-5.5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
         {
           id: "anthropic/claude-fable-5.1",
           name: "Claude Fable 5.1",
@@ -2266,7 +2657,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     category: "aggregator",
     icon: "cherryin",
     suggestedDefaults: {
-      model: { default: "anthropic/claude-opus-5", provider: "cherryin" },
+      model: { default: "anthropic/claude-opus-5.5", provider: "cherryin" },
     },
   },
   {
@@ -2279,12 +2670,19 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
-        { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
         {
           id: "claude-opus-5-5",
           name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
           context_length: 1000000,
         },
         {
@@ -2298,7 +2696,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     icon: "eflowcode",
     iconColor: "#000000",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "eflowcode" },
+      model: { default: "claude-opus-5-5", provider: "eflowcode" },
     },
   },
   {
@@ -2311,15 +2709,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        { id: "openai/gpt-5.6-sol", name: "GPT-5.6 Sol" },
-        { id: "openai/gpt-5.4-mini", name: "GPT-5.4 mini" },
-        { id: "openai/gpt-5.4-nano", name: "GPT-5.4 nano" },
+        { id: "openai/gpt-6.1-sol", name: "GPT-6.1 Sol" },
+        { id: "openai/gpt-6-luna", name: "GPT-6 Luna" },
       ],
     },
     category: "aggregator",
     suggestedDefaults: {
       model: {
-        default: "openai/gpt-5.6-sol",
+        default: "openai/gpt-6.1-sol",
         provider: "therouter",
       },
     },
@@ -2345,8 +2742,13 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1048576,
         },
         {
-          id: "deepseek-ai/DeepSeek-V4.1-Flash",
-          name: "DeepSeek V4.1 Flash",
+          id: "zai-org/GLM-5.3-Fast",
+          name: "GLM-5.3 Fast",
+          context_length: 1048576,
+        },
+        {
+          id: "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+          name: "DeepSeek V4.1 Flash 1017",
           context_length: 1048576,
         },
       ],
@@ -2367,21 +2769,44 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "chat_completions",
       models: [
-        { id: "zai-org/glm-5.1", name: "Zai-Org / GLM-5.1" },
         { id: "zai-org/glm-5.3", name: "GLM-5.3", context_length: 1048576 },
         {
           id: "zai-org/glm-5.3-flash",
           name: "GLM-5.3-Flash",
           context_length: 1048576,
         },
-        { id: "moonshotai/kimi-k3", name: "Kimi K3", context_length: 1048576 },
+        {
+          id: "moonshotai/kimi-k3.1-pro",
+          name: "Kimi K3.1 Pro",
+          context_length: 1048576,
+        },
+        {
+          id: "deepseek/deepseek-v4.1-flash",
+          name: "DeepSeek V4.1 Flash",
+          context_length: 1048576,
+        },
+        {
+          id: "minimax/minimax-m3.1-flash",
+          name: "MiniMax M3.1 Flash",
+          context_length: 1000000,
+        },
+        {
+          id: "qwen/qwen3.8-max",
+          name: "Qwen3.8 Max",
+          context_length: 1000000,
+        },
+        {
+          id: "xiaomimimo/mimo-v2.6-pro",
+          name: "MiMo V2.6 Pro",
+          context_length: 1048576,
+        },
       ],
     },
     category: "aggregator",
     icon: "novita",
     iconColor: "#000000",
     suggestedDefaults: {
-      model: { default: "zai-org/glm-5.1", provider: "novita" },
+      model: { default: "zai-org/glm-5.3", provider: "novita" },
     },
   },
   {
@@ -2395,9 +2820,9 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_mode: "chat_completions",
       models: [
         {
-          id: "moonshotai/kimi-k3",
-          name: "Moonshot Kimi K3",
-          context_length: 1048576,
+          id: "moonshotai/kimi-k2.6",
+          name: "Moonshot Kimi K2.6",
+          context_length: 262144,
         },
         { id: "z-ai/glm-5.3", name: "GLM-5.3", context_length: 1048576 },
         {
@@ -2411,7 +2836,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     icon: "nvidia",
     iconColor: "#000000",
     suggestedDefaults: {
-      model: { default: "moonshotai/kimi-k3", provider: "nvidia" },
+      model: { default: "moonshotai/kimi-k2.6", provider: "nvidia" },
     },
   },
   {
@@ -2625,8 +3050,8 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_mode: "chat_completions",
       models: [
         {
-          id: "deepseek-ai/DeepSeek-V4-Flash-0731",
-          name: "DeepSeek V4 Flash 0731",
+          id: "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+          name: "DeepSeek V4.1 Flash 1017",
           context_length: 1048576,
         },
         {
@@ -2636,14 +3061,18 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
         },
         { id: "moonshotai/Kimi-K3", name: "Kimi K3", context_length: 1048576 },
         { id: "zai-org/GLM-5.3", name: "GLM-5.3", context_length: 1048576 },
-        { id: "zai-org/GLM-5.2", name: "GLM-5.2", context_length: 1048576 },
+        {
+          id: "zai-org/GLM-5.3-Flash",
+          name: "GLM-5.3 Flash",
+          context_length: 1048576,
+        },
       ],
     },
     category: "aggregator",
     icon: "deepinfra",
     suggestedDefaults: {
       model: {
-        default: "deepseek-ai/DeepSeek-V4-Flash-0731",
+        default: "deepseek-ai/DeepSeek-V4.1-Flash-1017",
         provider: "deepinfra",
       },
     },
@@ -2679,18 +3108,33 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
+          id: "anthropic/claude-fable-5.1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
+        },
+        {
           id: "openai/gpt-6-astra",
           name: "GPT-6 Astra",
-          context_length: 272000,
+          context_length: 1050000,
         },
         {
           id: "openai/gpt-6.1-sol",
           name: "GPT-6.1 Sol",
-          context_length: 272000,
+          context_length: 1050000,
+        },
+        {
+          id: "openai/gpt-6-luna",
+          name: "GPT-6 Luna",
+          context_length: 1050000,
         },
         {
           id: "google/gemini-3.8-flash",
           name: "Gemini 3.8 Flash",
+          context_length: 1000000,
+        },
+        {
+          id: "google/gemini-4-argon",
+          name: "Gemini 4 Argon",
           context_length: 1000000,
         },
       ],
@@ -2733,6 +3177,21 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           id: "deepseek-ai/DeepSeek-V4-Pro-0813",
           name: "DeepSeek V4 Pro 0813",
           context_length: 979000,
+        },
+        {
+          id: "deepseek-ai/DeepSeek-V4.1-Flash",
+          name: "DeepSeek V4.1 Flash",
+          context_length: 1048000,
+        },
+        {
+          id: "MiniMaxAI/MiniMax-M3",
+          name: "MiniMax M3",
+          context_length: 1049000,
+        },
+        {
+          id: "MiniMaxAI/MiniMax-M3.1-Flash",
+          name: "MiniMax M3.1 Flash",
+          context_length: 1049000,
         },
       ],
     },
@@ -2871,6 +3330,11 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           name: "DeepSeek V4 Pro 0813 (Baseten)",
           context_length: 1048576,
         },
+        {
+          id: "deepseek-ai/DeepSeek-V4.1-Flash-1017:baseten",
+          name: "DeepSeek V4.1 Flash 1017 (Baseten)",
+          context_length: 1048576,
+        },
       ],
     },
     category: "aggregator",
@@ -2986,12 +3450,12 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
         {
           id: "openai/gpt-6.1-sol",
           name: "GPT-6.1 Sol",
-          context_length: 272000,
+          context_length: 1050000,
         },
         {
           id: "openai/gpt-6-luna",
           name: "GPT-6 Luna",
-          context_length: 272000,
+          context_length: 1050000,
         },
         {
           id: "moonshotai/kimi-k3",
@@ -3016,18 +3480,27 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "anthropic_messages",
       models: [
-        { id: "claude-opus-5", name: "Claude Opus 5" },
-        { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
         {
-          id: "claude-haiku-4-5-20251001",
-          name: "Claude Haiku 4.5",
+          id: "claude-opus-5-5",
+          name: "Claude Opus 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
         },
       ],
     },
     category: "aggregator",
     icon: "pipellm",
     suggestedDefaults: {
-      model: { default: "claude-opus-5", provider: "pipellm" },
+      model: { default: "claude-opus-5-5", provider: "pipellm" },
     },
   },
   {
@@ -3053,7 +3526,6 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           name: "MiMo V2.6 Pro UltraSpeed",
           context_length: 1048576,
         },
-        { id: "mimo-v2.5-pro", name: "MiMo v2.5 Pro" },
       ],
     },
     category: "cn_official",
@@ -3081,8 +3553,6 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           name: "MiMo V2.6 Flash",
           context_length: 1048576,
         },
-        { id: "mimo-v2.5-pro", name: "MiMo v2.5 Pro" },
-        { id: "mimo-v2.5", name: "MiMo v2.5" },
       ],
     },
     category: "cn_official",
@@ -3103,8 +3573,8 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_mode: "chat_completions",
       models: [
         {
-          id: "claude-fable-5",
-          name: "Claude Fable 5",
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
           context_length: 1000000,
         },
         {
@@ -3113,8 +3583,13 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
-          id: "claude-fable-5-1",
-          name: "Claude Fable 5.1",
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
           context_length: 1000000,
         },
       ],
@@ -3123,7 +3598,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     icon: "jiekou",
     iconColor: "#000000",
     suggestedDefaults: {
-      model: { default: "claude-fable-5", provider: "jiekou" },
+      model: { default: "claude-fable-5-1", provider: "jiekou" },
     },
   },
   {
@@ -3136,10 +3611,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
       api_key: "",
       api_mode: "codex_responses",
       models: [
-        {
-          id: "gpt-5.6-sol",
-          name: "GPT-5.6 Sol",
-        },
+        { id: "gpt-6.1-sol", name: "GPT-6.1 Sol" },
         { id: "gpt-6-sol", name: "GPT-6 Sol", context_length: 272000 },
         { id: "gpt-6-astra", name: "GPT-6 Astra", context_length: 272000 },
       ],
@@ -3148,7 +3620,7 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
     icon: "aicodewith",
     iconColor: "#3A3B40",
     suggestedDefaults: {
-      model: { default: "gpt-5.6-sol", provider: "aicodewith" },
+      model: { default: "gpt-6.1-sol", provider: "aicodewith" },
     },
   },
   {
@@ -3172,9 +3644,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5-20251001",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
         },
       ],
     },
@@ -3205,9 +3682,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5-20251001",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
         },
       ],
     },
@@ -3238,9 +3720,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5-20251001",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
         },
       ],
     },
@@ -3271,9 +3758,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5-20251001",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
         },
       ],
     },
@@ -3300,14 +3792,19 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
-          id: "claude-sonnet-5",
-          name: "Claude Sonnet 5",
+          id: "claude-sonnet-5-5",
+          name: "Claude Sonnet 5.5",
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5-20251001",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
         },
       ],
     },
@@ -3338,9 +3835,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
         },
       ],
     },
@@ -3374,9 +3876,9 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5-20251001",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
         },
       ],
     },
@@ -3407,9 +3909,14 @@ export const hermesProviderPresets: HermesProviderPreset[] = [
           context_length: 1000000,
         },
         {
-          id: "claude-haiku-4-5-20251001",
-          name: "Claude Haiku 4.5",
-          context_length: 200000,
+          id: "claude-haiku-5-5",
+          name: "Claude Haiku 5.5",
+          context_length: 1000000,
+        },
+        {
+          id: "claude-fable-5-1",
+          name: "Claude Fable 5.1",
+          context_length: 1000000,
         },
       ],
     },

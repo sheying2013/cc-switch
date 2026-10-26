@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::str::FromStr;
 
-use crate::config::{copy_file, get_app_config_dir, get_app_config_path, write_json_file};
+use crate::config::{get_app_config_path, write_json_file};
 use crate::error::AppError;
 use crate::provider::ProviderManager;
 
@@ -25,6 +25,9 @@ pub enum AppType {
     Hermes,
     Pi,
     Mcode,
+    Kimi,
+    Agy,
+    Omp,
 }
 
 impl AppType {
@@ -40,6 +43,9 @@ impl AppType {
             AppType::Hermes => "hermes",
             AppType::Pi => "pi",
             AppType::Mcode => "mcode",
+            AppType::Kimi => "kimi",
+            AppType::Agy => "agy",
+            AppType::Omp => "omp",
         }
     }
 
@@ -51,7 +57,13 @@ impl AppType {
     pub fn is_additive_mode(&self) -> bool {
         matches!(
             self,
-            AppType::OpenCode | AppType::OpenClaw | AppType::Hermes | AppType::Pi | AppType::Mcode
+            AppType::OpenCode
+                | AppType::OpenClaw
+                | AppType::Hermes
+                | AppType::Pi
+                | AppType::Mcode
+                | AppType::Kimi
+                | AppType::Omp
         )
     }
 
@@ -82,6 +94,9 @@ impl AppType {
             AppType::Hermes,
             AppType::Pi,
             AppType::Mcode,
+            AppType::Kimi,
+            AppType::Agy,
+            AppType::Omp,
         ]
         .into_iter()
     }
@@ -103,10 +118,13 @@ impl FromStr for AppType {
             "hermes" => Ok(AppType::Hermes),
             "pi" => Ok(AppType::Pi),
             "mcode" => Ok(AppType::Mcode),
+            "kimi" | "kimi-code" => Ok(AppType::Kimi),
+            "agy" | "antigravity" | "antigravity-cli" => Ok(AppType::Agy),
+            "omp" | "oh-my-pi" | "oh_my_pi" | "ohmypi" => Ok(AppType::Omp),
             other => Err(AppError::localized(
                 "unsupported_app",
-                format!("不支持的应用标识: '{other}'。可选值: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi。"),
-                format!("Unsupported app id: '{other}'. Allowed: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi."),
+                format!("不支持的应用标识: '{other}'。可选值: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi, mcode, kimi, agy, omp。"),
+                format!("Unsupported app id: '{other}'. Allowed: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi, mcode, kimi, agy, omp."),
             )),
         }
     }
@@ -146,7 +164,7 @@ impl CommonConfigSnippets {
             AppType::OpenCode => self.opencode.as_ref(),
             AppType::OpenClaw => self.openclaw.as_ref(),
             AppType::Hermes => self.hermes.as_ref(),
-            AppType::Pi | AppType::Mcode => None,
+            AppType::Pi | AppType::Mcode | AppType::Kimi | AppType::Agy | AppType::Omp => None,
         }
     }
 
@@ -161,7 +179,7 @@ impl CommonConfigSnippets {
             AppType::OpenCode => self.opencode = snippet,
             AppType::OpenClaw => self.openclaw = snippet,
             AppType::Hermes => self.hermes = snippet,
-            AppType::Pi | AppType::Mcode => {}
+            AppType::Pi | AppType::Mcode | AppType::Kimi | AppType::Agy | AppType::Omp => {}
         }
     }
 }
@@ -171,7 +189,7 @@ impl CommonConfigSnippets {
 pub struct MultiAppConfig {
     #[serde(default = "default_version")]
     pub version: u32,
-    /// 应用管理器（claude/codex）
+    /// 应用管理器（claude/codex 等）
     #[serde(flatten)]
     pub apps: HashMap<String, ProviderManager>,
     /// 通用配置片段（按应用分治）
@@ -197,6 +215,9 @@ impl Default for MultiAppConfig {
         apps.insert("opencode".to_string(), ProviderManager::default());
         apps.insert("openclaw".to_string(), ProviderManager::default());
         apps.insert("hermes".to_string(), ProviderManager::default());
+        apps.insert("kimi".to_string(), ProviderManager::default());
+        apps.insert("agy".to_string(), ProviderManager::default());
+        apps.insert("omp".to_string(), ProviderManager::default());
 
         Self {
             version: 2,
@@ -225,13 +246,13 @@ impl MultiAppConfig {
             std::fs::read_to_string(&config_path).map_err(|e| AppError::io(&config_path, e))?;
 
         // 先解析为 Value，以便严格判定是否为 v1 结构；
-        // 满足：顶层同时包含 providers(object) + current(string)，且不包含 version/apps/mcp 关键键，即视为 v1
+        // 满足：顶层同时包含 providers(object) + current(string)，且不包含 version/apps 关键键，即视为 v1
         let mut value: serde_json::Value =
             serde_json::from_str(&content).map_err(|e| AppError::json(&config_path, e))?;
         let is_v1 = value.as_object().is_some_and(|map| {
             let has_providers = map.get("providers").map(|v| v.is_object()).unwrap_or(false);
             let has_current = map.get("current").map(|v| v.is_string()).unwrap_or(false);
-            // v1 的充分必要条件：有 providers 和 current，且 apps 不存在（version/mcp 可能存在但不作为 v2 判据）
+            // v1 的充分必要条件：有 providers 和 current，且 apps 不存在
             let has_apps = map.contains_key("apps");
             has_providers && has_current && !has_apps
         });
@@ -299,10 +320,13 @@ impl MultiAppConfig {
             log::info!(
                 "迁移通用配置：claude_common_config_snippet → common_config_snippets.claude"
             );
-            config.common_config_snippets.claude = Some(old_claude_snippet);
+            if config.common_config_snippets.claude.is_none() {
+                config.common_config_snippets.claude = Some(old_claude_snippet);
+            }
             updated = true;
         }
 
+        // 如果配置结构发生变化，保存更新后的配置
         if updated {
             log::info!("配置结构已更新，保存配置...");
             config.save()?;
@@ -314,16 +338,14 @@ impl MultiAppConfig {
     /// 保存配置到文件
     pub fn save(&self) -> Result<(), AppError> {
         let config_path = get_app_config_path();
-        // 先备份旧版（若存在）到 ~/.cc-switch/config.json.bak，再写入新内容
-        if config_path.exists() {
-            let backup_path = get_app_config_dir().join("config.json.bak");
-            if let Err(e) = copy_file(&config_path, &backup_path) {
-                log::warn!("备份 config.json 到 .bak 失败: {e}");
-            }
+
+        // 确保目录存在
+        if let Some(parent) = config_path.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| AppError::io(parent, e))?;
         }
 
-        write_json_file(&config_path, self)?;
-        Ok(())
+        // 使用安全的原子写入方式
+        write_json_file(&config_path, self)
     }
 
     /// 获取指定应用的管理器
@@ -331,16 +353,15 @@ impl MultiAppConfig {
         self.apps.get(app.as_str())
     }
 
-    /// 获取指定应用的管理器（可变引用）
+    /// 获取指定应用管理器的可变引用
     pub fn get_manager_mut(&mut self, app: &AppType) -> Option<&mut ProviderManager> {
         self.apps.get_mut(app.as_str())
     }
 
-    /// 确保应用存在
-    pub fn ensure_app(&mut self, app: &AppType) {
-        if !self.apps.contains_key(app.as_str()) {
-            self.apps
-                .insert(app.as_str().to_string(), ProviderManager::default());
+    /// 确保所有支持的应用都存在对应的管理器
+    pub fn ensure_all_apps(&mut self) {
+        for app in AppType::all() {
+            self.apps.entry(app.as_str().to_string()).or_default();
         }
     }
 }
@@ -360,9 +381,24 @@ mod tests {
             AppType::ClaudeDesktop
         );
         assert_eq!(
-            "claudeDesktop".parse::<AppType>().unwrap(),
+            "claudedesktop".parse::<AppType>().unwrap(),
             AppType::ClaudeDesktop
         );
         assert_eq!(AppType::ClaudeDesktop.as_str(), "claude-desktop");
+    }
+
+    #[test]
+    fn app_type_parses_kimi_agy_omp_aliases() {
+        assert_eq!("kimi".parse::<AppType>().unwrap(), AppType::Kimi);
+        assert_eq!("kimi-code".parse::<AppType>().unwrap(), AppType::Kimi);
+        assert_eq!(AppType::Kimi.as_str(), "kimi");
+
+        assert_eq!("agy".parse::<AppType>().unwrap(), AppType::Agy);
+        assert_eq!("antigravity".parse::<AppType>().unwrap(), AppType::Agy);
+        assert_eq!(AppType::Agy.as_str(), "agy");
+
+        assert_eq!("omp".parse::<AppType>().unwrap(), AppType::Omp);
+        assert_eq!("oh-my-pi".parse::<AppType>().unwrap(), AppType::Omp);
+        assert_eq!(AppType::Omp.as_str(), "omp");
     }
 }

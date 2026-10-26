@@ -54,8 +54,7 @@ impl Drop for TestHomeGuard {
     }
 }
 
-// =============================================================================
-// Parser Tests
+// ======================================================================// Parser Tests
 // =============================================================================
 
 #[test]
@@ -217,6 +216,19 @@ fn test_parse_rejects_config_url_up_front() {
     assert!(err.to_string().contains("configUrl"), "{err}");
 }
 
+/// 供应商链接对 Oh My Pi 明确拒绝，而不是落到「Invalid provider app type」。
+#[test]
+fn test_parse_provider_deeplink_refuses_omp_with_guidance() {
+    for app in ["omp", "ohmypi", "oh-my-pi", "oh_my_pi"] {
+        let url =
+            format!("ccswitch://v1/import?resource=provider&app={app}&name=Test&endpoint=https%3A%2F%2Fapi.example.com");
+        let err = parse_deeplink_url(&url).unwrap_err().to_string();
+        assert!(
+            err.contains("Oh My Pi provider page"),
+            "{app} should be sent to the Oh My Pi page, got: {err}"
+        );
+    }
+}
 /// 读取不清除，按编号确认才清除：前端读到后、显示前被打断（effect 重建、窗口销毁），
 /// 下次读取仍能拿到；期间来了新链接，迟到的旧确认不能把新链接清掉
 #[test]
@@ -1766,6 +1778,20 @@ fn test_deeplink_coding_plan_never_replaces_a_carried_script() {
 }
 
 #[test]
+fn test_deeplink_volcengine_plan_is_preselected_but_off() {
+    // 火山查额度要账号级 AccessKey，链接里没有：只预选套餐，不默认启用
+    let request = coding_plan_request("opencode", "https://ark.cn-beijing.volces.com/api/plan/v3");
+    let script = imported_usage_script(AppType::OpenCode, &request).unwrap();
+    assert!(!script.enabled);
+    assert_eq!(script.coding_plan_provider.as_deref(), Some("volcengine"));
+
+    let mut request = coding_plan_request("claude", "https://ark.cn-beijing.volces.com/api/coding");
+    request.usage_enabled = Some(true);
+    let script = imported_usage_script(AppType::Claude, &request).unwrap();
+    assert!(script.enabled, "usageEnabled=true 必须照办");
+}
+
+#[test]
 fn test_deeplink_non_plan_and_zenmux_outside_claude_stay_off() {
     let request = coding_plan_request("claude", "https://api.example.com/v1");
     assert!(imported_usage_script(AppType::Claude, &request).is_none());
@@ -1827,4 +1853,106 @@ fn test_codex_link_config_keeps_provider_settings_and_drops_global_ones() {
     assert!(doc["model_providers"]["custom"]
         .get("unknown_future_field")
         .is_none());
+}
+
+#[test]
+fn agy_deeplink_provider_config_precedence_and_protocol() {
+    let config = BASE64_URL_SAFE_NO_PAD.encode(serde_json::json!({
+        "env": {"GEMINI_API_KEY": "fixture", "GOOGLE_GEMINI_BASE_URL": "https://relay.example", "GEMINI_MODEL": "env-model", "NODE_OPTIONS": "untrusted"},
+        "config": {"model": {"name": "native-model"}, "unrelated": true}
+    }).to_string());
+    let url = format!("ccswitch://v1/import?resource=provider&app=agy&name=Test&config={config}&apiFormat=gemini_native");
+    let request = parse_deeplink_url(&url).unwrap();
+    let merged = parse_and_merge_config(&request).unwrap();
+    assert_eq!(merged.model.as_deref(), Some("native-model"));
+    assert_eq!(merged.api_key.as_deref(), Some("fixture"));
+    let provider = super::provider::build_provider_from_request(&AppType::Agy, &merged).unwrap();
+    assert_eq!(
+        provider.settings_config["config"]["model"]["name"],
+        "native-model"
+    );
+    assert!(provider.settings_config["env"]
+        .get("NODE_OPTIONS")
+        .is_none());
+    assert!(provider.settings_config["config"]
+        .get("unrelated")
+        .is_none());
+    let explicit = parse_deeplink_url(&format!(
+        "{url}&model=url-model&apiKey=url-key&endpoint=https://explicit.example"
+    ))
+    .unwrap();
+    let merged = parse_and_merge_config(&explicit).unwrap();
+    assert_eq!(merged.model.as_deref(), Some("url-model"));
+    assert_eq!(merged.api_key.as_deref(), Some("url-key"));
+    assert_eq!(merged.endpoint.as_deref(), Some("https://explicit.example"));
+    for format in ["anthropic", "openai_chat", "openai_responses"] {
+        assert!(parse_deeplink_url(&format!(
+            "ccswitch://v1/import?resource=provider&app=agy&name=Test&apiFormat={format}"
+        ))
+        .is_err());
+    }
+}
+
+#[test]
+fn agy_deeplink_accepts_flat_env_and_rejects_invalid_env() {
+    for (config, valid) in [
+        (
+            serde_json::json!({"GEMINI_API_KEY":"fixture", "GEMINI_BASE_URL":"https://relay.example", "GEMINI_MODEL":"flat-model"}),
+            true,
+        ),
+        (serde_json::json!({"env": []}), false),
+    ] {
+        let encoded = BASE64_URL_SAFE_NO_PAD.encode(config.to_string());
+        let request = parse_deeplink_url(&format!(
+            "ccswitch://v1/import?resource=provider&app=agy&name=Test&config={encoded}"
+        ))
+        .unwrap();
+        let result = parse_and_merge_config(&request);
+        assert_eq!(result.is_ok(), valid);
+        if valid {
+            let merged = result.unwrap();
+            assert_eq!(merged.model.as_deref(), Some("flat-model"));
+            assert_eq!(merged.endpoint.as_deref(), Some("https://relay.example"));
+        }
+    }
+}
+
+#[test]
+#[cfg(unix)]
+#[serial_test::serial]
+fn agy_deeplink_enabled_key_provider_stays_out_of_live_files() {
+    let _home = TestHomeGuard::new();
+    let state = AppState::new(Arc::new(Database::memory().unwrap()));
+    let request = parse_deeplink_url("ccswitch://v1/import?resource=provider&app=agy&name=Agy&endpoint=https://relay.example&apiKey=fixture&model=link-model&enabled=true").unwrap();
+    let id = super::provider::import_provider_from_deeplink(&state, request).unwrap();
+    // Antigravity cards have no "enable": enabled=true only imports the card.
+    let current = crate::mode::current::provider_for(
+        &state.db,
+        &AppType::Agy,
+        crate::mode::current::Purpose::Direct,
+    )
+    .unwrap();
+    assert_eq!(current, None);
+    // A key card never creates or changes the native settings: it only applies
+    // to agy started from "Open Terminal" with its private profile.
+    assert!(!crate::agy_config::settings_path().exists());
+    assert!(!crate::config::get_home_dir().join(".gemini/.env").exists());
+    let row = state.db.get_provider_by_id(&id, "agy").unwrap().unwrap();
+    let launch = crate::services::provider::agy_direct::terminal_launch(&row).unwrap();
+    assert_eq!(
+        launch.env[0],
+        ("GEMINI_API_KEY", Some("fixture".to_string()))
+    );
+    let private: serde_json::Value = serde_json::from_slice(
+        &std::fs::read(
+            launch
+                .gemini_dir
+                .unwrap()
+                .join("antigravity-cli/settings.json"),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(private["model"], "link-model");
+    assert_eq!(private["modelProvider"], "gemini");
 }

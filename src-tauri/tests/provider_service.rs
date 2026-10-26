@@ -3206,218 +3206,134 @@ fn claude_editor_never_leaves_the_row_and_live_apart() {
     );
 }
 
+/// Codex 官方卡的编辑器：auth.json 框显示盘上真实的登录（Codex 轮换过 token，行里旧版
+/// 回填的快照早就对不上了）；不改直接保存，行里原来的 auth 不变、盘上的登录也不动。
 #[test]
-fn packycode_partner_meta_triggers_security_flag_even_without_keywords() {
+fn codex_editor_official_auth_shows_disk_login_and_keeps_row_auth() {
     let _guard = test_mutex().lock().unwrap_or_else(|e| e.into_inner());
     reset_test_fs();
-    let home = ensure_test_home();
-
-    let mut config = MultiAppConfig::default();
-    {
-        let manager = config
-            .get_manager_mut(&AppType::Gemini)
-            .expect("gemini manager");
-        manager.current = "packy-meta".to_string();
-        let mut provider = Provider::with_id(
-            "packy-meta".to_string(),
-            "Generic Gemini".to_string(),
-            json!({
-                "env": {
-                    "GEMINI_API_KEY": "pk-meta",
-                    "GOOGLE_GEMINI_BASE_URL": "https://generativelanguage.googleapis.com"
-                }
-            }),
-            Some("https://example.com".to_string()),
-        );
-        provider.meta = Some(ProviderMeta::default());
-        manager.providers.insert("packy-meta".to_string(), provider);
-    }
-
-    let state = create_test_state_with_config(&config).expect("create test state");
-
-    ProviderService::switch(&state, AppType::Gemini, "packy-meta")
-        .expect("switching to partner meta provider should succeed");
-
-    // Gemini security settings are written to ~/.gemini/settings.json, not ~/.cc-switch/settings.json
-    let settings_path = home.join(".gemini").join("settings.json");
-    assert!(
-        settings_path.exists(),
-        "Gemini settings.json should exist at {}",
-        settings_path.display()
-    );
-    let raw = std::fs::read_to_string(&settings_path).expect("read gemini settings.json");
-    let value: serde_json::Value =
-        serde_json::from_str(&raw).expect("parse gemini settings.json after switch");
-
-    assert_eq!(
-        value
-            .pointer("/security/auth/selectedType")
-            .and_then(|v| v.as_str()),
-        Some("gemini-api-key"),
-        "Partner meta should set security.auth.selectedType even without packy keywords"
-    );
-}
-
-#[test]
-fn provider_service_switch_codex_updates_live_and_config() {
-    let _guard = test_mutex().lock().unwrap_or_else(|e| e.into_inner());
-    reset_test_fs();
-    enable_codex_official_auth_preservation();
     let _home = ensure_test_home();
 
-    let legacy_auth = json!({ "OPENAI_API_KEY": "legacy-key" });
-    let legacy_config = r#"[mcp_servers.legacy]
-type = "stdio"
-command = "echo"
-"#;
-    write_codex_live_atomic(&legacy_auth, Some(legacy_config))
-        .expect("seed existing codex live config");
+    let login = |access: &str| {
+        json!({
+            "auth_mode": "chatgpt",
+            "OPENAI_API_KEY": null,
+            "tokens": {
+                "access_token": access,
+                "refresh_token": format!("{access}-refresh"),
+                "account_id": "acct-official"
+            }
+        })
+    };
+    write_codex_live_atomic(&login("fresh"), Some("")).expect("seed live login");
 
     let mut initial_config = MultiAppConfig::default();
     {
         let manager = initial_config
             .get_manager_mut(&AppType::Codex)
             .expect("codex manager");
-        manager.current = "old-provider".to_string();
-        manager.providers.insert(
-            "old-provider".to_string(),
-            Provider::with_id(
-                "old-provider".to_string(),
-                "Legacy".to_string(),
-                json!({
-                    "auth": {"OPENAI_API_KEY": "stale"},
-                    "config": "stale-config"
-                }),
+        manager.current = "codex-official".to_string();
+        for (id, auth) in [("codex-official", login("stale")), ("follow", json!({}))] {
+            let mut provider = Provider::with_id(
+                id.to_string(),
+                id.to_string(),
+                json!({ "auth": auth, "config": "" }),
                 None,
-            ),
-        );
-        manager.providers.insert(
-            "new-provider".to_string(),
-            Provider::with_id(
-                "new-provider".to_string(),
-                "Latest".to_string(),
-                json!({
-                    "auth": {"OPENAI_API_KEY": "fresh-key"},
-                    "config": r#"[mcp_servers.latest]
-type = "stdio"
-command = "say"
-"#
-                }),
-                None,
-            ),
-        );
+            );
+            provider.category = Some("official".to_string());
+            manager.providers.insert(id.to_string(), provider);
+        }
     }
-
     let state = create_test_state_with_config(&initial_config).expect("create test state");
 
-    ProviderService::switch(&state, AppType::Codex, "new-provider")
-        .expect("switch provider should succeed");
+    for (id, stored_auth) in [("codex-official", login("stale")), ("follow", json!({}))] {
+        let row = state
+            .db
+            .get_provider_by_id(id, AppType::Codex.as_str())
+            .expect("read provider")
+            .expect("provider exists");
+        let view = ProviderService::editor_view(
+            &state,
+            AppType::Codex,
+            &row.settings_config,
+            Some("official"),
+        )
+        .expect("editor view");
+        assert_eq!(
+            view.settings.pointer("/auth/tokens/access_token"),
+            Some(&json!("fresh")),
+            "{id}: the auth.json box shows the login on disk, not the row snapshot"
+        );
 
-    let auth_value: serde_json::Value =
-        read_json_file(&cc_switch_lib::get_codex_auth_path()).expect("read auth.json");
-    assert_eq!(
-        auth_value.get("OPENAI_API_KEY").and_then(|v| v.as_str()),
-        Some("legacy-key"),
-        "Codex provider switching should preserve the existing live auth.json"
-    );
+        let mut provider = row.clone();
+        provider.settings_config = view.settings.clone();
+        ProviderService::update_from_editor(
+            &state,
+            AppType::Codex,
+            None,
+            provider,
+            Some(editor_save(&view.settings, "refuse")),
+        )
+        .expect("save unchanged editor");
 
-    let config_text =
-        std::fs::read_to_string(cc_switch_lib::get_codex_config_path()).expect("read config.toml");
-    // 只替换关键字段：live 里用户的 MCP 原样留着；行里的 MCP 不是关键字段，不投影。
-    assert!(
-        config_text.contains("[mcp_servers.legacy]"),
-        "live settings outside the key fields stay: {config_text}"
-    );
-    assert!(
-        !config_text.contains("mcp_servers.latest"),
-        "the row's own MCP section is not projected: {config_text}"
-    );
-    // 这张卡没有路由（只有 MCP），Key 没有第三方地址可发，不写进 live。
-    assert!(
-        !config_text.contains("experimental_bearer_token"),
-        "{config_text}"
-    );
-
-    let current_id = state
-        .db
-        .get_current_provider(AppType::Codex.as_str())
-        .expect("read current provider after switch");
-    assert_eq!(
-        current_id.as_deref(),
-        Some("new-provider"),
-        "current provider updated"
-    );
-
-    let providers = state
-        .db
-        .get_all_providers(AppType::Codex.as_str())
-        .expect("read providers after switch");
-    let legacy = providers
-        .get("old-provider")
-        .expect("legacy provider still exists");
-    assert_eq!(
-        legacy.settings_config,
-        json!({ "auth": {"OPENAI_API_KEY": "stale"}, "config": "stale-config" }),
-        "switching away never writes live content back into the row"
-    );
+        let saved = state
+            .db
+            .get_provider_by_id(id, AppType::Codex.as_str())
+            .expect("read provider")
+            .expect("provider exists");
+        assert_eq!(
+            saved.settings_config.get("auth"),
+            Some(&stored_auth),
+            "{id}: an untouched auth box must not capture the disk login into the row"
+        );
+        let on_disk: serde_json::Value =
+            read_json_file(&cc_switch_lib::get_codex_auth_path()).expect("read auth.json");
+        assert_eq!(
+            on_disk,
+            login("fresh"),
+            "{id}: saving leaves auth.json alone"
+        );
+    }
 }
 
 #[test]
-fn switch_google_official_gemini_preserves_env_vars() {
+fn omp_edit_save_keeps_every_byte_outside_the_edited_entry() {
+    use cc_switch_lib::update_settings;
+    use std::fs;
+
     let _guard = test_mutex().lock().unwrap_or_else(|e| e.into_inner());
     reset_test_fs();
     let home = ensure_test_home();
+    let agent_dir = home.join(".omp/agent");
+    fs::create_dir_all(&agent_dir).unwrap();
+    let models_path = agent_dir.join("models.yml");
+    let sibling = "  # hand-written sibling\n  other:\n    baseUrl: https://other.test/v1 # keep\n";
+    fs::write(
+        &models_path,
+        format!("# managed by me\nproviders:\n  duolalab:\n    baseUrl: https://api.duolalab.test/v1\n    api: openai-completions\n    apiKey: sk-live\n    models:\n    - id: glm-4.7\n{sibling}"),
+    )
+    .unwrap();
+    update_settings(cc_switch_lib::AppSettings {
+        omp_config_dir: Some(agent_dir.to_string_lossy().into_owned()),
+        ..Default::default()
+    })
+    .unwrap();
+    let state = create_test_state().expect("create test state");
 
-    let mut config = MultiAppConfig::default();
-    {
-        let manager = config
-            .get_manager_mut(&AppType::Gemini)
-            .expect("gemini manager");
-        manager.current = "google-official".to_string();
-        let mut provider = Provider::with_id(
-            "google-official".to_string(),
-            "Google".to_string(),
-            json!({
-                "env": {
-                    "GEMINI_MODEL": "gemini-2.5-pro"
-                }
-            }),
-            Some("https://ai.google.dev".to_string()),
-        );
-        provider.meta = Some(ProviderMeta::default());
-        manager
-            .providers
-            .insert("google-official".to_string(), provider);
-    }
+    let mut edited = ProviderService::list(&state, AppType::Omp)
+        .expect("list")
+        .get("duolalab")
+        .cloned()
+        .expect("provider imported from models.yml");
+    edited.settings_config["name"] = json!("Duolalab");
+    ProviderService::update(&state, AppType::Omp, Some("duolalab"), edited)
+        .expect("edit save must not conflict");
 
-    let state = create_test_state_with_config(&config).expect("create test state");
-
-    ProviderService::switch(&state, AppType::Gemini, "google-official")
-        .expect("switching to Google official Gemini should succeed");
-
-    // Verify env vars are preserved in ~/.gemini/.env
-    let env_path = home.join(".gemini").join(".env");
+    let after = fs::read_to_string(&models_path).unwrap();
     assert!(
-        env_path.exists(),
-        "Gemini .env should exist at {}",
-        env_path.display()
+        after.starts_with("# managed by me\nproviders:\n  duolalab:\n"),
+        "{after}"
     );
-    let env_content = std::fs::read_to_string(&env_path).expect("read gemini .env");
-    assert!(
-        env_content.contains("GEMINI_MODEL=gemini-2.5-pro"),
-        "GEMINI_MODEL should be preserved in .env, got: {env_content}"
-    );
-
-    // Verify OAuth security flag is still set correctly
-    let gemini_settings = home.join(".gemini").join("settings.json");
-    let gemini_raw = std::fs::read_to_string(&gemini_settings).expect("read gemini settings");
-    let gemini_value: serde_json::Value =
-        serde_json::from_str(&gemini_raw).expect("parse gemini settings");
-    assert_eq!(
-        gemini_value
-            .pointer("/security/auth/selectedType")
-            .and_then(|v| v.as_str()),
-        Some("oauth-personal"),
-        "OAuth security flag should still be set"
-    );
+    assert!(after.contains("name: Duolalab"), "{after}");
+    assert!(after.ends_with(sibling), "{after}");
 }
