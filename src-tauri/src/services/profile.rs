@@ -79,6 +79,12 @@ impl ProfileScope {
     }
 }
 
+/// 提示词槽位的「拍到时没有启用中的提示词」标记（应用时停用当前启用项）。
+///
+/// 不能用 None 表示：None 已约定为「该侧从未拍过、不动」。提示词 id 不会是空串；
+/// 旧版读到它会当作已删除的提示词跳过并给提示，不会误改配置。
+pub const NO_ACTIVE_PROMPT: &str = "";
+
 /// 按 app 分槽的载荷容器；字段名与 AppType 的 serde 形式一致
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(default)]

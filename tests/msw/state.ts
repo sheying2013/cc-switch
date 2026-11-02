@@ -69,6 +69,7 @@ const createDefaultProviders = (): ProvidersByApp => ({
   pi: {},
   mcode: {},
   kimi: {},
+  dsh: {},
   agy: {},
   omp: {},
 });
@@ -85,6 +86,7 @@ const createDefaultCurrent = (): CurrentProviderState => ({
   pi: "",
   mcode: "",
   kimi: "",
+  dsh: "",
   agy: "",
   omp: "",
 });

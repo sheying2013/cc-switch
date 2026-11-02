@@ -26,6 +26,7 @@ pub enum AppType {
     Pi,
     Mcode,
     Kimi,
+    Dsh,
     Agy,
     Omp,
 }
@@ -44,6 +45,7 @@ impl AppType {
             AppType::Pi => "pi",
             AppType::Mcode => "mcode",
             AppType::Kimi => "kimi",
+            AppType::Dsh => "dsh",
             AppType::Agy => "agy",
             AppType::Omp => "omp",
         }
@@ -63,6 +65,7 @@ impl AppType {
                 | AppType::Pi
                 | AppType::Mcode
                 | AppType::Kimi
+                | AppType::Dsh
                 | AppType::Omp
         )
     }
@@ -95,6 +98,7 @@ impl AppType {
             AppType::Pi,
             AppType::Mcode,
             AppType::Kimi,
+            AppType::Dsh,
             AppType::Agy,
             AppType::Omp,
         ]
@@ -119,12 +123,13 @@ impl FromStr for AppType {
             "pi" => Ok(AppType::Pi),
             "mcode" => Ok(AppType::Mcode),
             "kimi" | "kimi-code" => Ok(AppType::Kimi),
+            "dsh" | "deepseek-harness" => Ok(AppType::Dsh),
             "agy" | "antigravity" | "antigravity-cli" => Ok(AppType::Agy),
             "omp" | "oh-my-pi" | "oh_my_pi" | "ohmypi" => Ok(AppType::Omp),
             other => Err(AppError::localized(
                 "unsupported_app",
-                format!("不支持的应用标识: '{other}'。可选值: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi, mcode, kimi, agy, omp。"),
-                format!("Unsupported app id: '{other}'. Allowed: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi, mcode, kimi, agy, omp."),
+                format!("不支持的应用标识: '{other}'。可选值: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi, mcode, kimi, dsh, agy, omp。"),
+                format!("Unsupported app id: '{other}'. Allowed: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi, mcode, kimi, dsh, agy, omp."),
             )),
         }
     }
@@ -164,7 +169,12 @@ impl CommonConfigSnippets {
             AppType::OpenCode => self.opencode.as_ref(),
             AppType::OpenClaw => self.openclaw.as_ref(),
             AppType::Hermes => self.hermes.as_ref(),
-            AppType::Pi | AppType::Mcode | AppType::Kimi | AppType::Agy | AppType::Omp => None,
+            AppType::Pi
+            | AppType::Mcode
+            | AppType::Kimi
+            | AppType::Dsh
+            | AppType::Agy
+            | AppType::Omp => None,
         }
     }
 
@@ -179,7 +189,12 @@ impl CommonConfigSnippets {
             AppType::OpenCode => self.opencode = snippet,
             AppType::OpenClaw => self.openclaw = snippet,
             AppType::Hermes => self.hermes = snippet,
-            AppType::Pi | AppType::Mcode | AppType::Kimi | AppType::Agy | AppType::Omp => {}
+            AppType::Pi
+            | AppType::Mcode
+            | AppType::Kimi
+            | AppType::Dsh
+            | AppType::Agy
+            | AppType::Omp => {}
         }
     }
 }
@@ -216,6 +231,7 @@ impl Default for MultiAppConfig {
         apps.insert("openclaw".to_string(), ProviderManager::default());
         apps.insert("hermes".to_string(), ProviderManager::default());
         apps.insert("kimi".to_string(), ProviderManager::default());
+        apps.insert("dsh".to_string(), ProviderManager::default());
         apps.insert("agy".to_string(), ProviderManager::default());
         apps.insert("omp".to_string(), ProviderManager::default());
 
@@ -388,10 +404,14 @@ mod tests {
     }
 
     #[test]
-    fn app_type_parses_kimi_agy_omp_aliases() {
+    fn app_type_parses_kimi_dsh_agy_omp_aliases() {
         assert_eq!("kimi".parse::<AppType>().unwrap(), AppType::Kimi);
         assert_eq!("kimi-code".parse::<AppType>().unwrap(), AppType::Kimi);
         assert_eq!(AppType::Kimi.as_str(), "kimi");
+
+        assert_eq!("dsh".parse::<AppType>().unwrap(), AppType::Dsh);
+        assert_eq!("deepseek-harness".parse::<AppType>().unwrap(), AppType::Dsh);
+        assert_eq!(AppType::Dsh.as_str(), "dsh");
 
         assert_eq!("agy".parse::<AppType>().unwrap(), AppType::Agy);
         assert_eq!("antigravity".parse::<AppType>().unwrap(), AppType::Agy);

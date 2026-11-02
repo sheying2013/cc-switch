@@ -29,6 +29,9 @@ pub(crate) fn provider_exists_in_live_config(
         AppType::Hermes => crate::hermes_config::get_providers()
             .map(|providers| providers.contains_key(provider_id)),
         AppType::Pi => crate::pi_config::pi_provider_exists(provider_id),
+        AppType::Dsh => {
+            crate::dsh_config::get_providers().map(|providers| providers.contains_key(provider_id))
+        }
         AppType::Kimi => {
             crate::kimi_config::get_providers().map(|providers| providers.contains_key(provider_id))
         }
@@ -305,6 +308,7 @@ fn settings_contain_common_config(app_type: &AppType, settings: &Value, snippet:
         | AppType::Pi
         | AppType::Mcode
         | AppType::Kimi
+        | AppType::Dsh
         | AppType::Agy
         | AppType::Omp
         | AppType::ClaudeDesktop => false,
@@ -384,6 +388,7 @@ pub(crate) fn remove_common_config_from_settings(
         | AppType::Pi
         | AppType::Mcode
         | AppType::Kimi
+        | AppType::Dsh
         | AppType::ClaudeDesktop
         | AppType::Agy
         | AppType::Omp => Ok(settings.clone()),
@@ -701,6 +706,9 @@ pub(crate) fn write_live_snapshot(app_type: &AppType, provider: &Provider) -> Re
             crate::hermes_config::set_provider(&provider.id, provider.settings_config.clone())?;
             log::debug!("Hermes provider '{}' written to live config", provider.id);
         }
+        AppType::Dsh => {
+            crate::dsh_config::set_provider(&provider.id, provider.settings_config.clone())?
+        }
         AppType::Kimi => {
             crate::kimi_config::set_provider(&provider.id, provider.settings_config.clone())?
         }
@@ -834,6 +842,26 @@ pub(crate) fn sync_current_provider_for_app_respecting_mode(
     sync_live_for_provider_respecting_mode(state, app_type, provider, None).map(Some)
 }
 
+/// Populate newly encountered DSH profiles with managed providers and enabled MCP servers.
+/// The native writer records completion locally so later native deletions remain intentional.
+pub(crate) fn initialize_dsh_profiles(state: &AppState) -> Result<(), AppError> {
+    let providers = state
+        .db
+        .get_all_providers("dsh")?
+        .into_iter()
+        .filter(|(_, provider)| {
+            provider
+                .meta
+                .as_ref()
+                .and_then(|meta| meta.live_config_managed)
+                == Some(true)
+        })
+        .map(|(id, provider)| (id, provider.settings_config))
+        .collect();
+    let servers = indexmap::IndexMap::new();
+    crate::dsh_config::initialize_profiles(&providers, &servers)
+}
+
 /// Sync current provider to live configuration
 ///
 /// 使用有效的当前供应商 ID（验证过存在性）。
@@ -843,12 +871,15 @@ pub(crate) fn sync_current_provider_for_app_respecting_mode(
 /// For additive mode apps (OpenCode), all providers are synced instead of just the current one.
 pub fn sync_current_to_live(state: &AppState) -> Result<(), AppError> {
     let mut failures = Vec::new();
+    if let Err(error) = initialize_dsh_profiles(state) {
+        failures.push(format!("provider/dsh: {error}"));
+    }
 
     // Sync providers based on mode
     for app_type in AppType::all() {
         if matches!(
             app_type,
-            AppType::Pi | AppType::Mcode | AppType::Kimi | AppType::Omp
+            AppType::Pi | AppType::Mcode | AppType::Kimi | AppType::Dsh | AppType::Omp
         ) {
             continue;
         }
@@ -992,6 +1023,9 @@ pub fn read_live_settings(app_type: AppType) -> Result<Value, AppError> {
         }
         AppType::Mcode => Ok(json!(crate::mcode_config::get_providers()?)),
         AppType::Kimi => Ok(json!(crate::kimi_config::get_providers()?)),
+        AppType::Dsh => {
+            Ok(json!(crate::dsh_config::get_providers()?))
+        }
         AppType::Pi => Err(AppError::InvalidInput(
             "Pi providers are read from Pi's native models file".to_string(),
         )),
@@ -1119,6 +1153,7 @@ pub fn import_default_config(state: &AppState, app_type: AppType) -> Result<bool
         | AppType::Pi
         | AppType::Mcode
         | AppType::Kimi
+        | AppType::Dsh
         | AppType::Omp => {
             unreachable!("additive mode apps are handled by early return")
         }

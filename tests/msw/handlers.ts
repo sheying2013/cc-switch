@@ -1,6 +1,5 @@
 import { http, HttpResponse } from "msw";
 import type { AppId } from "@/lib/api/types";
-import { MODELS_DEV_API_URL } from "@/lib/modelsDev";
 import type { Provider, Settings } from "@/types";
 import {
   addProvider,
@@ -47,7 +46,9 @@ const withJson = async <T>(request: Request): Promise<T> => {
 const success = <T>(payload: T) => HttpResponse.json(payload as any);
 
 export const handlers = [
-  http.get(MODELS_DEV_API_URL, () => success({})),
+  http.post(`${TAURI_ENDPOINT}/fetch_models_dev`, () =>
+    success(JSON.stringify({})),
+  ),
   http.post(`${TAURI_ENDPOINT}/get_migration_result`, () => success(false)),
   http.post(`${TAURI_ENDPOINT}/list_profiles`, () => success([])),
   http.post(`${TAURI_ENDPOINT}/get_providers`, async ({ request }) => {
@@ -474,6 +475,16 @@ export const handlers = [
       accounts: [],
     });
   }),
+  http.post(`${TAURI_ENDPOINT}/claude_account_submit_paste`, () =>
+    success(null),
+  ),
+  http.post(`${TAURI_ENDPOINT}/get_claude_login_switch`, () =>
+    success({
+      active: true,
+      blocked: null,
+      live: null,
+    }),
+  ),
   http.post(`${TAURI_ENDPOINT}/get_claude_desktop_status`, () =>
     success({
       supported: true,

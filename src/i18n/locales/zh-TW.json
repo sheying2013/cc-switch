@@ -162,6 +162,8 @@
     "editClaudeProvider": "編輯 Claude Code 供應商",
     "editCodexProvider": "編輯 Codex 供應商",
     "configError": "設定錯誤",
+    "liveConfigReadFailed": "無法讀取 {{app}} 設定檔",
+    "liveConfigReadFailedHint": "修好設定檔之前，新增、移除供應商都會失敗。",
     "notConfigured": "未設定官網位址",
     "applyToClaudePlugin": "套用至 Claude 外掛程式",
     "removeFromClaudePlugin": "從 Claude 外掛程式移除",
@@ -179,7 +181,8 @@
     "configureUsage": "設定用量查詢",
     "managedByHermes": "Hermes 託管",
     "managedByHermesHint": "該專案定義於 Hermes 的 providers: dict，請在 Hermes Web UI 中編輯或刪除。",
-    "openTerminal": "開啟終端機",
+    "openTerminal": "以此供應商開啟終端機",
+    "openTerminalIsolated": "以此供應商開啟終端機（環境隔離）",
     "openTerminalWithProvider": "使用此供應商開啟終端機",
     "terminalOpened": "終端機已開啟",
     "terminalOpenFailed": "開啟終端機失敗",
@@ -195,6 +198,10 @@
       "recent": "最近用過",
       "forget": "從最近用過中移除",
       "confirm": "開啟終端機",
+      "skipPermissions": "略過權限確認",
+      "extraArgs": "附加參數（選填）",
+      "extraArgsPlaceholder": "例如 --debug --append-system-prompt \"簡潔回答\"",
+      "extraArgsHint": "接在啟動命令後面，只用於這次開啟的終端機。用空格分隔，含空格的值用引號括起來。",
       "agySwitchTitle": "會切換 agy 的登入",
       "agySwitchBody": "開啟前把 agy 的登入切換到 {{account}}，之後新開的 agy 都用這個帳號。",
       "agySwitchRunning": "偵測到 agy 正在執行：已開啟的 agy 仍使用原帳號，還可能把原帳號寫回去，最好先結束它們。"
@@ -231,6 +238,29 @@
         "oauthTitle": "OAuth 驗證模式",
         "oauthHint": "Google 官方使用 OAuth 個人驗證，無需填寫 API Key。首次使用時會自動開啟瀏覽器進行登入。",
         "apiKeyPlaceholder": "請輸入 Gemini API Key"
+      },
+      "claudeAccount": {
+        "label": "登入方式",
+        "default": "跟隨 Claude Code 登入",
+        "defaultDescription": "帳號會隨 Claude Code 目前登入而變更",
+        "missing": "不在這台電腦上的帳號",
+        "manage": "新增或管理 Claude 帳號",
+        "helpTerminal": "設定裡覆寫了 Claude 設定目錄，切到這張卡不會切換 Claude Code 的登入，請從卡片「開啟終端機」使用選取的帳號。",
+        "helpWsl": "Claude 設定目錄在 WSL 裡，暫不支援 Claude 帳號，切到這張卡不會切換 Claude Code 的登入。",
+        "help": "切到這張卡後，Claude Code 的登入會即時換成選取的帳號，正在執行的工作階段也一樣。想同時用幾個帳號，從卡片「開啟終端機」。",
+        "claudeAccount": "Claude 帳號",
+        "reauthBadge": "需要重新登入",
+        "terminalHint": "從卡片開啟終端機使用",
+        "wslHint": "WSL 暫不支援",
+        "plan": {
+          "pro": "Pro",
+          "max": "Max",
+          "max5x": "Max 5x",
+          "max20x": "Max 20x",
+          "team": "Team",
+          "teamPremium": "Team 進階席位",
+          "enterprise": "Enterprise"
+        }
       }
     },
     "duplicateLiveIdsLoadFailed": "讀取設定中的供應商識別碼失敗，請先修復設定後再試",
@@ -701,6 +731,15 @@
       "saved": "已儲存",
       "unsavedChanges": "請先儲存設定",
       "saveBeforeSync": "請先儲存設定，再使用上傳/下載。",
+      "clear": "清除設定",
+      "clearing": "清除中...",
+      "clearSuccess": "已清除本機的 WebDAV 設定",
+      "clearFailed": "清除設定失敗：{{error}}",
+      "clearConfirm": {
+        "title": "清除 WebDAV 設定",
+        "message": "將從本機刪除已儲存的 WebDAV 位址、帳號、密碼和遠端目錄，並停止自動同步。雲端已上傳的資料不會被刪除。",
+        "confirm": "清除"
+      },
       "fetchingRemote": "取得遠端資訊...",
       "fetchRemoteFailed": "取得遠端資訊失敗，請檢查設定和網路後重試。",
       "confirmDownload": {
@@ -1253,6 +1292,7 @@
     "groupByTime": "按時間",
     "groupByProject": "按專案",
     "desktopNote": "Claude Desktop 沒有單獨的工作階段記錄，這裡顯示 Claude Code 的工作階段。",
+    "dshMergedNote": "DeepSeek Harness 的 Web 和 Desktop 共用同一份工作階段記錄，這裡合併顯示。",
     "matchCount": "符合 {{count}} 個工作階段",
     "totalCount": "共 {{count}} 個工作階段",
     "selectAllMatches": "全選符合結果",
@@ -1496,6 +1536,13 @@
     "openReleaseNotesFailed": "開啟更新日誌失敗："
   },
   "providerForm": {
+    "nativeConfig": {
+      "title": "設定檔 {{path}}（只顯示這一家）",
+      "hint": "按應用自己的格式顯示這一家在檔案裡的部分，儲存後寫進這個檔案；預設模型等全域設定不在這裡。在這裡寫的註解不會儲存。",
+      "invalid": "{{format}} 格式錯誤：{{error}}",
+      "scope": "這裡只能寫 {{section}} 這一個節點；供應商標識請在上方修改。",
+      "schema": "有欄位的類型不對，請對照上方表單檢查。"
+    },
     "supplierName": "供應商名稱",
     "supplierNameRequired": "供應商名稱 *",
     "supplierNamePlaceholder": "例如：Anthropic 官方",
@@ -1665,6 +1712,11 @@
     "customUserAgentHelp": "替換轉發到供應商的請求裡的 User-Agent。",
     "localProxyRequestOverridesHelp": "作用於格式轉換後發給上游的請求。",
     "apiFormatHelp": "看供應商原生支援哪種協定：Anthropic Messages 原樣轉發、不轉換格式；其餘三種由路由轉成 Anthropic Messages。",
+    "reasoningEffort": "思考檔位",
+    "reasoningEffortHelp": "經路由轉成 OpenAI 格式時，用戶端選的思考檔位怎麼送給上游。自動：按上游支援的檔位送出，認不出的上游最多送 high，關掉思考時不送。原樣送出：用戶端選哪檔送哪檔，上游不支援 xhigh 或 max 時會報錯。不送出：上游因這個參數報錯時使用。",
+    "reasoningEffortAuto": "自動（建議）",
+    "reasoningEffortOff": "不送出",
+    "reasoningEffortPassthrough": "原樣送出",
     "directModeFormatInUse": "這張卡正在直連使用：改成這種格式後儲存，請求會失敗。請先切到路由或聚合。",
     "directModeFormatSwitch": "直連模式下用不了這種格式，切到路由或聚合後才能用這張卡。"
   },
@@ -1711,7 +1763,6 @@
   "codexOauth": {
     "authStatus": "驗證狀態",
     "notAuthenticated": "未驗證",
-    "loginWithChatGPT": "使用 ChatGPT 登入",
     "loginRequired": "請先登入 ChatGPT 帳號",
     "statusLoading": "正在載入帳號狀態...",
     "statusUnavailable": "狀態無法使用",
@@ -1869,6 +1920,10 @@
     "subagentReasoningEffortDefault": "預設強度",
     "subagentModelHint": "Codex 派出的子代理預設使用的模型和推理強度。留空時沿用主代理的；只填模型時使用該模型自己的預設強度。聚合模式下不生效，改用聚合頁籤「聚合設定」裡的子代理模型。",
     "subagentModelNotInCatalog": "該模型不在模型列表中：Codex 取得不到它的上下文視窗；經路由轉成 Chat / Anthropic 協定時會被換成預設模型。",
+    "agentMaxThreadsLabel": "子代理並行上限",
+    "agentMaxThreadsHint": "一個 Codex 會話裡最多同時開多少個子代理（不含主代理）。這是 Codex 的全域設定，寫進 config.toml 的 [agents] max_threads，切換供應商時保持不變。留空用 Codex 預設值：經典子 agent 工具 6 個，新版工具 3 個。Codex 不支援不限，最小為 1；開得越多，同時消耗的額度越多。重新開啟 Codex 後生效。",
+    "agentMaxThreadsPlaceholder": "留空則用 Codex 預設值",
+    "agentMaxThreadsV2Override": "config.toml 的 [features.multi_agent_v2] 寫了總數 {{total}}（含主代理），使用新版子 agent 工具時以它為準。",
     "autoReviewModelLabel": "自動審批模型",
     "autoReviewModelHint": "Codex 開了自動審批（Approve for me）時，判斷操作能不能放行所用的模型。審批請求和主對話發給同一家，所以只能選這張卡模型列表裡的。聚合模式下不生效，改用聚合頁籤「聚合設定」裡的自動審批模型。修改後需要重新啟動 Codex。",
     "autoReviewModelCodexDefault": "Codex 預設（codex-auto-review）",
@@ -1958,9 +2013,6 @@
     "extraOptionValuePlaceholder": "600000",
     "noExtraOptions": "暫無額外選項",
     "noModelOptions": "模型選項，點擊 + 新增",
-    "modelLimits": "Token 限制",
-    "limitContext": "上下文",
-    "limitOutput": "輸出",
     "modelExtraFields": "模型屬性",
     "noModelExtraFields": "模型屬性 (variants, cost 等)，點擊 + 新增",
     "modelExtraFieldKeyPlaceholder": "variants",
@@ -2012,6 +2064,7 @@
     "universalDetail": "同步到 Claude Code、Codex、Gemini CLI",
     "manageUniversal": "管理現有的統一供應商 ›",
     "loginWith": {
+      "deepseek": "使用 DeepSeek 帳號登入",
       "kimi": "使用 Kimi 帳號登入",
       "claude": "用 Claude 帳號登入",
       "chatgpt": "用 ChatGPT 帳號登入",
@@ -2098,6 +2151,11 @@
       "short": "工作階段日誌",
       "label": "{{app}} · 工作階段日誌",
       "hint": "未開啟路由時從用戶端的工作階段日誌讀取，無法區分是哪家供應商"
+    },
+    "sessionAccountProvider": {
+      "short": "DeepSeek 帳號",
+      "label": "{{app}} · DeepSeek 帳號（OAuth）",
+      "hint": "從工作階段記錄讀取，使用的是 DeepSeek 帳號登入；Web 和 Desktop 共用這份登入，用量合併統計"
     },
     "stream": "串流",
     "nonStream": "非串流",
@@ -2286,6 +2344,17 @@
       "title": "顯示",
       "currency": "幣別",
       "rate": "匯率",
+      "rateSource": "匯率來源",
+      "rateSources": {
+        "auto": "自動取得",
+        "manual": "手動填寫"
+      },
+      "rateAutoHint": "每天自動取得一次，只用於換算顯示；費用仍以美元記錄。",
+      "rateAutoUpdated": "上次更新：{{time}}",
+      "rateAutoNever": "尚未取得匯率",
+      "rateAutoFailed": "自動取得失敗，暫用上次的匯率",
+      "rateAttribution": "匯率資料由 {{provider}} 提供。",
+      "rateRefresh": "立即更新",
       "rateHint": "手動填寫，只用於換算顯示；費用仍以美元記錄。",
       "rateInvalid": "請輸入大於 0 的數字",
       "approxNote": "換算後的金額，滑鼠移上去可看美元原值。",
@@ -2399,7 +2468,7 @@
       "scanTitle": "自動掃描工作階段日誌",
       "scanHelpTitle": "工作階段日誌是什麼",
       "scanHelp": "各應用程式寫在本機的工作階段記錄。cc switch live 從中讀取用量，不開路由也有資料。",
-      "coverage": "涵蓋 7 個應用程式：{{apps}}",
+      "coverage": "涵蓋 {{total}} 個應用程式：{{apps}}",
       "cadenceOn": "啟動時掃描一次，背景每 10 分鐘一次；開啟用量頁時立即掃描，之後依所選間隔掃描",
       "cadenceOff": "自動掃描已關閉，只在點「立即同步」時掃描",
       "unsupported": "Hermes、OpenClaw 暫不支援用量統計",
@@ -2635,7 +2704,7 @@
       "jsonConfig": "完整的 JSON 設定",
       "jsonConfigOrPrefix": "完整的 JSON 設定或者使用",
       "tomlConfigOrPrefix": "完整的 TOML 設定或者使用",
-      "jsonPlaceholder": "{\n    \"type\": \"stdio\",\n    \"command\": \"uvx\",\n    \"args\": [\"mcp-server-fetch\"]\n}",
+      "jsonPlaceholder": "{\n  \"type\": \"stdio\",\n  \"command\": \"uvx\",\n  \"args\": [\"mcp-server-fetch\"]\n}",
       "tomlConfig": "完整的 TOML 設定",
       "tomlPlaceholder": "type = \"stdio\"\ncommand = \"uvx\"\nargs = [\"mcp-server-fetch\"]",
       "useWizard": "設定精靈",
@@ -2687,6 +2756,9 @@
       "tomlInvalid": "TOML 格式錯誤，請檢查",
       "commandRequired": "請填寫命令",
       "singleServerObjectRequired": "此處只需單個伺服器物件，請不要貼上包含 mcpServers 的整份設定",
+      "piSseUnsupported": "Pi 不支援 SSE 連線方式的 MCP 伺服器，請改用 HTTP（streamable HTTP）",
+      "piInvalidName": "Pi 的 MCP 伺服器名稱只能包含字母、數字、_ 和 -：{{id}}",
+      "piNameConflict": "Pi 會把只差 - 和 _ 的伺服器名稱視為同一個：{{id}} 與已有的 {{other}} 衝突",
       "saveFailed": "儲存失敗",
       "deleteFailed": "刪除失敗"
     },
@@ -3805,6 +3877,7 @@
     "extraUsage": "超額用量",
     "expired": "工作階段已過期",
     "expiredHint": "請執行 {{tool}} 命令重新整理登入",
+    "expiredHintAccounts": "請在授權中心重新登入這個帳號",
     "queryFailed": "查詢失敗",
     "refresh": "重新整理"
   },
@@ -4006,7 +4079,6 @@
       "routing": "路由中",
       "currentDefault": "目前預設",
       "defaultAfterSwitch": "切換後預設",
-      "current": "目前",
       "default": "預設"
     },
     "action": {
@@ -4023,7 +4095,8 @@
       "edit": "編輯 {{name}}",
       "more": "{{name}} 的更多操作",
       "moveUp": "{{name}} 上移一位",
-      "moveDown": "{{name}} 下移一位"
+      "moveDown": "{{name}} 下移一位",
+      "openTerminal": "用 {{name}} 開啟終端機"
     },
     "chip": {
       "official": "官方",
@@ -4043,7 +4116,6 @@
       "defaultWhileRouting": "正在路由時，預設就是路由到的那家；切換到聚合模式時可以另選。",
       "needsRoute": "需要路由：{{reason}}，不能直連。",
       "defaultCannotRemove": "預設那家不能移除，先把別家設為預設。",
-      "currentCannotRemove": "正在用的這家不能移除，先啟用別家。",
       "inUseCannotDelete": "正在用的這家不能刪除，先切到別家。",
       "directDefaultCannotDelete": "退出路由後會回到這家，所以不能刪除。先在直連頁對別家點「回到直連並使用」，再刪除。",
       "noFailover": "官方帳號不進故障轉移佇列：它用客戶端自己的登入，不能和別家輪換。"
@@ -4204,12 +4276,13 @@
       "copilotHelp": "用於 Claude Code、Claude Desktop 的 GitHub Copilot 預設。沒指定帳號的供應商用「預設」帳號。",
       "chatgptHelp": "用於 Claude Code、Claude Desktop 的 ChatGPT 預設，以及 Codex 官方登入綁定。沒指定帳號的供應商用「預設」帳號。",
       "xaiHelp": "用於 Claude Code、Claude Desktop、Codex 的 xAI 預設。沒指定帳號的供應商用「預設」帳號。",
-      "agyHelp": "Antigravity CLI（agy）的官方登入。agy 同時只能登入一個帳號，「切換」會把 agy 的登入換成選中的帳號，之後新開的 agy 都用它。agy 裡原本登入的帳號會自動收進這裡，切走也不會遺失。"
+      "agyHelp": "Antigravity CLI（agy）的官方登入。agy 同時只能登入一個帳號，「切換」會把 agy 的登入換成選中的帳號，之後新開的 agy 都用它。agy 裡原本登入的帳號會自動收進這裡，切走也不會遺失。",
+      "claudeHelpTerminal": "Claude Code 的官方訂閱帳號（Pro / Max / Team）。設定裡覆寫了 Claude 設定目錄，切卡不會切換 Claude Code 的登入；在官方卡上選一個帳號，再從卡片「開啟終端機」使用。",
+      "claudeHelpWsl": "Claude Code 的官方訂閱帳號（Pro / Max / Team）。Claude 設定目錄在 WSL 裡時暫不支援，後續會跟進。",
+      "claudeHelp": "Claude Code 的官方訂閱帳號（Pro / Max / Team）。在 Claude 官方卡上選一個帳號，切到這張卡後，Claude Code 的登入會即時換成這個帳號；想同時用幾個帳號，從卡片「開啟終端機」。登入權杖只留在本機，不上傳、不重新整理、不登出。第一次切換會自動收進 Claude Code 目前登入的帳號；切換帳號後 Remote Control 會中斷，提示快取要重建。"
     },
     "addAccount": "新增帳號",
-    "groupMenu": "{{service}} 的更多操作",
     "accountMenu": "{{login}} 的更多操作",
-    "removeAll": "刪除全部帳號",
     "removeAccount": "刪除帳號",
     "setDefault": "設為預設",
     "reauth": "重新登入",
@@ -4229,7 +4302,6 @@
     "loginFailed": "登入沒有完成",
     "pending": {
       "add": "新增 {{service}} 帳號 · 等待授權中…",
-      "login": "登入 {{service}} · 等待授權中…",
       "reauth": "重新登入 {{login}} · 等待授權中…",
       "enterCode": "在瀏覽器中輸入驗證碼：",
       "copy": "複製驗證碼",
@@ -4237,7 +4309,11 @@
       "open": "開啟授權頁面",
       "note": "已在瀏覽器開啟授權頁面，完成後這裡會自動更新。注意 {{service}} 的使用條款。",
       "browserNote": "已在瀏覽器開啟 {{service}} 的登入頁，登入並同意授權後這裡會自動更新。",
-      "reopen": "重新開啟登入頁"
+      "reopen": "重新開啟登入頁",
+      "copyLink": "複製登入連結",
+      "linkCopied": "登入連結已複製。",
+      "linkNote": "登入連結已複製。在你要用的瀏覽器裡開啟，登入並同意授權後這裡會自動更新。",
+      "linkCodeNote": "登入連結已複製。在你要用的瀏覽器裡開啟並輸入驗證碼，完成後這裡會自動更新。注意 {{service}} 的使用條款。"
     },
     "toast": {
       "added": "已新增 {{service}} 帳號。",
@@ -4247,19 +4323,38 @@
       "updating": "更新中…",
       "loading": "正在查詢額度…",
       "refresh": "重新整理額度",
-      "refreshAria": "重新整理 {{login}} 的額度"
+      "refreshAria": "重新整理 {{login}} 的額度",
+      "refreshAll": "全部重新整理"
     },
     "agy": {
       "reauthNote": "登入憑證已失效，無法切換過去",
       "addedOn": "{{date}}新增",
       "statusLoadFailed": "無法讀取 Antigravity 帳號，請重試。",
       "empty": "還沒有 Antigravity 帳號。agy 裡已登入的帳號會自動出現在這裡。",
-      "login": "使用 Google 登入",
       "current": "agy 使用中",
       "switchTo": "將 agy 切換到這個帳號",
       "removeNote": "不會讓 agy 登出：agy 目前登入的帳號刪除後仍然可用。",
       "switched": "已切換，新開的 agy 會使用這個帳號。",
       "switchedWhileRunning": "已切換。偵測到 agy 正在執行：已開啟的 agy 仍使用原帳號，還可能把原帳號寫回去，請結束後重新開啟。"
+    },
+    "claude": {
+      "pasteSubmitted": "已送出，正在完成登入…",
+      "pasteToggle": "授權後沒有回到這裡？",
+      "pasteHint": "把授權後瀏覽器網址列裡的網址，或頁面上顯示的代碼貼到這裡。",
+      "pasteLabel": "授權代碼或網址",
+      "pasteSubmit": "送出",
+      "reauthNote": "登入已失效，請重新登入",
+      "addedOn": "{{date}}新增",
+      "loginExpiresOn": "登入約在{{date}}到期，之後需要重新登入",
+      "loginMaybeExpired": "登入可能已過期，切換前請重新登入",
+      "statusLoadFailed": "無法讀取 Claude 帳號，請重試。",
+      "empty": "還沒有新增 Claude 帳號。要在多個訂閱帳號之間切換時在這裡登入。",
+      "removeNote": "只刪除 cc switch live 為這個帳號儲存的登入，不會讓它在其他地方登出；Claude Code 目前的登入（~/.claude）不受影響。綁定它的卡片會改用 Claude Code 目前的登入。",
+      "wslUnsupported": "Claude 設定目錄在 WSL 裡，暫不支援新增和切換 Claude 帳號。"
+    },
+    "openBrowser": {
+      "title": "登入時自動開啟瀏覽器",
+      "description": "關掉後只複製登入連結，由你自己選瀏覽器開啟，適合用獨立的瀏覽器環境管理多個帳號。"
     }
   },
   "kimi": {
@@ -4294,7 +4389,8 @@
     },
     "modelSelectionHint": "點擊供應商卡片的切換按鈕選擇預設供應商；若要指定其他模型，請在 Kimi Code 中使用 /model。",
     "contextSize": "上下文長度",
-    "deleteSessionHint": "請在 Kimi Code 中刪除，以同時更新工作階段索引和歷史紀錄。",
+    "configTomlScope": "這裡只能寫 [providers.{{key}}] 和屬於它的 [models.*] 表；供應商標識請在上方修改。",
+    "configTomlSchema": "設定不完整：請檢查供應商的 type，以及每個模型的 model 和 max_context_size（正整數）。",
     "empty": {
       "title": "新增 Kimi Code 供應商",
       "description": "設定請求位址、API Key 和模型；已有 Kimi 設定會自動匯入。"
@@ -4356,5 +4452,37 @@
       "providerMissing": "此 Oh My Pi 供應商已不在儲存的清單中。",
       "legacyModelsJson": "Oh My Pi 目錄裡仍是舊的 models.json，omp 會在下次啟動時將它遷移為 models.yml。請先執行一次 omp，再回來新增供應商。"
     }
+  },
+  "dsh": {
+    "empty": {
+      "title": "新增 DeepSeek Harness 供應商",
+      "description": "設定請求網址、API Key 和模型。現有的自訂供應商會自動顯示在這裡。"
+    },
+    "sharedProviders": "已加入的供應商會一起寫進 DeepSeek Harness 的 Web 和 Desktop 設定（以及已初始化的 headless、acp），在 DeepSeek Harness 裡選模型即可。",
+    "sharedProvidersNote": "Web 和 Desktop 共用這份列表",
+    "account": {
+      "help": "DeepSeek 帳號以瀏覽器登入（OAuth），可以在這裡登入，也可以在 DeepSeek Harness 裡登入。登入資訊儲存在 $DSH_HOME/.credentials.yaml（預設 ~/.dsh/.credentials.yaml），DeepSeek Harness 的 Web 和 Desktop 共用：任一處登入或登出，兩端同時生效，執行中的 DeepSeek Harness 會自動重新讀取。帳號路由的模型用量在用量頁單獨顯示為「DeepSeek 帳號（OAuth）」。",
+      "statusFailed": "無法讀取 DeepSeek 帳號的登入狀態",
+      "empty": "未登入 DeepSeek 帳號",
+      "unnamed": "DeepSeek 帳號",
+      "expired": "登入已失效，請重新登入",
+      "shared": "Web 與 Desktop 共用",
+      "signOut": "登出",
+      "signOutConfirm": "登出 DeepSeek 帳號「{{name}}」？DeepSeek Harness 的 Web 和 Desktop 會同時登出，API Key 供應商不受影響。",
+      "signOutFailed": "登出 DeepSeek 帳號失敗",
+      "balance": "餘額 {{amount}}",
+      "bonus": "贈金 {{amount}}",
+      "balanceFailed": "暫時查不到餘額",
+      "signedIn": "DeepSeek 帳號已登入，Web 和 Desktop 都可以使用",
+      "signInFailed": "DeepSeek 帳號登入失敗",
+      "presetName": "DeepSeek 官方登入",
+      "presetDescription": "以瀏覽器登入 DeepSeek 帳號後，DeepSeek Harness 會直接提供帳號下的模型，不用再新增供應商；Web 和 Desktop 共用這份登入。登入和登出在授權中心管理，登入後帳號會出現在「已加入」裡。",
+      "manageAccounts": "管理 DeepSeek 帳號",
+      "cardSubtitle": "官方帳號 · Web 和 Desktop 共用",
+      "expiredChip": "登入已失效",
+      "editDisabled": "帳號下的模型由 DeepSeek Harness 自動提供，無需編輯。",
+      "managedHint": "帳號在授權中心管理：登出後這張卡會自動消失。"
+    },
+    "deleteSessionHint": "請在 DeepSeek Harness 中刪除此工作階段，以保持原生歷史記錄一致。"
   }
 }
